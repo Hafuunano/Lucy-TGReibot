@@ -1,9 +1,11 @@
 github.com/FloatTech/zbputils v1.4.0 h1:zjFiTJ5UHFjnDX6iP+f1KMCO9uqFbDjFFVzW8cyMbe8=
 github.com/FloatTech/zbputils v1.4.0/go.mod h1:Cf2wAFtq7OUj4RUHcSQtcAYgAspP06wQseKZwtCJRXQ=
+github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c h1:cNPOdTNiVwxLpROLjXCgbIPvdkE+BwvxDvgmdYmWx6Q=
+github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c/go.mod h1:KqZzu7slNKROh3TSYEH/IUMG6f4M+1qubZ5e52QypsE=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/fumiama/ReiBot v0.0.0-20220602072913-c1610cd5bee5 h1:eRpXyhxeM0CKBbWqlLS0XKgvvZk3EIfiq1uMxrIoFIs=
-github.com/fumiama/ReiBot v0.0.0-20220602072913-c1610cd5bee5/go.mod h1:zoAfqSV7K+o6FMgIvuW2cRMTXmCX/hn9fhjVRDcSy0o=
+github.com/fumiama/ReiBot v0.0.0-20220602113320-131fd9727c50 h1:0WTBqsrbCuoAsobKVhlOJZKDZ7c5f3VAd3jI8Ke+oi0=
+github.com/fumiama/ReiBot v0.0.0-20220602113320-131fd9727c50/go.mod h1:QDBMORe19ulNt7EYkyPyrSI0iaHhmdJnHlbl/hYZThE=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 h1:wG8n/XJQ07TmjbITcGiUaOtXxdrINDz1b0J1w0SzqDc=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1/go.mod h1:A2S0CWkNylc2phvKXWBBdD3K0iGnDBGbzRpISP2zBl8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -13,11 +15,10 @@ github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
 github.com/tidwall/gjson v1.14.1 h1:iymTbGkQBhveq21bEvAQ81I0LEBork8BFe1CUZXdyuo=
-github.com/tidwall/gjson v1.14.1/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
-github.com/tidwall/match v1.1.1/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
 github.com/tidwall/pretty v1.2.0 h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=
-github.com/tidwall/pretty v1.2.0/go.mod h1:ITEVvHYasfjBbM0u2Pg8T2nJnzm8xPwvNhhsoaGGjNU=
+github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220509035736-f3ad8fa960d7 h1:GDJ+ZhbaGGBdlaT6qljgt61A/rlZdrNtA5fQyb5uVP4=
+github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220509035736-f3ad8fa960d7/go.mod h1:LJ+VOf523i3IrykuLK53UEeWqnAclRL5d2wGT4sS4Zk=
 golang.org/x/sys v0.0.0-20191026070338-33540a1f6037/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a h1:dGzPydgVsqGcTRVwiLJ1jVbufYwmzD3LfVPLKsKg+0k=
 golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

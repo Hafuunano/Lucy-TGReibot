@@ -43,7 +43,7 @@ func main() {
 		sus = append(sus, i)
 	}
 
-	rei.OnMessageFullMatchGroup([]string{"help", "帮助", "menu", "菜单"}).SetBlock(true).SecondPriority().
+	rei.OnMessageFullMatchGroup([]string{"help", "帮助", "menu", "菜单"}).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			msg := ctx.Value.(*tgba.Message)
 			_, _ = ctx.Caller.Send(tgba.NewMessage(msg.Chat.ID, kanban.Banner))
