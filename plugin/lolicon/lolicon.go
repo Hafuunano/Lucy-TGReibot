@@ -104,12 +104,12 @@ func init() {
 			case <-time.After(time.Minute):
 				_, _ = ctx.Caller.Send(tgba.NewMessage(msg.Chat.ID, "ERROR: 等待填充，请稍后再试..."))
 			case img := <-queue:
-				img.ChatID = msg.From.ID
+				img.ChatID = msg.Chat.ID
 				m, err := ctx.Caller.Send(img)
 				if err != nil {
 					return
 				}
-				_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(msg.From.ID, m.MessageID, tgba.NewInlineKeyboardMarkup(tgba.NewInlineKeyboardRow(
+				_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(m.Chat.ID, m.MessageID, tgba.NewInlineKeyboardMarkup(tgba.NewInlineKeyboardRow(
 					tgba.NewInlineKeyboardButtonURL(
 						"UID "+strings.TrimLeft(img.CaptionEntities[1].URL, "https://pixiv.net/u/"),
 						img.CaptionEntities[1].URL,
