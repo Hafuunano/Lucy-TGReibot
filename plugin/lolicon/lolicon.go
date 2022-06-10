@@ -70,38 +70,29 @@ func init() {
 					caption.WriteString(r.Data[0].Title)
 					caption.WriteString(" @")
 					caption.WriteString(r.Data[0].Author)
-					entities := []tgba.MessageEntity{
-						{
-							Type:   "bold",
-							Offset: 0,
-							Length: len([]rune(r.Data[0].Title)),
-						},
-						{
-							Type:   "text_link",
-							Offset: len([]rune(r.Data[0].Title)) + 1,
-							Length: len([]rune(r.Data[0].Author)) + 1,
-							URL:    "https://pixiv.net/u/" + strconv.Itoa(r.Data[0].UID),
-						},
-					}
-					offset := entities[1].Offset + entities[1].Length + 1
 					caption.WriteByte('\n')
 					for _, t := range r.Data[0].Tags {
 						caption.WriteByte(' ')
 						caption.WriteString(t)
-						l := len([]rune(t))
-						entities = append(entities, tgba.MessageEntity{
-							Type:   "code",
-							Offset: offset + 1,
-							Length: l,
-						})
-						offset += l + 1
 					}
 					queue <- &tgba.PhotoConfig{
 						BaseFile: tgba.BaseFile{
 							File: tgba.FileURL(r.Data[0].Urls.Original),
 						},
-						Caption:         caption.String(),
-						CaptionEntities: entities,
+						Caption: caption.String(),
+						CaptionEntities: []tgba.MessageEntity{
+							{
+								Type:   "bold",
+								Offset: 0,
+								Length: len([]rune(r.Data[0].Title)),
+							},
+							{
+								Type:   "text_link",
+								Offset: len([]rune(r.Data[0].Title)) + 1,
+								Length: len([]rune(r.Data[0].Author)) + 1,
+								URL:    "https://pixiv.net/u/" + strconv.Itoa(r.Data[0].UID),
+							},
+						},
 					}
 				}
 			}()
@@ -113,6 +104,7 @@ func init() {
 				img.ChatID = msg.Chat.ID
 				m, err := ctx.Caller.Send(img)
 				if err != nil {
+					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 					return
 				}
 				_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(m.Chat.ID, m.MessageID, tgba.NewInlineKeyboardMarkup(tgba.NewInlineKeyboardRow(
