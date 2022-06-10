@@ -75,8 +75,24 @@ func init() {
 						caption.WriteByte(' ')
 						caption.WriteString(t)
 					}
+					uidlink := "https://pixiv.net/u/" + strconv.Itoa(r.Data[0].UID)
+					pidlink := "https://pixiv.net/i/" + strconv.Itoa(r.Data[0].Pid)
 					queue <- &tgba.PhotoConfig{
 						BaseFile: tgba.BaseFile{
+							BaseChat: tgba.BaseChat{
+								ReplyMarkup: tgba.NewInlineKeyboardMarkup(
+									tgba.NewInlineKeyboardRow(
+										tgba.NewInlineKeyboardButtonURL(
+											"UID "+strconv.Itoa(r.Data[0].UID),
+											uidlink,
+										),
+										tgba.NewInlineKeyboardButtonURL(
+											"PID "+strconv.Itoa(r.Data[0].Pid),
+											pidlink,
+										),
+									),
+								),
+							},
 							File: tgba.FileURL(r.Data[0].Urls.Original),
 						},
 						Caption: caption.String(),
@@ -87,10 +103,9 @@ func init() {
 								Length: len([]rune(r.Data[0].Title)),
 							},
 							{
-								Type:   "text_link",
+								Type:   "underline",
 								Offset: len([]rune(r.Data[0].Title)) + 1,
 								Length: len([]rune(r.Data[0].Author)) + 1,
-								URL:    "https://pixiv.net/u/" + strconv.Itoa(r.Data[0].UID),
 							},
 						},
 					}
@@ -101,20 +116,11 @@ func init() {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: 等待填充，请稍后再试..."))
 			case img := <-queue:
 				img.ChatID = ctx.Message.Chat.ID
-				m, err := ctx.Caller.Send(img)
+				_, err := ctx.Caller.Send(img)
 				if err != nil {
 					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 					return
 				}
-				_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(m.Chat.ID, m.MessageID, tgba.NewInlineKeyboardMarkup(tgba.NewInlineKeyboardRow(
-					tgba.NewInlineKeyboardButtonURL(
-						"UID "+strings.TrimLeft(img.CaptionEntities[1].URL, "https://pixiv.net/u/"),
-						img.CaptionEntities[1].URL,
-					),
-					tgba.NewInlineKeyboardButtonURL(
-						"PID "+strings.TrimLeft(img.CaptionEntities[0].URL, "https://pixiv.net/i/"),
-						img.CaptionEntities[0].URL,
-					)))))
 			}
 		})
 }
