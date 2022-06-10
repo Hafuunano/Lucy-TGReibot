@@ -8,11 +8,13 @@ import (
 	"strconv"
 	"time"
 
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/b14"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 
 	// -----------------------以下为内置依赖，勿动------------------------ //
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sirupsen/logrus"
 
 	"github.com/FloatTech/ReiBot-Plugin/kanban"
 	// -----------------------以上为内置依赖，勿动------------------------ //
@@ -32,6 +34,10 @@ func main() {
 		fmt.Println("Usage:")
 		flag.PrintDefaults()
 		os.Exit(0)
+	}
+
+	if *debug {
+		logrus.SetLevel(logrus.DebugLevel)
 	}
 
 	sus := make([]int64, 0, 16)

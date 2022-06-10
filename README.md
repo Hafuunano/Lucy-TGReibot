@@ -31,6 +31,21 @@ reibot [-tbdoTh] ID1 ID2 ...
 > 在编译时，以下功能均可通过注释`main.go`中的相应`import`而物理禁用，减小插件体积。
 
 <details>
+  <summary>base16384加解密</summary>
+
+  `import _ "github.com/FloatTech/ZeroBot-Plugin/plugin/b14"`
+
+  - [x] 加密xxx
+
+  - [x] 解密xxx
+
+  - [x] 用yyy加密xxx
+
+  - [x] 用yyy解密xxx
+
+</details>
+
+<details>
   <summary>lolicon</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"`

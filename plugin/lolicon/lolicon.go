@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
@@ -44,7 +45,12 @@ var (
 )
 
 func init() {
-	rei.OnMessageFullMatch("来份萝莉").SetBlock(true).
+	en := rei.Register("lolicon", &ctrl.Options[*rei.Ctx]{
+		DisableOnDefault: false,
+		Help: "lolicon\n" +
+			"- 来份萝莉",
+	})
+	en.OnMessageFullMatch("来份萝莉").SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			go func() {
 				for i := 0; i < math.Min(cap(queue)-len(queue), 2); i++ {
@@ -66,10 +72,9 @@ func init() {
 					caption.WriteString(r.Data[0].Author)
 					entities := []tgba.MessageEntity{
 						{
-							Type:   "text_link",
+							Type:   "bold",
 							Offset: 0,
 							Length: len([]rune(r.Data[0].Title)),
-							URL:    "https://pixiv.net/i/" + strconv.Itoa(r.Data[0].Pid),
 						},
 						{
 							Type:   "text_link",
@@ -78,7 +83,8 @@ func init() {
 							URL:    "https://pixiv.net/u/" + strconv.Itoa(r.Data[0].UID),
 						},
 					}
-					offset := entities[1].Offset + entities[1].Length
+					offset := entities[1].Offset + entities[1].Length + 1
+					caption.WriteByte('\n')
 					for _, t := range r.Data[0].Tags {
 						caption.WriteByte(' ')
 						caption.WriteString(t)
@@ -102,7 +108,7 @@ func init() {
 			msg := ctx.Value.(*tgba.Message)
 			select {
 			case <-time.After(time.Minute):
-				_, _ = ctx.Caller.Send(tgba.NewMessage(msg.Chat.ID, "ERROR: 等待填充，请稍后再试..."))
+				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: 等待填充，请稍后再试..."))
 			case img := <-queue:
 				img.ChatID = msg.Chat.ID
 				m, err := ctx.Caller.Send(img)
