@@ -96,12 +96,11 @@ func init() {
 					}
 				}
 			}()
-			msg := ctx.Value.(*tgba.Message)
 			select {
 			case <-time.After(time.Minute):
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: 等待填充，请稍后再试..."))
 			case img := <-queue:
-				img.ChatID = msg.Chat.ID
+				img.ChatID = ctx.Message.Chat.ID
 				m, err := ctx.Caller.Send(img)
 				if err != nil {
 					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))

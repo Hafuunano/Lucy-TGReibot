@@ -51,8 +51,7 @@ func main() {
 
 	rei.OnMessageFullMatchGroup([]string{"help", "帮助", "menu", "菜单"}).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
-			msg := ctx.Value.(*tgba.Message)
-			_, _ = ctx.Caller.Send(tgba.NewMessage(msg.Chat.ID, kanban.Banner))
+			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, kanban.Banner))
 		})
 	rei.Run(rei.Bot{
 		Token:  *token,
