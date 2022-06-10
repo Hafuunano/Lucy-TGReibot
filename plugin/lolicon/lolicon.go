@@ -9,8 +9,10 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
+	base14 "github.com/fumiama/go-base16384"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
+	"github.com/FloatTech/zbputils/binary"
 	"github.com/FloatTech/zbputils/math"
 	"github.com/FloatTech/zbputils/web"
 )
@@ -77,6 +79,14 @@ func init() {
 					}
 					uidlink := "https://pixiv.net/u/" + strconv.Itoa(r.Data[0].UID)
 					pidlink := "https://pixiv.net/i/" + strconv.Itoa(r.Data[0].Pid)
+					title16, err := base14.UTF82UTF16BE(binary.StringToBytes(r.Data[0].Title))
+					if err != nil {
+						continue
+					}
+					auth16, err := base14.UTF82UTF16BE(binary.StringToBytes(r.Data[0].Author))
+					if err != nil {
+						continue
+					}
 					queue <- &tgba.PhotoConfig{
 						BaseFile: tgba.BaseFile{
 							BaseChat: tgba.BaseChat{
@@ -91,6 +101,12 @@ func init() {
 											pidlink,
 										),
 									),
+									tgba.NewInlineKeyboardRow(
+										tgba.NewInlineKeyboardButtonData(
+											"发送原图",
+											strings.TrimLeft(r.Data[0].Urls.Original, "https://i.pixiv.cat/img-original/img/"),
+										),
+									),
 								),
 							},
 							File: tgba.FileURL(r.Data[0].Urls.Original),
@@ -100,12 +116,12 @@ func init() {
 							{
 								Type:   "bold",
 								Offset: 0,
-								Length: len([]rune(r.Data[0].Title)),
+								Length: len(title16) / 2,
 							},
 							{
 								Type:   "underline",
-								Offset: len([]rune(r.Data[0].Title)) + 1,
-								Length: len([]rune(r.Data[0].Author)) + 1,
+								Offset: len(title16)/2 + 1,
+								Length: len(auth16)/2 + 1,
 							},
 						},
 					}
@@ -121,6 +137,14 @@ func init() {
 					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 					return
 				}
+			}
+		})
+	en.OnCallbackQueryRegex(`^(\d{4}/\d{2}/\d{2}/\d{2}/\d{2}/\d{2}/\d+_p\d+.\w+){1}$`).SetBlock(true).
+		Handle(func(ctx *rei.Ctx) {
+			_, err := ctx.Caller.Send(tgba.NewDocument(ctx.Message.Chat.ID, tgba.FileURL("https://i.pixiv.cat/img-original/img/"+ctx.State["regex_matched"].([]string)[1])))
+			if err != nil {
+				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				return
 			}
 		})
 }
