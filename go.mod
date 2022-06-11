@@ -6,7 +6,7 @@ require (
 	github.com/FloatTech/zbpctrl v1.4.1-0.20220610074608-425160596f27
 	github.com/FloatTech/zbputils v1.4.1-0.20220611055800-1d7cfb243e7e
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20220611060303-27842b6fdf9a
+	github.com/fumiama/ReiBot v0.0.0-20220611063724-2e1dd2a66afa
 	github.com/fumiama/go-base16384 v1.5.2
 	github.com/fumiama/gofastTEA v0.0.10
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
