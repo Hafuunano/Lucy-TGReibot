@@ -66,6 +66,17 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>原神抽卡</summary>
+
+  `import _ github.com/FloatTech/ReiBot-Plugin/plugin/genshin`
+
+  - [x] 切换原神卡池
+
+  - [x] 原神十连
+
+</details>
+
+<details>
   <summary>lolicon</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"`
