@@ -9,6 +9,7 @@ import (
 	"time"
 
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/b14"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/bilibili_parse"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 

@@ -33,7 +33,7 @@ reibot [-tbdoTh] ID1 ID2 ...
 <details>
   <summary>base16384加解密</summary>
 
-  `import _ "github.com/FloatTech/ZeroBot-Plugin/plugin/b14"`
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/b14"`
 
   - [x] 加密xxx
 
@@ -46,9 +46,18 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>b站视频链接解析</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/bilibili_parse"`
+
+  - [x] https://www.bilibili.com/video/BV1xx411c7BF | https://www.bilibili.com/video/av1605 | https://b23.tv/I8uzWCA | https://www.bilibili.com/video/bv1xx411c7BF
+
+</details>
+
+<details>
   <summary>每日运势</summary>
 
-  `import _ github.com/FloatTech/ZeroBot-Plugin/plugin/fortune`
+  `import _ github.com/FloatTech/ReiBot-Plugin/plugin/fortune`
 
   - [x] 运势 | 抽签
 
