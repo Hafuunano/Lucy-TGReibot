@@ -18,7 +18,7 @@ func init() {
 		Help: "base16384加解密\n" +
 			"- 加密xxx\n- 解密xxx\n- 用yyy加密xxx\n- 用yyy解密xxx",
 	})
-	en.OnMessageRegex(`^加密\s?(.*)`).SetBlock(true).
+	en.OnMessageRegex(`^加密\s*(.*)`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := base14.EncodeString(str)
@@ -28,7 +28,7 @@ func init() {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
 			}
 		})
-	en.OnMessageRegex(`^解密\s?([一-踀]*[㴁-㴆]?)$`).SetBlock(true).
+	en.OnMessageRegex(`^解密\s*([一-踀]*[㴁-㴆]?)$`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := base14.DecodeString(str)
@@ -41,7 +41,7 @@ func init() {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
 			}
 		})
-	en.OnMessageRegex(`^用(.*)加密\s?(.*)`).SetBlock(true).
+	en.OnMessageRegex(`^用(.*)加密\s*(.*)`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			key, str := ctx.State["regex_matched"].([]string)[1], ctx.State["regex_matched"].([]string)[2]
 			t := getea(key)
@@ -52,7 +52,7 @@ func init() {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
 			}
 		})
-	en.OnMessageRegex(`^用(.*)解密\s?([一-踀]*[㴁-㴆]?)$`).SetBlock(true).
+	en.OnMessageRegex(`^用(.*)解密\s*([一-踀]*[㴁-㴆]?)$`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			key, str := ctx.State["regex_matched"].([]string)[1], ctx.State["regex_matched"].([]string)[2]
 			t := getea(key)
