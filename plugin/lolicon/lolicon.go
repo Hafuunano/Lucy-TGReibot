@@ -143,8 +143,11 @@ func init() {
 		Handle(func(ctx *rei.Ctx) {
 			_, err := ctx.Caller.Send(tgba.NewDocument(ctx.Message.Chat.ID, tgba.FileURL("https://i.pixiv.cat/img-original/img/"+ctx.State["regex_matched"].([]string)[1])))
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
 				return
 			}
+			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
+			ctx.Message.ReplyMarkup.InlineKeyboard = ctx.Message.ReplyMarkup.InlineKeyboard[:1]
+			_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(ctx.Message.Chat.ID, ctx.Message.MessageID, *ctx.Message.ReplyMarkup))
 		})
 }
