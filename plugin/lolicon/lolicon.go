@@ -51,7 +51,13 @@ func init() {
 		DisableOnDefault: false,
 		Help: "lolicon\n" +
 			"- 来份萝莉",
-	})
+	}).ApplySingle(rei.NewSingle(
+		rei.WithKeyFn(func(ctx *rei.Ctx) int64 {
+			return ctx.Message.Chat.ID
+		}),
+		rei.WithPostFn[int64](func(ctx *rei.Ctx) {
+			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "正在找萝莉, 不要着急"))
+		})))
 	en.OnMessageFullMatch("来份萝莉").SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			go func() {

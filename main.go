@@ -9,6 +9,7 @@ import (
 	"time"
 
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/b14"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 
 	// -----------------------以下为内置依赖，勿动------------------------ //
