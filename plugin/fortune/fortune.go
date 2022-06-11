@@ -54,7 +54,13 @@ func init() {
 			"- 运势 | 抽签\n" +
 			"- 设置底图[车万 | DC4 | 爱因斯坦 | 星空列车 | 樱云之恋 | 富婆妹 | 李清歌 | 公主连结 | 原神 | 明日方舟 | 碧蓝航线 | 碧蓝幻想 | 战双 | 阴阳师 | 赛马娘 | 东方归言录 | 奇异恩典 | 夏日口袋 | ASoul]",
 		PublicDataFolder: "Fortune",
-	})
+	}).ApplySingle(rei.NewSingle(
+		rei.WithKeyFn(func(ctx *rei.Ctx) int64 {
+			return ctx.Message.Chat.ID
+		}),
+		rei.WithPostFn[int64](func(ctx *rei.Ctx) {
+			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "有其他运势操作正在执行中, 不要着急哦"))
+		})))
 	_ = os.RemoveAll(cache)
 	err := os.MkdirAll(cache, 0755)
 	if err != nil {

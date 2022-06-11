@@ -56,7 +56,7 @@ func init() {
 			return ctx.Message.Chat.ID
 		}),
 		rei.WithPostFn[int64](func(ctx *rei.Ctx) {
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "正在找萝莉, 不要着急"))
+			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "有其他萝莉操作正在执行中, 不要着急哦"))
 		})))
 	en.OnMessageFullMatch("来份萝莉").SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
@@ -147,13 +147,17 @@ func init() {
 		})
 	en.OnCallbackQueryRegex(`^(\d{4}/\d{2}/\d{2}/\d{2}/\d{2}/\d{2}/\d+_p\d+.\w+){1}$`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
-			_, err := ctx.Caller.Send(tgba.NewDocument(ctx.Message.Chat.ID, tgba.FileURL("https://i.pixiv.cat/img-original/img/"+ctx.State["regex_matched"].([]string)[1])))
+			if len(ctx.Message.ReplyMarkup.InlineKeyboard) > 1 {
+				ctx.Message.ReplyMarkup.InlineKeyboard = ctx.Message.ReplyMarkup.InlineKeyboard[:1]
+				_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(ctx.Message.Chat.ID, ctx.Message.MessageID, *ctx.Message.ReplyMarkup))
+			}
+			f := tgba.NewDocument(ctx.Message.Chat.ID, tgba.FileURL("https://i.pixiv.cat/img-original/img/"+ctx.State["regex_matched"].([]string)[1]))
+			f.ReplyToMessageID = ctx.Message.MessageID
+			_, err := ctx.Caller.Send(&f)
 			if err != nil {
 				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
 				return
 			}
 			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
-			ctx.Message.ReplyMarkup.InlineKeyboard = ctx.Message.ReplyMarkup.InlineKeyboard[:1]
-			_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(ctx.Message.Chat.ID, ctx.Message.MessageID, *ctx.Message.ReplyMarkup))
 		})
 }
