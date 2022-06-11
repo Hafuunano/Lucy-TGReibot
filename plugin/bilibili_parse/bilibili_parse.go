@@ -147,7 +147,7 @@ func parse(id string) (*tgba.PhotoConfig, error) {
 		Caption: binary.BytesToString(binary.NewWriterF(func(m *binary.Writer) {
 			m.WriteString("标题: ")
 			m.WriteString(r.Data.Title)
-			m.WriteByte('\n')
+			_ = m.WriteByte('\n')
 			if r.Data.Rights.IsCooperation == 1 {
 				for i := 0; i < len(r.Data.Staff); i++ {
 					m.WriteString(r.Data.Staff[i].Title)
@@ -155,7 +155,7 @@ func parse(id string) (*tgba.PhotoConfig, error) {
 					m.WriteString(r.Data.Staff[i].Name)
 					m.WriteString(", 粉丝: ")
 					m.WriteString(row(r.Data.Staff[i].Follower))
-					m.WriteByte('\n')
+					_ = m.WriteByte('\n')
 				}
 			} else {
 				o, err := getcard(r.Data.Owner.Mid)
@@ -167,7 +167,7 @@ func parse(id string) (*tgba.PhotoConfig, error) {
 					m.WriteString(", 粉丝: ")
 					m.WriteString(row(o.Data.Card.Fans))
 				}
-				m.WriteByte('\n')
+				_ = m.WriteByte('\n')
 			}
 			m.WriteString("播放: ")
 			m.WriteString(row(r.Data.Stat.View))
@@ -181,7 +181,7 @@ func parse(id string) (*tgba.PhotoConfig, error) {
 			m.WriteString(row(r.Data.Stat.Favorite))
 			m.WriteString(", 分享: ")
 			m.WriteString(row(r.Data.Stat.Share))
-			m.WriteByte('\n')
+			_ = m.WriteByte('\n')
 			m.WriteString(origin)
 			m.WriteString(id)
 		})),
