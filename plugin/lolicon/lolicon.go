@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	api      = "https://api.lolicon.app/setu/v2?r18=2"
+	api      = "https://api.lolicon.app/setu/v2?r18=2&proxy=i.pixiv.cat"
 	capacity = 10
 )
 
@@ -93,6 +93,7 @@ func init() {
 					if err != nil {
 						continue
 					}
+					_, imgcallbackdata, _ := strings.Cut(r.Data[0].Urls.Original, "/img-original/img/")
 					queue <- &tgba.PhotoConfig{
 						BaseFile: tgba.BaseFile{
 							BaseChat: tgba.BaseChat{
@@ -110,7 +111,7 @@ func init() {
 									tgba.NewInlineKeyboardRow(
 										tgba.NewInlineKeyboardButtonData(
 											"发送原图",
-											strings.TrimLeft(r.Data[0].Urls.Original, "https://i.pixiv.cat/img-original/img/"),
+											imgcallbackdata,
 										),
 									),
 								),
