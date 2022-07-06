@@ -16,8 +16,8 @@ github.com/fumiama/ReiBot v0.0.0-20220706075756-1645369ed3fa h1:S9e56JJN1ccxiG88
 github.com/fumiama/ReiBot v0.0.0-20220706075756-1645369ed3fa/go.mod h1:A7GQJbPsQgIg/FM0WpR9824LhyIlOAm4gwoQGxpFRbw=
 github.com/fumiama/cron v1.3.0 h1:ZWlwuexF+HQHl3cYytEE5HNwD99q+3vNZF1GrEiXCFo=
 github.com/fumiama/cron v1.3.0/go.mod h1:bz5Izvgi/xEUI8tlBN8BI2jr9Moo8N4or0KV8xXuPDY=
-github.com/fumiama/go-base16384 v1.5.3 h1:IUZUlm2ajJB1nEJzauP6yD5IeJoVHyBEkzKJf9O82zs=
-github.com/fumiama/go-base16384 v1.5.3/go.mod h1:OEn+947GV5gsbTAnyuUW/SrfxJYUdYupSIQXOuGOcXM=
+github.com/fumiama/go-base16384 v1.5.4 h1:UKx925X7cTsqsVWBlBLBs1v38epFT/q3AGjvyP5E0PM=
+github.com/fumiama/go-base16384 v1.5.4/go.mod h1:OEn+947GV5gsbTAnyuUW/SrfxJYUdYupSIQXOuGOcXM=
 github.com/fumiama/go-registry v0.1.6 h1:Ee/tXCCIR/xt8celhbbw0W/xDMdhAXLwy2YFBB/LWFk=
 github.com/fumiama/go-registry v0.1.6/go.mod h1:dIUVbiOgfk9oZcsgwDvNLC72i+ctibVukSXR/9bLviI=
 github.com/fumiama/gofastTEA v0.0.10 h1:JJJ+brWD4kie+mmK2TkspDXKzqq0IjXm89aGYfoGhhQ=
