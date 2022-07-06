@@ -57,7 +57,7 @@ reibot [-tbdoTh] ID1 ID2 ...
 <details>
   <summary>每日运势</summary>
 
-  `import _ github.com/FloatTech/ReiBot-Plugin/plugin/fortune`
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"`
 
   - [x] 运势 | 抽签
 
@@ -68,11 +68,22 @@ reibot [-tbdoTh] ID1 ID2 ...
 <details>
   <summary>原神抽卡</summary>
 
-  `import _ github.com/FloatTech/ReiBot-Plugin/plugin/genshin`
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/genshin"`
 
   - [x] 切换原神卡池
 
   - [x] 原神十连
+
+</details>
+
+<details>
+  <summary>百人一首</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/hyaku"`
+
+  - [x] 百人一首
+
+  - [x] 百人一首之n
 
 </details>
 
