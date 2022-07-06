@@ -35,7 +35,7 @@ func init() {
 			if es != "" {
 				_, err := ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, es))
 				if err != nil {
-					ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 				}
 			} else {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
@@ -60,7 +60,7 @@ func init() {
 			if err == nil {
 				_, err := ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, helper.BytesToString(t.Decrypt(base14.Decode(es)))))
 				if err != nil {
-					ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 				}
 			} else {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
