@@ -4,9 +4,9 @@ go 1.18
 
 require (
 	github.com/FloatTech/zbpctrl v1.4.1-0.20220706075314-7fdbbc2a2345
-	github.com/FloatTech/zbputils v1.4.1-0.20220706075514-0ba0bb2b8953
+	github.com/FloatTech/zbputils v1.4.1-0.20220706162215-fd9437e83a63
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20220706075756-1645369ed3fa
+	github.com/fumiama/ReiBot v0.0.0-20220707084452-ac54e2446839
 	github.com/fumiama/go-base16384 v1.5.4
 	github.com/fumiama/gofastTEA v0.0.10
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
