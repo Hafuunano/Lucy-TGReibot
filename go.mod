@@ -3,20 +3,21 @@ module github.com/FloatTech/ReiBot-Plugin
 go 1.18
 
 require (
-	github.com/FloatTech/zbpctrl v1.4.1-0.20220708120020-996c0e071fca
-	github.com/FloatTech/zbputils v1.4.1-0.20220708133204-3fa802132b81
+	github.com/FloatTech/zbpctrl v1.4.1-0.20220715042842-93f081cb0133
+	github.com/FloatTech/zbputils v1.4.1-0.20220715043109-4e1d708dffe9
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20220708133313-84e96879834e
+	github.com/fumiama/ReiBot v0.0.0-20220715044048-22a197d57e7e
 	github.com/fumiama/go-base16384 v1.5.4
 	github.com/fumiama/gofastTEA v0.0.10
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220610070647-9eeffcb277ee
+	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220715040337-ef4327320c40
 )
 
 require (
-	github.com/FloatTech/sqlite v0.3.2 // indirect
+	github.com/FloatTech/sqlite v0.3.3 // indirect
+	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
 	github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c // indirect
 	github.com/fumiama/cron v1.3.0 // indirect
 	github.com/fumiama/go-registry v0.1.6 // indirect
