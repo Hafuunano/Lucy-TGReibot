@@ -118,7 +118,7 @@ func init() {
 	engine.OnMessageRegex(`^百人一首之\s?(\d+)$`).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		i, err := strconv.Atoi(ctx.State["regex_matched"].([]string)[1])
 		if err != nil {
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR:"+err.Error()))
+			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 			return
 		}
 		if i > 100 || i < 1 {

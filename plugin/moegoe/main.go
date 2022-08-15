@@ -40,7 +40,7 @@ func init() {
 			a.CaptionEntities = []tgba.MessageEntity{{Type: "bold", Length: len([]rune(speaker))}}
 			_, err := ctx.Caller.Send(&a)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR:"+err.Error()))
+				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 				return
 			}
 		})
@@ -54,7 +54,7 @@ func init() {
 			a.CaptionEntities = []tgba.MessageEntity{{Type: "bold", Length: len([]rune(speaker))}}
 			_, err := ctx.Caller.Send(&a)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR:"+err.Error()))
+				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
 				return
 			}
 		})
