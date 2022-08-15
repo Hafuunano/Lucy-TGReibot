@@ -98,14 +98,22 @@ func init() {
 	}()
 	engine.OnMessageFullMatch("百人一首").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		i := rand.Intn(100)
-		_, _ = ctx.Caller.Send(tgba.NewPhoto(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(bed+"img/%03d.jpg", i+1))))
-		_, _ = ctx.Caller.Send(&tgba.PhotoConfig{
-			BaseFile: tgba.BaseFile{
-				BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID},
-				File:     tgba.FileURL(fmt.Sprintf(bed+"img/%03d.png", i+1)),
+		mg := tgba.NewMediaGroup(ctx.Message.Chat.ID, []any{
+			tgba.InputMediaPhoto{
+				BaseInputMedia: tgba.BaseInputMedia{
+					Type:  "photo",
+					Media: tgba.FileURL(fmt.Sprintf(bed+"img/%03d.jpg", i+1)),
+				},
 			},
-			Caption: lines[i].String(),
+			tgba.InputMediaPhoto{
+				BaseInputMedia: tgba.BaseInputMedia{
+					Type:    "photo",
+					Media:   tgba.FileURL(fmt.Sprintf(bed+"img/%03d.png", i+1)),
+					Caption: lines[i].String(),
+				},
+			},
 		})
+		_, _ = ctx.Caller.SendMediaGroup(mg)
 	})
 	engine.OnMessageRegex(`^百人一首之\s?(\d+)$`).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		i, err := strconv.Atoi(ctx.State["regex_matched"].([]string)[1])
@@ -117,13 +125,21 @@ func init() {
 			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR:超出范围"))
 			return
 		}
-		_, _ = ctx.Caller.Send(tgba.NewPhoto(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(bed+"img/%03d.jpg", i))))
-		_, _ = ctx.Caller.Send(&tgba.PhotoConfig{
-			BaseFile: tgba.BaseFile{
-				BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID},
-				File:     tgba.FileURL(fmt.Sprintf(bed+"img/%03d.png", i)),
+		mg := tgba.NewMediaGroup(ctx.Message.Chat.ID, []any{
+			tgba.InputMediaPhoto{
+				BaseInputMedia: tgba.BaseInputMedia{
+					Type:  "photo",
+					Media: tgba.FileURL(fmt.Sprintf(bed+"img/%03d.jpg", i)),
+				},
 			},
-			Caption: lines[i-1].String(),
+			tgba.InputMediaPhoto{
+				BaseInputMedia: tgba.BaseInputMedia{
+					Type:    "photo",
+					Media:   tgba.FileURL(fmt.Sprintf(bed+"img/%03d.png", i)),
+					Caption: lines[i-1].String(),
+				},
+			},
 		})
+		_, _ = ctx.Caller.SendMediaGroup(mg)
 	})
 }
