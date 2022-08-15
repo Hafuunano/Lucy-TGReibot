@@ -32,9 +32,13 @@ func init() {
 	}).ApplySingle(ctxext.DefaultSingle)
 	en.OnMessageRegex("^让(宁宁|爱瑠|芳乃|茉子|丛雨|小春|七海)说([A-Za-z\\s\\d\u3005\u3040-\u30ff\u4e00-\u9fff\uff11-\uff19\uff21-\uff3a\uff41-\uff5a\uff66-\uff9d.。,，、:：;；!！?？]+)$").Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
+			speaker := ctx.State["regex_matched"].([]string)[1]
 			text := ctx.State["regex_matched"].([]string)[2]
-			id := speakers[ctx.State["regex_matched"].([]string)[1]]
-			_, err := ctx.Caller.Send(tgba.NewAudio(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(jpapi, url.QueryEscape(text), id))))
+			id := speakers[speaker]
+			a := tgba.NewAudio(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(jpapi, url.QueryEscape(text), id)))
+			a.Caption = speaker + ": " + text
+			a.CaptionEntities = []tgba.MessageEntity{{Type: "bold", Length: len([]rune(speaker))}}
+			_, err := ctx.Caller.Send(&a)
 			if err != nil {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR:"+err.Error()))
 				return
@@ -42,9 +46,13 @@ func init() {
 		})
 	en.OnMessageRegex("^让(수아|미미르|아린|연화|유화|선배)说([A-Za-z\\s\\d\u3131-\u3163\uac00-\ud7ff.。,，、:：;；!！?？]+)$").Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
+			speaker := ctx.State["regex_matched"].([]string)[1]
 			text := ctx.State["regex_matched"].([]string)[2]
-			id := speakers[ctx.State["regex_matched"].([]string)[1]]
-			_, err := ctx.Caller.Send(tgba.NewAudio(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(krapi, url.QueryEscape(text), id))))
+			id := speakers[speaker]
+			a := tgba.NewAudio(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(krapi, url.QueryEscape(text), id)))
+			a.Caption = speaker + ": " + text
+			a.CaptionEntities = []tgba.MessageEntity{{Type: "bold", Length: len([]rune(speaker))}}
+			_, err := ctx.Caller.Send(&a)
 			if err != nil {
 				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR:"+err.Error()))
 				return
