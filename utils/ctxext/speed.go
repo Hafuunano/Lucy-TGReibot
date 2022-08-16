@@ -38,7 +38,7 @@ type fakeLM struct {
 //
 //	每 interval 时间 burst 次触发
 func SetDefaultLimiterManagerParam(interval time.Duration, burst int) {
-	f := (*fakeLM)(unsafe.Pointer(&defaultLimiterManager))
+	f := (*fakeLM)(unsafe.Pointer(defaultLimiterManager))
 	f.interval = interval
 	f.burst = burst
 }

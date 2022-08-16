@@ -12,9 +12,9 @@ import (
 	base14 "github.com/fumiama/go-base16384"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-	"github.com/FloatTech/zbputils/binary"
-	"github.com/FloatTech/zbputils/math"
-	"github.com/FloatTech/zbputils/web"
+	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/math"
+	"github.com/FloatTech/floatbox/web"
 )
 
 const (

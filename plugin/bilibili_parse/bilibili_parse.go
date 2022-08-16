@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/web"
 	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/binary"
-	"github.com/FloatTech/zbputils/web"
 	rei "github.com/fumiama/ReiBot"
 	base14 "github.com/fumiama/go-base16384"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"

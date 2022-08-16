@@ -17,11 +17,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 
+	zcext "github.com/FloatTech/floatbox/ctxext"
+	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/floatbox/img/writer"
+	"github.com/FloatTech/floatbox/math"
 	ctrl "github.com/FloatTech/zbpctrl"
-	zcext "github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/file"
-	"github.com/FloatTech/zbputils/img/writer"
-	"github.com/FloatTech/zbputils/math"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 )

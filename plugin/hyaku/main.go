@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"unsafe"
 
+	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/file"
 	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/binary"
-	"github.com/FloatTech/zbputils/file"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
