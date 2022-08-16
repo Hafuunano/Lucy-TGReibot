@@ -17,7 +17,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 
-	zcext "github.com/FloatTech/floatbox/ctxext"
+	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/math"
@@ -93,7 +93,7 @@ func init() {
 			}
 			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "没有这个底图哦～"))
 		})
-	en.OnMessageFullMatchGroup([]string{"运势", "抽签"}, zcext.DoOnceOnSuccess(
+	en.OnMessageFullMatchGroup([]string{"运势", "抽签"}, fcext.DoOnceOnSuccess(
 		func(ctx *rei.Ctx) bool {
 			data, err := file.GetLazyData(omikujson, false)
 			if err != nil {
@@ -145,7 +145,7 @@ func init() {
 			}
 
 			// 随机获取签文
-			randtextindex := zcext.RandSenderPerDayN(ctx.Message.From.ID, len(omikujis))
+			randtextindex := fcext.RandSenderPerDayN(ctx.Message.From.ID, len(omikujis))
 			title, text := omikujis[randtextindex]["title"], omikujis[randtextindex]["content"]
 			digest := md5.Sum(helper.StringToBytes(zipfile + strconv.Itoa(index) + title + text))
 			cachefile := cache + hex.EncodeToString(digest[:])
@@ -181,7 +181,7 @@ func randimage(path string, usr int64) (im image.Image, index int, err error) {
 	}
 	defer reader.Close()
 
-	file := reader.File[zcext.RandSenderPerDayN(usr, len(reader.File))]
+	file := reader.File[fcext.RandSenderPerDayN(usr, len(reader.File))]
 	f, err := file.Open()
 	if err != nil {
 		return

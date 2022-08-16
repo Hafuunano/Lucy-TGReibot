@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	zcext "github.com/FloatTech/floatbox/ctxext"
+	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -68,7 +68,7 @@ func init() {
 			}
 		})
 
-	engine.OnMessageFullMatch("原神十连", zcext.DoOnceOnSuccess(
+	engine.OnMessageFullMatch("原神十连", fcext.DoOnceOnSuccess(
 		func(ctx *rei.Ctx) bool {
 			zipfile := engine.DataFolder() + "Genshin.zip"
 			_, err := engine.GetLazyData("Genshin.zip", false)
