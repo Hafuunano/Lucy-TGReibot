@@ -46,6 +46,36 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>base64卦加解密</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/base64gua"`
+
+  - [x] 六十四卦加密xxx
+
+  - [x] 六十四卦解密xxx
+
+  - [x] 六十四卦用yyy加密xxx
+
+  - [x] 六十四卦用yyy解密xxx
+
+</details>
+
+<details>
+  <summary>base天城文加解密</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/baseamasiro"`
+
+  - [x] 天城文加密xxx
+
+  - [x] 天城文解密xxx
+
+  - [x] 天城文用yyy加密xxx
+
+  - [x] 天城文用yyy解密xxx
+
+</details>
+
+<details>
   <summary>b站视频链接解析</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/bilibili_parse"`
