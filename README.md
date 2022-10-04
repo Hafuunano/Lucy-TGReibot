@@ -145,6 +145,15 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>bot管理相关</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/manager"`
+
+  - [x] /离开 (ChatID)
+
+</details>
+
+<details>
   <summary>日韩 VITS 模型拟声</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/moegoe"`

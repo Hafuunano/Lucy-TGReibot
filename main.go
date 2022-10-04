@@ -18,6 +18,7 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/genshin"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/hyaku"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/manager"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/moegoe"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/runcode"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
