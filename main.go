@@ -12,11 +12,14 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/base64gua"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/baseamasiro"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/bilibili_parse"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/chrev"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/emojimix"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/genshin"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/hyaku"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/moegoe"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/runcode"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
 	// -----------------------以下为内置依赖，勿动------------------------ //

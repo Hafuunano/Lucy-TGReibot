@@ -8,7 +8,7 @@ import (
 var (
 	info = [...]string{
 		"* Telegram + ReiBot + Golang",
-		"* Version 0.0.5 - 2022-10-04 15:53:52 +0800 CST",
+		"* Version 0.1.0 - 2022-10-04 22:19:39 +0800 CST",
 		"* Copyright © 2020 - 2022 FloatTech. All Rights Reserved.",
 		"* Project: https://github.com/FloatTech/ReiBot-Plugin",
 	}

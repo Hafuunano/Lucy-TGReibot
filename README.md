@@ -85,6 +85,24 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>英文字符翻转</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/chrev"`
+
+  - [x] 翻转 I love you
+
+</details>
+
+<details>
+  <summary>合成emoji</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/emojimix"`
+
+  - [x] [emoji][emoji]
+
+</details>
+
+<details>
   <summary>每日运势</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"`
@@ -134,6 +152,19 @@ reibot [-tbdoTh] ID1 ID2 ...
   - [x] 让[宁宁|爱瑠|芳乃|茉子|丛雨|小春|七海]说(日语)
 
   - [x] 让[수아|미미르|아린|연화|유화|선배]说(韩语)
+
+</details>
+
+<details>
+  <summary>在线代码运行</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/runcode"`
+
+  - [x] > runcode [language] help
+
+  - [x] > runcode [language] [code block]
+
+  - [x] > runcoderaw [language] [code block]
 
 </details>
 
