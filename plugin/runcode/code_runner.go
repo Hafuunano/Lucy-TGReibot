@@ -13,8 +13,10 @@ import (
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
+	base14 "github.com/fumiama/go-base16384"
 	"github.com/tidwall/gjson"
 
+	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
@@ -120,16 +122,36 @@ func init() {
 				case "help":
 					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "> "+ctx.Message.From.String()+"  "+language+"-template:\n>runcode "+language+"\n"+templates[language]))
 				default:
-					if output, err := runCode(block, &runType); err != nil {
-						// 运行失败
-						_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "> "+ctx.Message.From.String()+"\nERROR: "+err.Error()))
+					output, err := runCode(block, &runType)
+					if err != nil {
+						output = "ERROR:\n" + err.Error()
+					}
+					if israw {
+						_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, output))
 					} else {
-						// 运行成功
-						if israw {
-							_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, output))
-						} else {
-							_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "> "+ctx.Message.From.String()+"\n"+output))
+						head := "> " + ctx.Message.From.String() + "\n"
+						head16, err := base14.UTF82UTF16BE(binary.StringToBytes(head))
+						if err != nil {
+							_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+							return
 						}
+						code16, err := base14.UTF82UTF16BE(binary.StringToBytes(output))
+						if err != nil {
+							_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+							return
+						}
+						msg := &tgba.MessageConfig{
+							BaseChat: tgba.BaseChat{
+								ChatID: ctx.Message.Chat.ID,
+							},
+							Text: head + output,
+							Entities: []tgba.MessageEntity{{
+								Type:   "code",
+								Offset: len(head16) / 2,
+								Length: len(code16) / 2,
+							}},
+						}
+						_, _ = ctx.Caller.Send(msg)
 					}
 				}
 			}
