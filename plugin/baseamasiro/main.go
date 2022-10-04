@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	en := rei.Register("base64gua", &ctrl.Options[*rei.Ctx]{
+	en := rei.Register("baseamasiro", &ctrl.Options[*rei.Ctx]{
 		DisableOnDefault: false,
 		Help: "base天城文加解密\n" +
 			"- 天城文加密xxx\n- 天城文解密xxx\n- 天城文用yyy加密xxx\n- 天城文用yyy解密xxx",
