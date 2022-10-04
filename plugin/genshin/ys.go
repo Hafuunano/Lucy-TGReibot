@@ -13,14 +13,16 @@ import (
 	"strings"
 	"sync/atomic"
 
+	rei "github.com/fumiama/ReiBot"
+	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+	"github.com/golang/freetype"
+	"github.com/sirupsen/logrus"
+
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
-	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/golang/freetype"
-	"github.com/sirupsen/logrus"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 )

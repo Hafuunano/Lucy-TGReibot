@@ -11,9 +11,10 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/fogleman/gg" // 注册了 jpg png gif
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+	"github.com/fogleman/gg" // 注册了 jpg png gif
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 

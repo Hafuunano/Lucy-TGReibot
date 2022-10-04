@@ -11,19 +11,20 @@ import (
 	"strconv"
 	"unsafe"
 
+	rei "github.com/fumiama/ReiBot"
+	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/web"
 	ctrl "github.com/FloatTech/zbpctrl"
-	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 )
 
 const bed = "https://gitcode.net/u011570312/OguraHyakuninIsshu/-/raw/master/"
 
-//nolint: asciicheck
+// nolint: asciicheck
 type line struct {
 	番号, 歌人, 上の句, 下の句, 上の句ひらがな, 下の句ひらがな string
 }

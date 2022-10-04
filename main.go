@@ -17,6 +17,7 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/hyaku"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/moegoe"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
 	// -----------------------以下为内置依赖，勿动------------------------ //
 	rei "github.com/fumiama/ReiBot"

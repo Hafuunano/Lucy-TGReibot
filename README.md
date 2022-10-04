@@ -137,6 +137,15 @@ reibot [-tbdoTh] ID1 ID2 ...
 
 </details>
 
+<details>
+  <summary>搜番</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"`
+
+  - [x] 搜番 | 搜索番剧[图片]
+
+</details>
+
 ## 特别感谢
 
 - [ZeroBot](https://github.com/wdvxdr1123/ZeroBot)
