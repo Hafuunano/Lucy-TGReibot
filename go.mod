@@ -1,6 +1,6 @@
 module github.com/FloatTech/ReiBot-Plugin
 
-go 1.18
+go 1.19
 
 require (
 	github.com/FloatTech/floatbox v0.0.0-20221003150509-1eb268ad10ff
