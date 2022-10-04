@@ -6,7 +6,7 @@ require (
 	github.com/FloatTech/floatbox v0.0.0-20221003150509-1eb268ad10ff
 	github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20221003153945-5633f01473a6
+	github.com/fumiama/ReiBot v0.0.0-20221004083425-63a0752c6148
 	github.com/fumiama/go-base16384 v1.6.1
 	github.com/fumiama/unibase2n v0.0.0-20221003115227-e7db987de949
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
