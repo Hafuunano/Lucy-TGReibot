@@ -3,8 +3,9 @@ module github.com/FloatTech/ReiBot-Plugin
 go 1.19
 
 require (
-	github.com/FloatTech/AnimeAPI v1.5.1-0.20221005090407-8f69916c8daa
+	github.com/FloatTech/AnimeAPI v1.5.1-0.20221005124013-4dfd01669e64
 	github.com/FloatTech/floatbox v0.0.0-20221004092550-1ebf9b4e6198
+	github.com/FloatTech/sqlite v0.4.0
 	github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/ReiBot v0.0.0-20221005042724-985217f276f6
@@ -20,7 +21,6 @@ require (
 )
 
 require (
-	github.com/FloatTech/sqlite v0.4.0 // indirect
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
 	github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c // indirect
 	github.com/fumiama/cron v1.3.0 // indirect
