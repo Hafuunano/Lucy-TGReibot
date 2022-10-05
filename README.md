@@ -165,6 +165,17 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>NovelAI作画</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/novelai"`
+
+  - [x] novelai作图 tag1 tag2...
+
+	- [x] 设置 novelai key [key]
+
+</details>
+
+<details>
   <summary>在线代码运行</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/runcode"`
