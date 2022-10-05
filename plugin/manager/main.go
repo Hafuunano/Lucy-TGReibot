@@ -17,7 +17,7 @@ func init() {
 		Help: "bot管理相关\n" +
 			"- [emoji][emoji]",
 	})
-	en.OnMessageCommand("离开").SetBlock(true).
+	en.OnMessageCommand("离开", rei.OnlyToMe, rei.SuperUserPermission).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			arg := strings.TrimSpace(ctx.State["args"].(string))
 			var gid int64
