@@ -169,11 +169,11 @@ reibot [-tbdoTh] ID1 ID2 ...
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/runcode"`
 
-  - [x] > runcode [language] help
+  - [x] >runcode [language] help
 
-  - [x] > runcode [language] [code block]
+  - [x] >runcode [language] [code block]
 
-  - [x] > runcoderaw [language] [code block]
+  - [x] >runcoderaw [language] [code block]
 
 </details>
 
