@@ -178,6 +178,19 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>搜图</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/saucenao"`
+
+  - [x] 以图搜图 | 搜索图片 | 以图识图[图片]
+
+  - [x] 搜图[P站图片ID]
+
+  - [x] 设置 saucenao api key [apikey]
+
+</details>
+
+<details>
   <summary>搜番</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"`

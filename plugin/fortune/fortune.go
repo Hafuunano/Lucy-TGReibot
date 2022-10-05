@@ -60,7 +60,7 @@ func init() {
 			return ctx.Message.Chat.ID
 		}),
 		rei.WithPostFn[int64](func(ctx *rei.Ctx) {
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "有其他运势操作正在执行中, 不要着急哦"))
+			_, _ = ctx.SendPlainMessage(false, "有其他运势操作正在执行中, 不要着急哦")
 		})))
 	_ = os.RemoveAll(cache)
 	err := os.MkdirAll(cache, 0755)
@@ -73,42 +73,38 @@ func init() {
 	en.OnMessageRegex(`^设置底图\s?(.*)`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			gid := ctx.Message.Chat.ID
-			if ctx.Message.Chat.IsPrivate() {
-				// 个人用户设为负数
-				gid = -ctx.Message.From.ID
-			}
 			i, ok := index[ctx.State["regex_matched"].([]string)[1]]
 			if ok {
 				c, ok := ctx.State["manager"].(*ctrl.Control[*rei.Ctx])
 				if ok {
 					err := c.SetData(gid, int64(i)&0xff)
 					if err != nil {
-						_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "设置失败: "+err.Error()))
+						_, _ = ctx.SendPlainMessage(false, "设置失败: "+err.Error())
 						return
 					}
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "设置成功~"))
+					_, _ = ctx.SendPlainMessage(false, "设置成功~")
 					return
 				}
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "设置失败: 找不到插件"))
+				_, _ = ctx.SendPlainMessage(false, "设置失败: 找不到插件")
 				return
 			}
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "没有这个底图哦～"))
+			_, _ = ctx.SendPlainMessage(false, "没有这个底图哦～")
 		})
 	en.OnMessageFullMatchGroup([]string{"运势", "抽签"}, fcext.DoOnceOnSuccess(
 		func(ctx *rei.Ctx) bool {
 			data, err := file.GetLazyData(omikujson, false)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
 			}
 			err = json.Unmarshal(data, &omikujis)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
 			}
 			_, err = file.GetLazyData(font, true)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
 			}
 			return true
@@ -118,10 +114,6 @@ func init() {
 			// 获取该群背景类型，默认车万
 			kind := "车万"
 			gid := ctx.Message.Chat.ID
-			if ctx.Message.Chat.IsPrivate() {
-				// 个人用户设为负数
-				gid = -ctx.Message.From.ID
-			}
 			logrus.Debugln("[fortune]gid:", ctx.Message.Chat.ID, "uid:", ctx.Message.From.ID)
 			c, ok := ctx.State["manager"].(*ctrl.Control[*rei.Ctx])
 			if ok {
@@ -134,14 +126,14 @@ func init() {
 			zipfile := images + kind + ".zip"
 			_, err := file.GetLazyData(zipfile, false)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 
 			// 随机获取背景
 			background, index, err := randimage(zipfile, ctx.Message.From.ID)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 
@@ -153,19 +145,19 @@ func init() {
 			if file.IsNotExist(cachefile) {
 				f, err := os.Create(cachefile)
 				if err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 					return
 				}
 				_, err = draw(background, title, text, f)
 				_ = f.Close()
 				if err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 					return
 				}
 			}
-			_, err = ctx.Caller.Send(tgba.NewPhoto(ctx.Message.Chat.ID, tgba.FilePath(cachefile)))
+			_, err = ctx.SendPhoto(tgba.FilePath(cachefile), false, "")
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 		})

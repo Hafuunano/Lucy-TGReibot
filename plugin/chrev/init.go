@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	ctrl "github.com/FloatTech/zbpctrl"
 )
@@ -27,6 +26,6 @@ func init() {
 				tmp.WriteRune(charMap[str[i]])
 			}
 			// 发送翻转后的字符串
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, tmp.String()))
+			_, _ = ctx.SendPlainMessage(false, tmp.String())
 		})
 }

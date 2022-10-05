@@ -3,7 +3,6 @@ package baseamasiro
 
 import (
 	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	"github.com/fumiama/unibase2n"
 
@@ -24,9 +23,9 @@ func init() {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := unibase2n.BaseDevanagari.EncodeString(str)
 			if es != "" {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, es))
+				_, _ = ctx.SendPlainMessage(false, es)
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "加密失败!")
 			}
 		})
 	en.OnMessageRegex(`^天城文解密\s*([ऀ-ॿ]+[০-৫]?)$`).SetBlock(true).
@@ -34,9 +33,9 @@ func init() {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := unibase2n.BaseDevanagari.DecodeString(str)
 			if es != "" {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, es))
+				_, _ = ctx.SendPlainMessage(false, es)
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "解密失败!")
 			}
 		})
 	en.OnMessageRegex(`^天城文用(.+)加密\s*(.+)$`).SetBlock(true).
@@ -45,9 +44,9 @@ func init() {
 			t := crypto.GetTEA(key)
 			es, err := unibase2n.UTF16BE2UTF8(unibase2n.BaseDevanagari.Encode(t.Encrypt(helper.StringToBytes(str))))
 			if err == nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, helper.BytesToString(es)))
+				_, _ = ctx.SendPlainMessage(false, helper.BytesToString(es))
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "加密失败!")
 			}
 		})
 	en.OnMessageRegex(`^天城文用(.+)解密\s*([ऀ-ॿ]+[০-৫]?)$`).SetBlock(true).
@@ -56,9 +55,9 @@ func init() {
 			t := crypto.GetTEA(key)
 			es, err := unibase2n.UTF82UTF16BE(helper.StringToBytes(str))
 			if err == nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, helper.BytesToString(t.Decrypt(unibase2n.BaseDevanagari.Decode(es)))))
+				_, _ = ctx.SendPlainMessage(false, helper.BytesToString(t.Decrypt(unibase2n.BaseDevanagari.Decode(es))))
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "解密失败!")
 			}
 		})
 }

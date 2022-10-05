@@ -27,15 +27,15 @@ func init() { // 插件主体
 	engine.OnMessagePrefixGroup([]string{"搜番", "搜索番剧"}, rei.MustProvidePhoto("请发送一张图片", "获取图片失败!")).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			// 开始搜索图片
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "少女祈祷中......"))
+			_, _ = ctx.SendPlainMessage(false, "少女祈祷中...")
 			for _, pic := range ctx.State["photos"].([]tgba.PhotoSize) {
 				picu, err := ctx.Caller.GetFileDirectURL(pic.FileID)
 				if err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 					continue
 				}
 				if result, err := moe.Search(picu, true, true); err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				} else if len(result.Result) > 0 {
 					r := result.Result[0]
 					hint := "我有把握是这个！"

@@ -25,7 +25,7 @@ func init() {
 			if arg != "" {
 				gid, err = strconv.ParseInt(arg, 10, 64)
 				if err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 					return
 				}
 			} else {

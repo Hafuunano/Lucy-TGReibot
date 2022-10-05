@@ -114,44 +114,37 @@ func init() {
 			language = strings.ToLower(language)
 			if runType, exist := table[language]; !exist {
 				// 不支持语言
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "> "+ctx.Message.From.String()+"\n语言不是受支持的编程语种呢~"))
+				_, _ = ctx.SendPlainMessage(false, "> "+ctx.Message.From.String()+"\n语言不是受支持的编程语种呢~")
 			} else {
 				// 执行运行
 				block := ctx.State["regex_matched"].([]string)[3]
 				switch block {
 				case "help":
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "> "+ctx.Message.From.String()+"  "+language+"-template:\n>runcode "+language+"\n"+templates[language]))
+					_, _ = ctx.SendPlainMessage(false, "> "+ctx.Message.From.String()+"  "+language+"-template:\n>runcode "+language+"\n"+templates[language])
 				default:
 					output, err := runCode(block, &runType)
 					if err != nil {
 						output = "ERROR:\n" + err.Error()
 					}
 					if israw {
-						_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, output))
+						_, _ = ctx.SendPlainMessage(false, output)
 					} else {
 						head := "> " + ctx.Message.From.String() + "\n"
 						head16, err := base14.UTF82UTF16BE(binary.StringToBytes(head))
 						if err != nil {
-							_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+							_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 							return
 						}
 						code16, err := base14.UTF82UTF16BE(binary.StringToBytes(output))
 						if err != nil {
-							_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+							_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 							return
 						}
-						msg := &tgba.MessageConfig{
-							BaseChat: tgba.BaseChat{
-								ChatID: ctx.Message.Chat.ID,
-							},
-							Text: head + output,
-							Entities: []tgba.MessageEntity{{
-								Type:   "code",
-								Offset: len(head16) / 2,
-								Length: len(code16) / 2,
-							}},
-						}
-						_, _ = ctx.Caller.Send(msg)
+						_, _ = ctx.SendMessage(false, head+output, tgba.MessageEntity{
+							Type:   "code",
+							Offset: len(head16) / 2,
+							Length: len(code16) / 2,
+						})
 					}
 				}
 			}

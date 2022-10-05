@@ -3,7 +3,6 @@ package base64gua
 
 import (
 	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	"github.com/fumiama/unibase2n"
 
@@ -24,9 +23,9 @@ func init() {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := unibase2n.Base64Gua.EncodeString(str)
 			if es != "" {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, es))
+				_, _ = ctx.SendPlainMessage(false, es)
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "加密失败!")
 			}
 		})
 	en.OnMessageRegex(`^六十四卦解密\s*([䷀-䷿]+[☰☱]?)$`).SetBlock(true).
@@ -34,9 +33,9 @@ func init() {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := unibase2n.Base64Gua.DecodeString(str)
 			if es != "" {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, es))
+				_, _ = ctx.SendPlainMessage(false, es)
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "解密失败!")
 			}
 		})
 	en.OnMessageRegex(`^六十四卦用(.+)加密\s*(.+)$`).SetBlock(true).
@@ -45,9 +44,9 @@ func init() {
 			t := crypto.GetTEA(key)
 			es, err := unibase2n.UTF16BE2UTF8(unibase2n.Base64Gua.Encode(t.Encrypt(helper.StringToBytes(str))))
 			if err == nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, helper.BytesToString(es)))
+				_, _ = ctx.SendPlainMessage(false, helper.BytesToString(es))
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "加密失败!")
 			}
 		})
 	en.OnMessageRegex(`^六十四卦用(.+)解密\s*([䷀-䷿]+[☰☱]?)$`).SetBlock(true).
@@ -56,9 +55,9 @@ func init() {
 			t := crypto.GetTEA(key)
 			es, err := unibase2n.UTF82UTF16BE(helper.StringToBytes(str))
 			if err == nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, helper.BytesToString(t.Decrypt(unibase2n.Base64Gua.Decode(es)))))
+				_, _ = ctx.SendPlainMessage(false, helper.BytesToString(t.Decrypt(unibase2n.Base64Gua.Decode(es))))
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "解密失败!")
 			}
 		})
 }

@@ -47,26 +47,22 @@ func init() {
 		Handle(func(ctx *rei.Ctx) {
 			c, ok := ctx.State["manager"].(*ctrl.Control[*rei.Ctx])
 			if !ok {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "找不到服务!"))
+				_, _ = ctx.SendPlainMessage(false, "找不到服务!")
 				return
 			}
 			gid := ctx.Message.Chat.ID
-			if ctx.Message.Chat.IsPrivate() {
-				// 个人用户设为负数
-				gid = -ctx.Message.From.ID
-			}
 			store := (storage)(c.GetData(gid))
 			if store.setmode(!store.is5starsmode()) {
 				process.SleepAbout1sTo2s()
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "切换到五星卡池~"))
+				_, _ = ctx.SendPlainMessage(false, "切换到五星卡池~")
 			} else {
 				process.SleepAbout1sTo2s()
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "切换到普通卡池~"))
+				_, _ = ctx.SendPlainMessage(false, "切换到普通卡池~")
 			}
 			err := c.SetData(gid, int64(store))
 			if err != nil {
 				process.SleepAbout1sTo2s()
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 			}
 		})
 
@@ -75,12 +71,12 @@ func init() {
 			zipfile := engine.DataFolder() + "Genshin.zip"
 			_, err := engine.GetLazyData("Genshin.zip", false)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
 			}
 			err = parsezip(zipfile)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
 			}
 			return true
@@ -89,32 +85,26 @@ func init() {
 		Handle(func(ctx *rei.Ctx) {
 			c, ok := ctx.State["manager"].(*ctrl.Control[*rei.Ctx])
 			if !ok {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "找不到服务!"))
+				_, _ = ctx.SendPlainMessage(false, "找不到服务!")
 				return
 			}
 			gid := ctx.Message.Chat.ID
-			if ctx.Message.Chat.IsPrivate() {
-				// 个人用户设为负数
-				gid = -ctx.Message.From.ID
-			}
 			store := (storage)(c.GetData(gid))
 			img, str, mode, err := randnums(10, store)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 			b, cl := writer.ToBytes(img)
-			f := tgba.NewPhoto(ctx.Message.Chat.ID, tgba.FileBytes{Bytes: b})
-			f.ReplyToMessageID = ctx.Message.MessageID
-			if mode {
-				f.Caption = "恭喜你抽到了: \n" + str
-			} else {
-				f.Caption = "十连成功~"
-			}
-			_, err = ctx.Caller.Send(&f)
+			_, err = ctx.SendPhoto(tgba.FileBytes{Bytes: b}, true, func() string {
+				if mode {
+					return "恭喜你抽到了:\n" + str
+				}
+				return "十连成功~"
+			}())
 			cl()
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 		})

@@ -32,7 +32,7 @@ func init() {
 			if err == nil {
 				resp1.Body.Close()
 				if resp1.StatusCode == http.StatusOK {
-					_, _ = ctx.Caller.Send(tgba.NewPhoto(ctx.Message.Chat.ID, tgba.FileURL(u1)))
+					_, _ = ctx.SendPhoto(tgba.FileURL(u1), false, "")
 					return
 				}
 			}
@@ -40,7 +40,7 @@ func init() {
 			if err == nil {
 				resp2.Body.Close()
 				if resp2.StatusCode == http.StatusOK {
-					_, _ = ctx.Caller.Send(tgba.NewPhoto(ctx.Message.Chat.ID, tgba.FileURL(u2)))
+					_, _ = ctx.SendPhoto(tgba.FileURL(u2), false, "")
 					return
 				}
 			}

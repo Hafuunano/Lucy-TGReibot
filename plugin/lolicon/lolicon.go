@@ -57,7 +57,7 @@ func init() {
 			return ctx.Message.Chat.ID
 		}),
 		rei.WithPostFn[int64](func(ctx *rei.Ctx) {
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "有其他萝莉操作正在执行中, 不要着急哦"))
+			_, _ = ctx.SendPlainMessage(false, "有其他萝莉操作正在执行中, 不要着急哦")
 		})))
 	en.OnMessageFullMatch("来份萝莉").SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
@@ -137,12 +137,11 @@ func init() {
 			}()
 			select {
 			case <-time.After(time.Minute):
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: 等待填充，请稍后再试..."))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: 等待填充，请稍后再试...")
 			case img := <-queue:
-				img.ChatID = ctx.Message.Chat.ID
-				_, err := ctx.Caller.Send(img)
+				_, err := ctx.Send(false, img)
 				if err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 					return
 				}
 			}

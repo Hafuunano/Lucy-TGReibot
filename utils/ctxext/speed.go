@@ -6,7 +6,6 @@ import (
 	"unsafe"
 
 	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
 
@@ -19,7 +18,7 @@ var DefaultSingle = rei.NewSingle(
 		return ctx.Message.From.ID
 	}),
 	rei.WithPostFn[int64](func(ctx *rei.Ctx) {
-		_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "您有操作正在执行, 请稍后再试!"))
+		_, _ = ctx.SendPlainMessage(false, "您有操作正在执行, 请稍后再试!")
 	}),
 )
 

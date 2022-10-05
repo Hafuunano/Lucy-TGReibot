@@ -85,38 +85,35 @@ func init() {
 			id := ctx.State["regex_matched"].([]string)[1]
 			photo, err := parse(id)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
-			photo.ChatID = ctx.Message.Chat.ID
-			_, _ = ctx.Caller.Send(photo)
+			_, _ = ctx.Send(false, photo)
 		})
 	en.OnMessageRegex(`https://www.bilibili.com/video/([0-9a-zA-Z]+)`).SetBlock(true).Limit(limit.LimitByGroup).
 		Handle(func(ctx *rei.Ctx) {
 			id := ctx.State["regex_matched"].([]string)[1]
 			photo, err := parse(id)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
-			photo.ChatID = ctx.Message.Chat.ID
-			_, _ = ctx.Caller.Send(photo)
+			_, _ = ctx.Send(false, photo)
 		})
 	en.OnMessageRegex(`(https://b23.tv/[0-9a-zA-Z]+)`).SetBlock(true).Limit(limit.LimitByGroup).
 		Handle(func(ctx *rei.Ctx) {
 			url := ctx.State["regex_matched"].([]string)[1]
 			realurl, err := getrealurl(url)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 			photo, err := parse(cuturl(realurl))
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
-			photo.ChatID = ctx.Message.Chat.ID
-			_, _ = ctx.Caller.Send(photo)
+			_, _ = ctx.Send(false, photo)
 		})
 }
 

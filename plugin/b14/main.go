@@ -3,7 +3,6 @@ package b14coder
 
 import (
 	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	base14 "github.com/fumiama/go-base16384"
 
@@ -24,9 +23,9 @@ func init() {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := base14.EncodeString(str)
 			if es != "" {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, es))
+				_, _ = ctx.SendPlainMessage(false, es)
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "加密失败!")
 			}
 		})
 	en.OnMessageRegex(`^解密\s*([一-踀]+[㴁-㴆]?)$`).SetBlock(true).
@@ -34,12 +33,12 @@ func init() {
 			str := ctx.State["regex_matched"].([]string)[1]
 			es := base14.DecodeString(str)
 			if es != "" {
-				_, err := ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, es))
+				_, err := ctx.SendPlainMessage(false, es)
 				if err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				}
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "解密失败!")
 			}
 		})
 	en.OnMessageRegex(`^用(.+)加密\s*(.+)$`).SetBlock(true).
@@ -48,9 +47,9 @@ func init() {
 			t := crypto.GetTEA(key)
 			es, err := base14.UTF16BE2UTF8(base14.Encode(t.Encrypt(helper.StringToBytes(str))))
 			if err == nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, helper.BytesToString(es)))
+				_, _ = ctx.SendPlainMessage(false, helper.BytesToString(es))
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "加密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "加密失败!")
 			}
 		})
 	en.OnMessageRegex(`^用(.+)解密\s*([一-踀]+[㴁-㴆]?)$`).SetBlock(true).
@@ -59,12 +58,12 @@ func init() {
 			t := crypto.GetTEA(key)
 			es, err := base14.UTF82UTF16BE(helper.StringToBytes(str))
 			if err == nil {
-				_, err := ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, helper.BytesToString(t.Decrypt(base14.Decode(es)))))
+				_, err := ctx.SendPlainMessage(false, helper.BytesToString(t.Decrypt(base14.Decode(es))))
 				if err != nil {
-					_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				}
 			} else {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "解密失败!"))
+				_, _ = ctx.SendPlainMessage(false, "解密失败!")
 			}
 		})
 }

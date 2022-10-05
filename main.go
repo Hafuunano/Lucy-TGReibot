@@ -21,6 +21,7 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/manager"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/moegoe"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/runcode"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/saucenao"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
 	// -----------------------以下为内置依赖，勿动------------------------ //
@@ -61,9 +62,9 @@ func main() {
 		sus = append(sus, i)
 	}
 
-	rei.OnMessageFullMatchGroup([]string{"help", "帮助", "menu", "菜单"}).SetBlock(true).
+	rei.OnMessageCommandGroup([]string{"help", "帮助", "menu", "菜单"}, rei.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
-			_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, kanban.Banner))
+			_, _ = ctx.SendPlainMessage(false, kanban.Banner)
 		})
 	rei.Run(rei.Bot{
 		Token:  *token,

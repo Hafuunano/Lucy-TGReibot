@@ -35,12 +35,13 @@ func init() {
 			speaker := ctx.State["regex_matched"].([]string)[1]
 			text := ctx.State["regex_matched"].([]string)[2]
 			id := speakers[speaker]
-			a := tgba.NewAudio(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(jpapi, url.QueryEscape(text), id)))
-			a.Caption = speaker + ": " + text
-			a.CaptionEntities = []tgba.MessageEntity{{Type: "bold", Length: len([]rune(speaker))}}
-			_, err := ctx.Caller.Send(&a)
+			_, err := ctx.SendAudio(
+				tgba.FileURL(fmt.Sprintf(jpapi, url.QueryEscape(text), id)),
+				false, speaker+": "+text,
+				tgba.MessageEntity{Type: "bold", Length: len([]rune(speaker))},
+			)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 		})
@@ -49,12 +50,13 @@ func init() {
 			speaker := ctx.State["regex_matched"].([]string)[1]
 			text := ctx.State["regex_matched"].([]string)[2]
 			id := speakers[speaker]
-			a := tgba.NewAudio(ctx.Message.Chat.ID, tgba.FileURL(fmt.Sprintf(krapi, url.QueryEscape(text), id)))
-			a.Caption = speaker + ": " + text
-			a.CaptionEntities = []tgba.MessageEntity{{Type: "bold", Length: len([]rune(speaker))}}
-			_, err := ctx.Caller.Send(&a)
+			_, err := ctx.SendAudio(
+				tgba.FileURL(fmt.Sprintf(krapi, url.QueryEscape(text), id)),
+				false, speaker+": "+text,
+				tgba.MessageEntity{Type: "bold", Length: len([]rune(speaker))},
+			)
 			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewMessage(ctx.Message.Chat.ID, "ERROR: "+err.Error()))
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 		})
