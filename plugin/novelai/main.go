@@ -38,7 +38,6 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
-		println(nv.Tok)
 	}
 	en.OnMessagePrefix("novelai作图").Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
