@@ -7,7 +7,7 @@ require (
 	github.com/FloatTech/floatbox v0.0.0-20221004092550-1ebf9b4e6198
 	github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20221005025125-2e467868892c
+	github.com/fumiama/ReiBot v0.0.0-20221005042724-985217f276f6
 	github.com/fumiama/go-base16384 v1.6.1
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/fumiama/unibase2n v0.0.0-20221003115227-e7db987de949
