@@ -27,7 +27,7 @@ func init() {
 		Help: "novelai\n" +
 			"- novelai作图 (seed=123) tag1 tag2...\n" +
 			"- novelai查tag 文件哈希\n" +
-			"- 设置(仅供我使用的|仅供此群使用的) novelai key [key]",
+			"- 设置(仅供我使用的|仅供群-1234使用的) novelai key [key]",
 		PrivateDataFolder: "novelai",
 	}).ApplySingle(ctxext.DefaultSingle)
 	ims = newims(en.DataFolder() + "images.db")
@@ -231,22 +231,44 @@ func init() {
 			_, _ = ctx.Caller.Send(tgba.NewDeleteMessage(ctx.Message.Chat.ID, ctx.Message.MessageID))
 			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "成功"))
 		})
-	en.OnMessageRegex(`^设置(仅供我使用的|仅供此群使用的)?\s?novelai\s?key\s?([0-9A-Za-z_]{64})$`, rei.OnlyPrivate).SetBlock(true).
+	en.OnMessageRegex(`^设置(仅供我使用的|仅供群-?\d+使用的)?\s?novelai\s?key\s?([0-9A-Za-z_]{64})$`, rei.OnlyPrivate).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			opt := ctx.State["regex_matched"].([]string)[1]
 			onlyme := opt == "仅供我使用的"
-			onlychat := opt == "仅供此群使用的"
+			onlychat := opt != "仅供我使用的" && opt != ""
 			if !onlyme && !onlychat && !rei.SuperUserPermission(ctx) {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: 只有主人可以设置全局key")
 				return
 			}
-			if onlychat && !(rei.OnlyPublic(ctx) && rei.AdminPermission(ctx)) {
-				_, _ = ctx.SendPlainMessage(false, "ERROR: 只有群管理员可以设置本群key")
-				return
-			}
 			id := ctx.Message.From.ID
 			if onlychat {
-				id = ctx.Message.Chat.ID
+				id, err = strconv.ParseInt(opt[3*3:len(opt)-3*3], 10, 64)
+				if err != nil {
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+					return
+				}
+				if !rei.SuperUserPermission(ctx) {
+					memb, err := ctx.Caller.GetChatAdministrators(tgba.ChatAdministratorsConfig{
+						ChatConfig: tgba.ChatConfig{
+							ChatID: id,
+						},
+					})
+					if err != nil {
+						_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+						return
+					}
+					found := false
+					for _, mb := range memb {
+						if mb.User.ID == ctx.Message.From.ID {
+							found = true
+							break
+						}
+					}
+					if !found {
+						_, _ = ctx.SendPlainMessage(false, "ERROR: 只有群管理员可以设置本群key")
+						return
+					}
+				}
 			}
 			onlyme = onlychat
 			key := ctx.State["regex_matched"].([]string)[2]

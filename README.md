@@ -173,7 +173,7 @@ reibot [-tbdoTh] ID1 ID2 ...
 
   - [x] novelai作图 (seed=123) tag1 tag2...
 
-	- [x] 设置(仅供我使用的|仅供此群使用的) novelai key [key]
+	- [x] 设置(仅供我使用的|仅供群-1234使用的) novelai key [key]
 
 </details>
 
