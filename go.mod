@@ -8,7 +8,7 @@ require (
 	github.com/FloatTech/sqlite v0.4.0
 	github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20221006043710-60552ff07dd9
+	github.com/fumiama/ReiBot v0.0.0-20221006071941-3d4c3d447fa9
 	github.com/fumiama/go-base16384 v1.6.1
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/fumiama/unibase2n v0.0.0-20221003115227-e7db987de949
