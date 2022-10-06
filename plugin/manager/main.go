@@ -33,4 +33,20 @@ func init() {
 			}
 			_, _ = ctx.Caller.Send(&tgba.LeaveChatConfig{ChatID: gid})
 		})
+	en.OnMessageCommand("exposeid").SetBlock(true).
+		Handle(func(ctx *rei.Ctx) {
+			msg := "*报告*\n*" + ctx.Message.Chat.UserName + "* `" + strconv.FormatInt(ctx.Message.Chat.ID, 10) + "`"
+			for _, e := range ctx.Message.Entities {
+				if e.User != nil {
+					msg += "\n*" + e.User.String() + "* `" + strconv.FormatInt(e.User.ID, 10) + "`"
+				}
+			}
+			_, _ = ctx.Caller.Send(&tgba.MessageConfig{
+				BaseChat: tgba.BaseChat{
+					ChatID: ctx.Message.Chat.ID,
+				},
+				Text:      msg,
+				ParseMode: "Markdown",
+			})
+		})
 }

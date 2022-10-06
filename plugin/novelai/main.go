@@ -25,7 +25,7 @@ func init() {
 	en := rei.Register("novelai", &ctrl.Options[*rei.Ctx]{
 		DisableOnDefault: false,
 		Help: "novelai\n" +
-			"- novelai作图 tag1 tag2...\n" +
+			"- novelai作图 (seed=123) tag1 tag2...\n" +
 			"- novelai查tag 文件哈希\n" +
 			"- 设置(仅供我使用的|仅供此群使用的) novelai key [key]",
 		PrivateDataFolder: "novelai",
@@ -88,7 +88,29 @@ func init() {
 				nv[k.Sender] = n
 				mu.Unlock()
 			}
-			seed, tags, img, err := n.Draw(strings.TrimSpace(ctx.State["args"].(string)))
+			t := strings.TrimSpace(ctx.State["args"].(string))
+			if strings.HasPrefix(t, "seed=") {
+				i := 5
+				for ; i < len(t); i++ {
+					if t[i] < '0' || t[i] > '9' {
+						break
+					}
+				}
+				s := t[5:i]
+				t = t[i:]
+				if s != "" {
+					p := nvai.NewDefaultPayload()
+					p.Parameters.Seed, err = strconv.Atoi(s)
+					if err != nil {
+						_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+						return
+					}
+					nn := nvai.NewNovalAI("", p)
+					nn.Tok = n.Tok
+					n = nn
+				}
+			}
+			seed, tags, img, err := n.Draw(strings.TrimSpace(t))
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
