@@ -16,8 +16,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/fogleman/gg v1.3.0 h1:/7zJX8F6AaYQc57WQCyN9cAIz+4bCJGO9B+dyW29am8=
 github.com/fogleman/gg v1.3.0/go.mod h1:R/bRT+9gY/C5z7JzPU0zXsXHKM4/ayA+zqcVNZzPa1k=
-github.com/fumiama/ReiBot v0.0.0-20221005042724-985217f276f6 h1:PGbO3qncYjdylIWg9h0B0kZhm5yJU9PFfPfUcu2AB2c=
-github.com/fumiama/ReiBot v0.0.0-20221005042724-985217f276f6/go.mod h1:WYcWKePKXSpo+L65JorBXOuktXH7cXPJL0S4yAQ/+2M=
+github.com/fumiama/ReiBot v0.0.0-20221006043710-60552ff07dd9 h1:MuZZKdhj6NrOveO3Q05DSX9iV49oKCwcgia4wX574mE=
+github.com/fumiama/ReiBot v0.0.0-20221006043710-60552ff07dd9/go.mod h1:WYcWKePKXSpo+L65JorBXOuktXH7cXPJL0S4yAQ/+2M=
 github.com/fumiama/cron v1.3.0 h1:ZWlwuexF+HQHl3cYytEE5HNwD99q+3vNZF1GrEiXCFo=
 github.com/fumiama/cron v1.3.0/go.mod h1:bz5Izvgi/xEUI8tlBN8BI2jr9Moo8N4or0KV8xXuPDY=
 github.com/fumiama/go-base16384 v1.6.1 h1:4yb4JgmBJDnQtq3XGXXdLrVwEnRpjhMUt4eAcsNeA30=
