@@ -299,4 +299,53 @@ func init() {
 			}
 			_, _ = ctx.SendPlainMessage(false, "成功!")
 		})
+	en.OnMessageRegex(`^移除(仅供我使用的|仅供群-?\d+使用的)?\s?novelai\s?key$`, rei.OnlyPrivate).SetBlock(true).
+		Handle(func(ctx *rei.Ctx) {
+			opt := ctx.State["regex_matched"].([]string)[1]
+			onlyme := opt == "仅供我使用的"
+			onlychat := opt != "仅供我使用的" && opt != ""
+			if !onlyme && !onlychat && !rei.SuperUserPermission(ctx) {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: 只有主人可以设置全局key")
+				return
+			}
+			id := ctx.Message.From.ID
+			if onlychat {
+				id, err = strconv.ParseInt(opt[3*3:len(opt)-3*3], 10, 64)
+				if err != nil {
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+					return
+				}
+				if !rei.SuperUserPermission(ctx) {
+					memb, err := ctx.Caller.GetChatAdministrators(tgba.ChatAdministratorsConfig{
+						ChatConfig: tgba.ChatConfig{
+							ChatID: id,
+						},
+					})
+					if err != nil {
+						_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+						return
+					}
+					found := false
+					for _, mb := range memb {
+						if mb.User.ID == ctx.Message.From.ID {
+							found = true
+							break
+						}
+					}
+					if !found {
+						_, _ = ctx.SendPlainMessage(false, "ERROR: 只有群管理员可以设置本群key")
+						return
+					}
+				}
+			}
+			onlyme = onlychat
+			mu.Lock()
+			err = ims.Del("k", "WHERE sender="+strconv.FormatInt(id, 10)+" and onlyme="+fmt.Sprint(onlyme))
+			mu.Unlock()
+			if err != nil {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+				return
+			}
+			_, _ = ctx.SendPlainMessage(false, "成功!")
+		})
 }
