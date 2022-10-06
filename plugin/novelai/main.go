@@ -3,10 +3,10 @@ package novelai
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -19,56 +19,88 @@ import (
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 )
 
-var nv *nvai.NovalAI
+var nv = map[int64]*nvai.NovalAI{}
 
 func init() {
 	en := rei.Register("novelai", &ctrl.Options[*rei.Ctx]{
 		DisableOnDefault: false,
 		Help: "novelai\n" +
 			"- novelai作图 tag1 tag2...\n" +
-			"- 设置 novelai key [key]",
+			"- novelai查tag 文件哈希\n" +
+			"- 设置(仅供我使用的|仅供此群使用的) novelai key [key]",
 		PrivateDataFolder: "novelai",
 	}).ApplySingle(ctxext.DefaultSingle)
+	ims = newims(en.DataFolder() + "images.db")
+	imgdir := en.DataFolder() + "imgs"
+	err := os.MkdirAll(imgdir, 0755)
+	if err != nil {
+		panic(err)
+	}
 	keyfile := en.DataFolder() + "key.txt"
 	if file.IsExist(keyfile) {
 		key, err := os.ReadFile(keyfile)
 		if err != nil {
 			panic(err)
 		}
-		nv = nvai.NewNovalAI(binary.BytesToString(key), nvai.NewDefaultPayload())
-		err = nv.Login()
+		n := nvai.NewNovalAI(binary.BytesToString(key), nvai.NewDefaultPayload())
+		err = n.Login()
 		if err != nil {
 			panic(err)
 		}
-	}
-	ims.DBPath = en.DataFolder() + "images.db"
-	err := ims.Open(time.Hour)
-	if err != nil {
-		panic(err)
-	}
-	err = ims.Create("s", &imgstorage{})
-	if err != nil {
-		panic(err)
+		err = ims.Insert("k", &keystorage{Key: binary.BytesToString(key)})
+		if err != nil {
+			panic(err)
+		}
+		nv[0] = n
+		_ = os.Remove(keyfile)
+	} else {
+		k := &keystorage{}
+		p := nvai.NewDefaultPayload()
+		_ = ims.FindFor("k", k, "WHERE onlyme=false", func() error {
+			n := nvai.NewNovalAI(k.Key, p)
+			err = n.Login()
+			if err == nil && n.Tok != "" {
+				nv[0] = n
+				return io.EOF
+			}
+			return nil
+		})
 	}
 	en.OnMessagePrefix("novelai作图").Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
-			if nv == nil {
-				_, _ = ctx.SendPlainMessage(false, "请私聊发送 设置 novelai key [key] 以启用 novelai 作图 (方括号不需要输入)")
-				return
+			k := &keystorage{}
+			mu.RLock()
+			_ = ims.Find("k", k, "WHERE (sender="+strconv.FormatInt(ctx.Message.From.ID, 10)+" or sender="+strconv.FormatInt(ctx.Message.Chat.ID, 10)+") and onlyme=true")
+			n, ok := nv[k.Sender]
+			mu.RUnlock()
+			if !ok {
+				n = nvai.NewNovalAI(k.Key, nvai.NewDefaultPayload())
+				err = n.Login()
+				if err != nil {
+					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+					return
+				}
+				if n.Tok == "" {
+					_, _ = ctx.SendPlainMessage(false, "ERROR: 登录失败, 请私聊发送 设置(仅供我使用的|仅供此群使用的) novelai key [key] 以启用 novelai 作图 (方括号不需要输入)")
+					return
+				}
+				mu.Lock()
+				nv[k.Sender] = n
+				mu.Unlock()
 			}
-			seed, tags, img, err := nv.Draw(strings.TrimSpace(ctx.State["args"].(string)))
+			seed, tags, img, err := n.Draw(strings.TrimSpace(ctx.State["args"].(string)))
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
 			seedtext := strconv.Itoa(seed)
 			fn := tags + " " + seedtext
-			err = os.WriteFile(en.DataFolder()+fn+".png", img, 0755)
+			id := idof(fn)
+			err = os.WriteFile(fmt.Sprintf("%s/%016x.png", imgdir, uint64(id)), img, 0755)
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
-			id := idof(fn)
 			mu.Lock()
 			err = ims.Insert("s", &imgstorage{
 				ID:   id,
@@ -97,52 +129,105 @@ func init() {
 							"发送原图",
 							"nvaiorg"+fmt.Sprintf("%016x", uint64(id)),
 						),
+						tgba.NewInlineKeyboardButtonData(
+							"移除该图",
+							"nvaidel"+fmt.Sprintf("%016x", uint64(id)),
+						),
 					),
 				)
 			}
 			_, _ = ctx.Caller.Send(pho)
 		})
+	en.OnMessageRegex(`^novelai查tag([0-9a-f]{16})$`).SetBlock(true).
+		Handle(func(ctx *rei.Ctx) {
+			fn := ctx.State["regex_matched"].([]string)[1]
+			id, err := strconv.ParseUint(fn, 16, 64)
+			if err != nil {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+				return
+			}
+			ids := strconv.FormatInt(int64(id), 10)
+			s := &imgstorage{}
+			mu.RLock()
+			err = ims.Find("s", s, "WHERE id="+ids)
+			mu.RUnlock()
+			if err != nil {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+				return
+			}
+			seedtext := strconv.Itoa(int(s.Seed))
+			_, _ = ctx.SendMessage(false, "seed: "+seedtext+"\ntags: "+s.Tags,
+				tgba.MessageEntity{Type: "bold", Offset: 0, Length: 5},
+				tgba.MessageEntity{Type: "bold", Offset: 5 + 1 + len(seedtext) + 1, Length: 5},
+			)
+		})
 	en.OnCallbackQueryRegex(`^nvaiorg([0-9a-f]{16})$`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			fn := ctx.State["regex_matched"].([]string)[1]
-			s := imgstorage{}
+			imgp := fmt.Sprintf("%s/%s.png", imgdir, fn)
+			_, err = ctx.Caller.Send(&tgba.DocumentConfig{
+				BaseFile: tgba.BaseFile{
+					BaseChat: tgba.BaseChat{
+						ChatID:           ctx.Message.Chat.ID,
+						ReplyToMessageID: ctx.Message.MessageID,
+					},
+					File: tgba.FilePath(imgp),
+				},
+			})
+			if err != nil {
+				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
+				return
+			}
+			if len(ctx.Message.ReplyMarkup.InlineKeyboard) > 0 && len(ctx.Message.ReplyMarkup.InlineKeyboard[0]) > 1 {
+				ctx.Message.ReplyMarkup.InlineKeyboard[0] = ctx.Message.ReplyMarkup.InlineKeyboard[0][1:]
+				_, _ = ctx.Caller.Send(tgba.NewEditMessageReplyMarkup(ctx.Message.Chat.ID, ctx.Message.MessageID, *ctx.Message.ReplyMarkup))
+			}
+			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
+		})
+	en.OnCallbackQueryRegex(`^nvaidel([0-9a-f]{16})$`).SetBlock(true).
+		Handle(func(ctx *rei.Ctx) {
+			if !rei.AdminPermission(ctx) && ctx.Message.ReplyToMessage.From.ID != ctx.Value.(*tgba.CallbackQuery).From.ID {
+				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: 只有管理员或作图发起者才可移除图片"))
+				return
+			}
+			fn := ctx.State["regex_matched"].([]string)[1]
 			id, err := strconv.ParseUint(fn, 16, 64)
 			if err != nil {
 				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
 				return
 			}
+			imgp := fmt.Sprintf("%s/%s.png", imgdir, fn)
 			ids := strconv.FormatInt(int64(id), 10)
-			mu.RLock()
-			err = ims.Find("s", &s, "WHERE id="+ids)
-			mu.RUnlock()
-			if err != nil {
-				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: 找不到文件"))
-				return
-			}
-			fn = s.Tags + " " + strconv.Itoa(int(s.Seed))
-			f := tgba.NewDocument(ctx.Message.Chat.ID, tgba.FilePath(en.DataFolder()+fn+".png"))
-			f.ReplyToMessageID = ctx.Message.MessageID
-			_, err = ctx.Caller.Send(&f)
+			err = os.Remove(imgp)
 			if err != nil {
 				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
 				return
 			}
-			if len(ctx.Message.ReplyMarkup.InlineKeyboard) > 0 {
-				_, _ = ctx.Caller.Send(&tgba.EditMessageReplyMarkupConfig{
-					BaseEdit: tgba.BaseEdit{
-						ChatID:    ctx.Message.Chat.ID,
-						MessageID: ctx.Message.MessageID,
-					},
-				})
-			}
-			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
 			mu.Lock()
 			_ = ims.Del("s", "WHERE id="+ids)
 			mu.Unlock()
+			_, _ = ctx.Caller.Send(tgba.NewDeleteMessage(ctx.Message.Chat.ID, ctx.Message.MessageID))
+			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "成功"))
 		})
-	en.OnMessageRegex(`^设置\s?novelai\s?key\s?([0-9A-Za-z_]{64})$`, rei.SuperUserPermission, rei.OnlyPrivate).SetBlock(true).
+	en.OnMessageRegex(`^设置(仅供我使用的|仅供此群使用的)?\s?novelai\s?key\s?([0-9A-Za-z_]{64})$`, rei.OnlyPrivate).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
-			key := ctx.State["regex_matched"].([]string)[1]
+			opt := ctx.State["regex_matched"].([]string)[1]
+			onlyme := opt == "仅供我使用的"
+			onlychat := opt == "仅供此群使用的"
+			if !onlyme && !onlychat && !rei.SuperUserPermission(ctx) {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: 只有主人可以设置全局key")
+				return
+			}
+			if onlychat && !(rei.OnlyPublic(ctx) && rei.AdminPermission(ctx)) {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: 只有群管理员可以设置本群key")
+				return
+			}
+			id := ctx.Message.From.ID
+			if onlychat {
+				id = ctx.Message.Chat.ID
+			}
+			onlyme = onlychat
+			key := ctx.State["regex_matched"].([]string)[2]
 			err := os.WriteFile(keyfile, binary.StringToBytes(key), 0644)
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
@@ -154,7 +239,20 @@ func init() {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
-			nv = nnv
+			mu.Lock()
+			err = ims.Insert("k", &keystorage{
+				Sender: id,
+				OnlyMe: onlyme,
+				Key:    key,
+			})
+			if err == nil {
+				nv[id] = nnv
+			}
+			mu.Unlock()
+			if err != nil {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+				return
+			}
 			_, _ = ctx.SendPlainMessage(false, "成功!")
 		})
 }
