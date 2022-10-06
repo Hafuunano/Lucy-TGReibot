@@ -80,13 +80,13 @@ func init() {
 					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 					return
 				}
-				if n.Tok == "" {
-					_, _ = ctx.SendPlainMessage(false, "ERROR: 登录失败, 请私聊发送 设置(仅供我使用的|仅供此群使用的) novelai key [key] 以启用 novelai 作图 (方括号不需要输入)")
-					return
-				}
 				mu.Lock()
 				nv[k.Sender] = n
 				mu.Unlock()
+			}
+			if n.Tok == "" {
+				_, _ = ctx.SendPlainMessage(false, "请私聊发送 设置(仅供我使用的|仅供群-1234使用的) novelai key [key] 以启用 novelai 作图 (方括号不需要输入)")
+				return
 			}
 			t := strings.TrimSpace(ctx.State["args"].(string))
 			if strings.HasPrefix(t, "seed=") {
