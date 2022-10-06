@@ -104,52 +104,51 @@ func init() { // 插件主体
 			}
 			// 开始搜索图片
 			_, _ = ctx.SendPlainMessage(false, "少女祈祷中...")
-			for _, p := range ctx.State["photos"].([]tgba.PhotoSize) {
-				pic, err := ctx.Caller.GetFileDirectURL(p.FileID)
-				if err != nil {
-					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
-					continue
-				}
-				resp, err := saucenaocli.FromURL(pic)
-				if err == nil && resp.Count() > 0 {
-					result := resp.First()
-					s, err := strconv.ParseFloat(result.Header.Similarity, 64)
-					if err == nil {
-						rr := reflect.ValueOf(&result.Data).Elem()
-						b := binary.NewWriterF(func(w *binary.Writer) {
-							r := rr.Type()
-							for i := 0; i < r.NumField(); i++ {
-								if !rr.Field(i).IsZero() {
-									w.WriteString("\n")
-									w.WriteString(r.Field(i).Name)
-									w.WriteString(": ")
-									w.WriteString(fmt.Sprint(rr.Field(i).Interface()))
-								}
+			ps := ctx.State["photos"].([]tgba.PhotoSize)
+			p := ps[len(ps)-1]
+			pic, err := ctx.Caller.GetFileDirectURL(p.FileID)
+			if err != nil {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+				return
+			}
+			resp, err := saucenaocli.FromURL(pic)
+			if err == nil && resp.Count() > 0 {
+				result := resp.First()
+				s, err := strconv.ParseFloat(result.Header.Similarity, 64)
+				if err == nil {
+					rr := reflect.ValueOf(&result.Data).Elem()
+					b := binary.NewWriterF(func(w *binary.Writer) {
+						r := rr.Type()
+						for i := 0; i < r.NumField(); i++ {
+							if !rr.Field(i).IsZero() {
+								w.WriteString("\n")
+								w.WriteString(r.Field(i).Name)
+								w.WriteString(": ")
+								w.WriteString(fmt.Sprint(rr.Field(i).Interface()))
 							}
-						})
-						resp, err := http.Head(result.Header.Thumbnail)
-						msg := make([]any, 0, 4)
-						if s > 80.0 {
-							msg = append(msg, "我有把握是这个!")
-						} else {
-							msg = append(msg, "也许是这个?")
 						}
-						var file tgba.RequestFileData
-						if err == nil {
-							_ = resp.Body.Close()
-							if resp.StatusCode == http.StatusOK {
-								file = tgba.FileURL(result.Header.Thumbnail)
-							} else {
-								file = tgba.FileURL(pic)
-							}
+					})
+					resp, err := http.Head(result.Header.Thumbnail)
+					msg := make([]any, 0, 4)
+					if s > 80.0 {
+						msg = append(msg, "我有把握是这个!")
+					} else {
+						msg = append(msg, "也许是这个?")
+					}
+					var file tgba.RequestFileData
+					if err == nil {
+						_ = resp.Body.Close()
+						if resp.StatusCode == http.StatusOK {
+							file = tgba.FileURL(result.Header.Thumbnail)
 						} else {
 							file = tgba.FileURL(pic)
 						}
-						msg = append(msg, "\n图源: ", result.Header.IndexName, binary.BytesToString(b))
-						_, _ = ctx.SendPhoto(file, false, fmt.Sprint(msg...))
+					} else {
+						file = tgba.FileURL(pic)
 					}
+					msg = append(msg, "\n图源: ", result.Header.IndexName, binary.BytesToString(b))
+					_, _ = ctx.SendPhoto(file, false, fmt.Sprint(msg...))
 				}
-				return
 			}
 		})
 	engine.OnMessageRegex(`^设置\s?saucenao\s?api\s?key\s?([0-9a-f]{40})$`, rei.SuperUserPermission, rei.OnlyPrivate).SetBlock(true).
