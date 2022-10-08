@@ -54,7 +54,16 @@ func init() {
 			"- 来份萝莉",
 	}).ApplySingle(rei.NewSingle(
 		rei.WithKeyFn(func(ctx *rei.Ctx) int64 {
-			return ctx.Message.Chat.ID
+			switch msg := ctx.Value.(type) {
+			case *tgba.Message:
+				return msg.Chat.ID
+			case *tgba.CallbackQuery:
+				if msg.Message != nil {
+					return msg.Message.Chat.ID
+				}
+				return msg.From.ID
+			}
+			return 0
 		}),
 		rei.WithPostFn[int64](func(ctx *rei.Ctx) {
 			_, _ = ctx.SendPlainMessage(false, "有其他萝莉操作正在执行中, 不要着急哦")

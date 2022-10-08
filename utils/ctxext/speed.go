@@ -6,16 +6,23 @@ import (
 	"unsafe"
 
 	rei "github.com/fumiama/ReiBot"
+	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
 
 // DefaultSingle 默认反并发处理
 //
-//	按 qq 号反并发
+//	按 发送者 反并发
 //	并发时返回 "您有操作正在执行, 请稍后再试!"
 var DefaultSingle = rei.NewSingle(
 	rei.WithKeyFn(func(ctx *rei.Ctx) int64 {
-		return ctx.Message.From.ID
+		switch msg := ctx.Value.(type) {
+		case *tgba.Message:
+			return msg.From.ID
+		case *tgba.CallbackQuery:
+			return msg.From.ID
+		}
+		return 0
 	}),
 	rei.WithPostFn[int64](func(ctx *rei.Ctx) {
 		_, _ = ctx.SendPlainMessage(false, "您有操作正在执行, 请稍后再试!")
@@ -44,16 +51,31 @@ func SetDefaultLimiterManagerParam(interval time.Duration, burst int) {
 
 // LimitByUser 默认限速器 每 10s 5次触发
 //
-//	按 qq 号限制
+//	按 发送者 限制
 func LimitByUser(ctx *rei.Ctx) *rate.Limiter {
-	return defaultLimiterManager.Load(ctx.Message.From.ID)
+	switch msg := ctx.Value.(type) {
+	case *tgba.Message:
+		return defaultLimiterManager.Load(msg.From.ID)
+	case *tgba.CallbackQuery:
+		return defaultLimiterManager.Load(msg.From.ID)
+	}
+	return defaultLimiterManager.Load(0)
 }
 
 // LimitByGroup 默认限速器 每 10s 5次触发
 //
 //	按群号限制
 func LimitByGroup(ctx *rei.Ctx) *rate.Limiter {
-	return defaultLimiterManager.Load(ctx.Message.Chat.ID)
+	switch msg := ctx.Value.(type) {
+	case *tgba.Message:
+		return defaultLimiterManager.Load(msg.Chat.ID)
+	case *tgba.CallbackQuery:
+		if msg.Message != nil {
+			return defaultLimiterManager.Load(msg.Message.Chat.ID)
+		}
+		return defaultLimiterManager.Load(msg.From.ID)
+	}
+	return defaultLimiterManager.Load(0)
 }
 
 // LimiterManager 自定义限速器管理
@@ -69,14 +91,29 @@ func NewLimiterManager(interval time.Duration, burst int) (m LimiterManager) {
 
 // LimitByUser 自定义限速器
 //
-//	按 qq 号限制
+//	按 发送者 限制
 func (m LimiterManager) LimitByUser(ctx *rei.Ctx) *rate.Limiter {
-	return m.m.Load(ctx.Message.From.ID)
+	switch msg := ctx.Value.(type) {
+	case *tgba.Message:
+		return defaultLimiterManager.Load(msg.From.ID)
+	case *tgba.CallbackQuery:
+		return defaultLimiterManager.Load(msg.From.ID)
+	}
+	return defaultLimiterManager.Load(0)
 }
 
 // LimitByGroup 自定义限速器
 //
 //	按群号限制
 func (m LimiterManager) LimitByGroup(ctx *rei.Ctx) *rate.Limiter {
-	return m.m.Load(ctx.Message.Chat.ID)
+	switch msg := ctx.Value.(type) {
+	case *tgba.Message:
+		return defaultLimiterManager.Load(msg.Chat.ID)
+	case *tgba.CallbackQuery:
+		if msg.Message != nil {
+			return defaultLimiterManager.Load(msg.Message.Chat.ID)
+		}
+		return defaultLimiterManager.Load(msg.From.ID)
+	}
+	return defaultLimiterManager.Load(0)
 }

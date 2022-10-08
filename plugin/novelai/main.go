@@ -160,7 +160,7 @@ func init() {
 			}
 			_, _ = ctx.Caller.Send(pho)
 		})
-	en.OnMessageRegex(`^novelai查tag([0-9a-f]{16})$`).SetBlock(true).
+	en.OnMessageRegex(`^novelai查tag([0-9a-f]{16})$`).Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			fn := ctx.State["regex_matched"].([]string)[1]
 			id, err := strconv.ParseUint(fn, 16, 64)
@@ -231,7 +231,7 @@ func init() {
 			_, _ = ctx.Caller.Send(tgba.NewDeleteMessage(ctx.Message.Chat.ID, ctx.Message.MessageID))
 			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "成功"))
 		})
-	en.OnMessageRegex(`^设置(仅供我使用的|仅供群-?\d+使用的)?\s?novelai\s?key\s?([0-9A-Za-z_\-]{64})$`, rei.OnlyPrivate).SetBlock(true).
+	en.OnMessageRegex(`^设置(仅供我使用的|仅供群-?\d+使用的)?\s?novelai\s?key\s?([0-9A-Za-z_\-]{64})$`, rei.OnlyPrivate).Limit(ctxext.LimitByUser).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			opt := ctx.State["regex_matched"].([]string)[1]
 			onlyme := opt == "仅供我使用的"
@@ -299,7 +299,7 @@ func init() {
 			}
 			_, _ = ctx.SendPlainMessage(false, "成功!")
 		})
-	en.OnMessageRegex(`^移除(仅供我使用的|仅供群-?\d+使用的)?\s?novelai\s?key$`, rei.OnlyPrivate).SetBlock(true).
+	en.OnMessageRegex(`^移除(仅供我使用的|仅供群-?\d+使用的)?\s?novelai\s?key$`, rei.OnlyPrivate).Limit(ctxext.LimitByUser).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			opt := ctx.State["regex_matched"].([]string)[1]
 			onlyme := opt == "仅供我使用的"
