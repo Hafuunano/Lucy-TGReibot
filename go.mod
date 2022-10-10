@@ -6,9 +6,9 @@ require (
 	github.com/FloatTech/AnimeAPI v1.5.2-0.20221010160553-eaf05e2fb14c
 	github.com/FloatTech/floatbox v0.0.0-20221010154018-16998fe73c7b
 	github.com/FloatTech/sqlite v0.5.0
-	github.com/FloatTech/zbpctrl v1.5.2-0.20221010032757-ed784af72c91
+	github.com/FloatTech/zbpctrl v1.5.2-0.20221010161826-e1908f4328ba
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20221010161405-73d5f1e59781
+	github.com/fumiama/ReiBot v0.0.0-20221010161908-f3992add0815
 	github.com/fumiama/go-base16384 v1.6.1
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/fumiama/unibase2n v0.0.0-20221003115227-e7db987de949

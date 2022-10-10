@@ -6,8 +6,8 @@ github.com/FloatTech/sqlite v0.5.0 h1:U7J5Omc534PqmH6csfu+ypCo3DS8L91l5lTsxUu3b/
 github.com/FloatTech/sqlite v0.5.0/go.mod h1:i33d92OtR8jcp5fBUvQtospf27+MkfUxnGwnZ95E/dA=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJGLDNIdRX3BI546D3O7k7vrVueZw=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b/go.mod h1:fHZFWGquNXuHttu9dUYoKuNbm3dzLETnIOnm1muSfDs=
-github.com/FloatTech/zbpctrl v1.5.2-0.20221010032757-ed784af72c91 h1:a7aLSJpdenAC62HKMbIYyo9wUgkB2NxgofWGfOyTwIc=
-github.com/FloatTech/zbpctrl v1.5.2-0.20221010032757-ed784af72c91/go.mod h1:a2UyXTypUbe5yoKUkymEjnWx2ai+DVaPlA+ZtjyDixw=
+github.com/FloatTech/zbpctrl v1.5.2-0.20221010161826-e1908f4328ba h1:/jJ6hHudMzSvky2oyoti9ZiUFPiyN65FkIXn4LxvYw8=
+github.com/FloatTech/zbpctrl v1.5.2-0.20221010161826-e1908f4328ba/go.mod h1:C7zee0O6bPtkDVh9NDGl77bVECOs/PL23x36/QEl4lE=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c h1:cNPOdTNiVwxLpROLjXCgbIPvdkE+BwvxDvgmdYmWx6Q=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c/go.mod h1:KqZzu7slNKROh3TSYEH/IUMG6f4M+1qubZ5e52QypsE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -16,8 +16,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/fogleman/gg v1.3.0 h1:/7zJX8F6AaYQc57WQCyN9cAIz+4bCJGO9B+dyW29am8=
 github.com/fogleman/gg v1.3.0/go.mod h1:R/bRT+9gY/C5z7JzPU0zXsXHKM4/ayA+zqcVNZzPa1k=
-github.com/fumiama/ReiBot v0.0.0-20221010161405-73d5f1e59781 h1:em5beYEoXXuylt6U4FwjOveFxUt8fw9Tz6AHiYhT8K4=
-github.com/fumiama/ReiBot v0.0.0-20221010161405-73d5f1e59781/go.mod h1:RAc1DARPnCholaff5vC2xx23YDdn4mM1hqXrQeh35dc=
+github.com/fumiama/ReiBot v0.0.0-20221010161908-f3992add0815 h1:nEqGrfYwWN/Y52SymqhTmNviRUMU+/gGdY4mG2NsB9Q=
+github.com/fumiama/ReiBot v0.0.0-20221010161908-f3992add0815/go.mod h1:IYCSNgApa0q/U09vBzMoUUH3l4z2dxHDymGs43p4VXw=
 github.com/fumiama/cron v1.3.0 h1:ZWlwuexF+HQHl3cYytEE5HNwD99q+3vNZF1GrEiXCFo=
 github.com/fumiama/cron v1.3.0/go.mod h1:bz5Izvgi/xEUI8tlBN8BI2jr9Moo8N4or0KV8xXuPDY=
 github.com/fumiama/go-base16384 v1.6.1 h1:4yb4JgmBJDnQtq3XGXXdLrVwEnRpjhMUt4eAcsNeA30=
