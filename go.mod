@@ -3,12 +3,12 @@ module github.com/FloatTech/ReiBot-Plugin
 go 1.19
 
 require (
-	github.com/FloatTech/AnimeAPI v1.5.2-0.20221010160553-eaf05e2fb14c
-	github.com/FloatTech/floatbox v0.0.0-20221010154018-16998fe73c7b
+	github.com/FloatTech/AnimeAPI v1.5.2-0.20221011154111-c322b785cadb
+	github.com/FloatTech/floatbox v0.0.0-20221011153549-68005767c531
 	github.com/FloatTech/sqlite v0.5.0
-	github.com/FloatTech/zbpctrl v1.5.2-0.20221010161826-e1908f4328ba
+	github.com/FloatTech/zbpctrl v1.5.2-0.20221011153929-4834c6911511
 	github.com/fogleman/gg v1.3.0
-	github.com/fumiama/ReiBot v0.0.0-20221010161908-f3992add0815
+	github.com/fumiama/ReiBot v0.0.0-20221011154611-97f2e6929847
 	github.com/fumiama/go-base16384 v1.6.1
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/fumiama/unibase2n v0.0.0-20221003115227-e7db987de949
@@ -17,7 +17,7 @@ require (
 	github.com/jozsefsallai/gophersauce v1.0.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.3
-	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20221010153647-ef3e42aff1ff
+	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20221011153413-16c9a77ce4f0
 )
 
 require (
