@@ -33,7 +33,8 @@ func init() { // 插件主体
 		PublicDataFolder: "Heisi",
 	}).ApplySingle(ctxext.DefaultSingle)
 
-	engine.OnMessageFullMatchGroup([]string{"来点黑丝", "来点白丝", "来点jk", "来点巨乳", "来点足控", "来点网红"}, fbctxext.DoOnceOnSuccess(filldata(engine.GetLazyData))).Limit(ctxext.LimitByGroup).SetBlock(true).
+	getbins := fbctxext.DoOnceOnSuccess(filldata(engine.GetLazyData))
+	engine.OnMessageFullMatchGroup([]string{"来点黑丝", "来点白丝", "来点jk", "来点巨乳", "来点足控", "来点网红"}, getbins).Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			matched := ctx.State["matched"].(string)
 			var pic item
@@ -76,7 +77,7 @@ func init() { // 插件主体
 			})
 		})
 
-	engine.OnCallbackQueryRegex(`^来点(黑丝|白丝|jk|巨乳|足控|网红)(\d+)$`, ctxext.MustMessageNotNil, fbctxext.DoOnceOnSuccess(filldata(engine.GetLazyData))).Limit(ctxext.LimitByGroup).SetBlock(true).
+	engine.OnCallbackQueryRegex(`^来点(黑丝|白丝|jk|巨乳|足控|网红)(\d+)$`, ctxext.MustMessageNotNil, getbins).Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			var pic item
 			i, err := strconv.Atoi(ctx.State["regex_matched"].([]string)[2])
