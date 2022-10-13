@@ -31,7 +31,7 @@ func init() { // 插件主体
 		Help: "黑丝\n" +
 			"- 来点黑丝\n- 来点白丝\n- 来点jk\n- 来点巨乳\n- 来点足控\n- 来点网红",
 		PublicDataFolder: "Heisi",
-	})
+	}).ApplySingle(ctxext.DefaultSingle)
 
 	engine.OnMessageFullMatchGroup([]string{"来点黑丝", "来点白丝", "来点jk", "来点巨乳", "来点足控", "来点网红"}, fbctxext.DoOnceOnSuccess(filldata(engine.GetLazyData))).Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
