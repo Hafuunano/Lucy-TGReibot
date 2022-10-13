@@ -183,7 +183,7 @@ func init() {
 				tgba.MessageEntity{Type: "bold", Offset: 5 + 1 + len(seedtext) + 1, Length: 5},
 			)
 		})
-	en.OnCallbackQueryRegex(`^nvaiorg([0-9a-f]{16})$`).SetBlock(true).
+	en.OnCallbackQueryRegex(`^nvaiorg([0-9a-f]{16})$`, ctxext.MustMessageNotNil).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			fn := ctx.State["regex_matched"].([]string)[1]
 			imgp := fmt.Sprintf("%s/%s.png", imgdir, fn)
@@ -206,7 +206,7 @@ func init() {
 			}
 			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
 		})
-	en.OnCallbackQueryRegex(`^nvaidel([0-9a-f]{16})$`).SetBlock(true).
+	en.OnCallbackQueryRegex(`^nvaidel([0-9a-f]{16})$`, ctxext.MustMessageNotNil).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			if !rei.AdminPermission(ctx) && ctx.Message.ReplyToMessage.From.ID != ctx.Value.(*tgba.CallbackQuery).From.ID {
 				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: 只有管理员或作图发起者才可移除图片"))

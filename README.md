@@ -125,6 +125,15 @@ reibot [-tbdoTh] ID1 ID2 ...
 </details>
 
 <details>
+  <summary>黑丝</summary>
+
+  `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/heisi"`
+
+  - [x] 来点黑丝/白丝/jk/巨乳/足控/网红
+
+</details>
+
+<details>
   <summary>百人一首</summary>
 
   `import _ "github.com/FloatTech/ReiBot-Plugin/plugin/hyaku"`

@@ -16,6 +16,8 @@ import (
 	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/floatbox/web"
 	ctrl "github.com/FloatTech/zbpctrl"
+
+	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 )
 
 const (
@@ -155,7 +157,7 @@ func init() {
 				}
 			}
 		})
-	en.OnCallbackQueryRegex(`^(\d{4}/\d{2}/\d{2}/\d{2}/\d{2}/\d{2}/\d+_p\d+.\w+){1}$`).SetBlock(true).
+	en.OnCallbackQueryRegex(`^(\d{4}/\d{2}/\d{2}/\d{2}/\d{2}/\d{2}/\d+_p\d+.\w+){1}$`, ctxext.MustMessageNotNil).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			if len(ctx.Message.ReplyMarkup.InlineKeyboard) > 1 {
 				ctx.Message.ReplyMarkup.InlineKeyboard = ctx.Message.ReplyMarkup.InlineKeyboard[:1]

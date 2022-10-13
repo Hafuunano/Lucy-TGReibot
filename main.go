@@ -16,6 +16,7 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/emojimix"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/genshin"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/heisi"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/hyaku"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/manager"
