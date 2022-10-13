@@ -111,6 +111,14 @@ func init() { // 插件主体
 				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
 				return
 			}
+			if len(ctx.Message.ReplyMarkup.InlineKeyboard) > 0 {
+				_, _ = ctx.Caller.Send(tgba.EditMessageReplyMarkupConfig{
+					BaseEdit: tgba.BaseEdit{
+						ChatID:    ctx.Message.Chat.ID,
+						MessageID: ctx.Message.MessageID,
+					},
+				})
+			}
 			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
 		})
 }
