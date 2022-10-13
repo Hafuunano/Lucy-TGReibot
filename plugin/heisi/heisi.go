@@ -61,6 +61,7 @@ func init() { // 插件主体
 			_, _ = ctx.Caller.Send(&tgba.PhotoConfig{
 				BaseFile: tgba.BaseFile{
 					BaseChat: tgba.BaseChat{
+						ChatID: ctx.Message.Chat.ID,
 						ReplyMarkup: tgba.NewInlineKeyboardMarkup(
 							tgba.NewInlineKeyboardRow(
 								tgba.NewInlineKeyboardButtonData(
@@ -97,7 +98,7 @@ func init() { // 插件主体
 			case "网红":
 				pic = mcnPic[i]
 			}
-			_, _ = ctx.Caller.Send(&tgba.DocumentConfig{
+			_, err = ctx.Caller.Send(&tgba.DocumentConfig{
 				BaseFile: tgba.BaseFile{
 					BaseChat: tgba.BaseChat{
 						ChatID:           ctx.Message.Chat.ID,
@@ -106,6 +107,11 @@ func init() { // 插件主体
 					File: tgba.FileURL(pic.String()),
 				},
 			})
+			if err != nil {
+				_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "ERROR: "+err.Error()))
+				return
+			}
+			_, _ = ctx.Caller.Send(tgba.NewCallbackWithAlert(ctx.Value.(*tgba.CallbackQuery).ID, "已发送"))
 		})
 }
 
