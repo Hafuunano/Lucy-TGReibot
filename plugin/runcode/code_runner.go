@@ -2,98 +2,21 @@
 package runcode
 
 import (
-	"errors"
-	"io"
-	"net/http"
-	"net/url"
-	"strconv"
 	"strings"
-	"time"
 
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	base14 "github.com/fumiama/go-base16384"
-	"github.com/tidwall/gjson"
 
+	"github.com/FloatTech/AnimeAPI/runoob"
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 )
 
-var (
-	templates = map[string]string{
-		"py2":        "print 'Hello World!'",
-		"ruby":       "puts \"Hello World!\";",
-		"rb":         "puts \"Hello World!\";",
-		"php":        "<?php\n\techo 'Hello World!';\n?>",
-		"javascript": "console.log(\"Hello World!\");",
-		"js":         "console.log(\"Hello World!\");",
-		"node.js":    "console.log(\"Hello World!\");",
-		"scala":      "object Main {\n  def main(args:Array[String])\n  {\n    println(\"Hello World!\")\n  }\n\t\t\n}",
-		"go":         "package main\n\nimport \"fmt\"\n\nfunc main() {\n   fmt.Println(\"Hello, World!\")\n}",
-		"c":          "#include <stdio.h>\n\nint main()\n{\n   printf(\"Hello, World! \n\");\n   return 0;\n}",
-		"c++":        "#include <iostream>\nusing namespace std;\n\nint main()\n{\n   cout << \"Hello World\";\n   return 0;\n}",
-		"cpp":        "#include <iostream>\nusing namespace std;\n\nint main()\n{\n   cout << \"Hello World\";\n   return 0;\n}",
-		"java":       "public class HelloWorld {\n    public static void main(String []args) {\n       System.out.println(\"Hello World!\");\n    }\n}",
-		"rust":       "fn main() {\n    println!(\"Hello World!\");\n}",
-		"rs":         "fn main() {\n    println!(\"Hello World!\");\n}",
-		"c#":         "using System;\nnamespace HelloWorldApplication\n{\n   class HelloWorld\n   {\n      static void Main(string[] args)\n      {\n         Console.WriteLine(\"Hello World!\");\n      }\n   }\n}",
-		"cs":         "using System;\nnamespace HelloWorldApplication\n{\n   class HelloWorld\n   {\n      static void Main(string[] args)\n      {\n         Console.WriteLine(\"Hello World!\");\n      }\n   }\n}",
-		"csharp":     "using System;\nnamespace HelloWorldApplication\n{\n   class HelloWorld\n   {\n      static void Main(string[] args)\n      {\n         Console.WriteLine(\"Hello World!\");\n      }\n   }\n}",
-		"shell":      "echo 'Hello World!'",
-		"bash":       "echo 'Hello World!'",
-		"erlang":     "% escript will ignore the first line\n\nmain(_) ->\n    io:format(\"Hello World!~n\").",
-		"perl":       "print \"Hello, World!\n\";",
-		"python":     "print(\"Hello, World!\")",
-		"py":         "print(\"Hello, World!\")",
-		"swift":      "var myString = \"Hello, World!\"\nprint(myString)",
-		"lua":        "var myString = \"Hello, World!\"\nprint(myString)",
-		"pascal":     "runcode Hello;\nbegin\n  writeln ('Hello, world!')\nend.",
-		"kotlin":     "fun main(args : Array<String>){\n    println(\"Hello World!\")\n}",
-		"kt":         "fun main(args : Array<String>){\n    println(\"Hello World!\")\n}",
-		"r":          "myString <- \"Hello, World!\"\nprint ( myString)",
-		"vb":         "Module Module1\n\n    Sub Main()\n        Console.WriteLine(\"Hello World!\")\n    End Sub\n\nEnd Module",
-		"typescript": "const hello : string = \"Hello World!\"\nconsole.log(hello)",
-		"ts":         "const hello : string = \"Hello World!\"\nconsole.log(hello)",
-	}
-	table = map[string][2]string{
-		"py2":        {"0", "py"},
-		"ruby":       {"1", "rb"},
-		"rb":         {"1", "rb"},
-		"php":        {"3", "php"},
-		"javascript": {"4", "js"},
-		"js":         {"4", "js"},
-		"node.js":    {"4", "js"},
-		"scala":      {"5", "scala"},
-		"go":         {"6", "go"},
-		"c":          {"7", "c"},
-		"c++":        {"7", "cpp"},
-		"cpp":        {"7", "cpp"},
-		"java":       {"8", "java"},
-		"rust":       {"9", "rs"},
-		"rs":         {"9", "rs"},
-		"c#":         {"10", "cs"},
-		"cs":         {"10", "cs"},
-		"csharp":     {"10", "cs"},
-		"shell":      {"10", "sh"},
-		"bash":       {"10", "sh"},
-		"erlang":     {"12", "erl"},
-		"perl":       {"14", "pl"},
-		"python":     {"15", "py3"},
-		"py":         {"15", "py3"},
-		"swift":      {"16", "swift"},
-		"lua":        {"17", "lua"},
-		"pascal":     {"18", "pas"},
-		"kotlin":     {"19", "kt"},
-		"kt":         {"19", "kt"},
-		"r":          {"80", "r"},
-		"vb":         {"84", "vb"},
-		"typescript": {"1010", "ts"},
-		"ts":         {"1010", "ts"},
-	}
-)
+var ro = runoob.NewRunOOB("b6365362a90ac2ac7098ba52c13e352b")
 
 func init() {
 	rei.Register("runcode", &ctrl.Options[*rei.Ctx]{
@@ -112,7 +35,7 @@ func init() {
 			israw := ctx.State["regex_matched"].([]string)[1] != ""
 			language := ctx.State["regex_matched"].([]string)[2]
 			language = strings.ToLower(language)
-			if runType, exist := table[language]; !exist {
+			if _, exist := runoob.LangTable[language]; !exist {
 				// 不支持语言
 				_, _ = ctx.SendPlainMessage(false, "> "+ctx.Message.From.String()+"\n语言不是受支持的编程语种呢~")
 			} else {
@@ -120,12 +43,13 @@ func init() {
 				block := ctx.State["regex_matched"].([]string)[3]
 				switch block {
 				case "help":
-					_, _ = ctx.SendPlainMessage(false, "> "+ctx.Message.From.String()+"  "+language+"-template:\n>runcode "+language+"\n"+templates[language])
+					_, _ = ctx.SendPlainMessage(false, "> "+ctx.Message.From.String()+"  "+language+"-template:\n>runcode "+language+"\n"+runoob.Templates[language])
 				default:
-					output, err := runCode(block, &runType)
+					output, err := ro.Run(block, language, "")
 					if err != nil {
 						output = "ERROR:\n" + err.Error()
 					}
+					output = cutTooLong(strings.Trim(output, "\n"))
 					if israw {
 						_, _ = ctx.SendPlainMessage(false, output)
 					} else {
@@ -149,59 +73,6 @@ func init() {
 				}
 			}
 		})
-}
-
-func runCode(code string, runType *[2]string) (string, error) {
-	// 对菜鸟api发送数据并返回结果
-	api := "https://tool.runoob.com/compile2.php"
-
-	header := http.Header{
-		"Content-Type": []string{"application/x-www-form-urlencoded; charset=UTF-8"},
-		"Referer":      []string{"https://c.runoob.com/"},
-		"User-Agent":   []string{"Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:87.0) Gecko/20100101 Firefox/87.0"},
-	}
-
-	val := url.Values{
-		"code":     []string{code},
-		"token":    []string{"4381fe197827ec87cbac9552f14ec62a"},
-		"stdin":    []string{""},
-		"language": []string{runType[0]},
-		"fileext":  []string{runType[1]},
-	}
-	// 发送请求
-	client := &http.Client{
-		Timeout: 15 * time.Second,
-	}
-	request, _ := http.NewRequest("POST", api, strings.NewReader(val.Encode()))
-	request.Header = header
-	body, err := client.Do(request)
-	if err != nil {
-		return "", err
-	}
-	defer body.Body.Close()
-	if body.StatusCode != http.StatusOK {
-		return "", errors.New("status code " + strconv.Itoa(body.StatusCode))
-	}
-	res, err := io.ReadAll(body.Body)
-	if err != nil {
-		return "", err
-	}
-	// 结果处理
-	content := gjson.ParseBytes(res)
-	if e := content.Get("errors").Str; e != "\n\n" {
-		return "", errors.New(cutTooLong(clearNewLineSuffix(e)))
-	}
-	output := content.Get("output").Str
-
-	return cutTooLong(clearNewLineSuffix(output)), nil
-}
-
-// 清除末尾多余的换行符
-func clearNewLineSuffix(text string) string {
-	for strings.HasSuffix(text, "\n") {
-		text = text[:len(text)-1]
-	}
-	return text
 }
 
 // 截断过长文本

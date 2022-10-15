@@ -3,7 +3,7 @@ module github.com/FloatTech/ReiBot-Plugin
 go 1.19
 
 require (
-	github.com/FloatTech/AnimeAPI v1.5.2-0.20221012045713-9809c0fe12ab
+	github.com/FloatTech/AnimeAPI v1.5.2-0.20221015060924-fe2f85a3cf45
 	github.com/FloatTech/floatbox v0.0.0-20221011153549-68005767c531
 	github.com/FloatTech/sqlite v0.5.0
 	github.com/FloatTech/zbpctrl v1.5.2-0.20221011153929-4834c6911511
