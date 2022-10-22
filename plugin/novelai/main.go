@@ -143,7 +143,7 @@ func init() {
 					{Type: "bold", Offset: 0, Length: 5},
 					{Type: "code", Offset: 5 + 1, Length: len(seedtext)},
 					{Type: "bold", Offset: 5 + 1 + len(seedtext) + 1, Length: 5},
-					{Type: "code", Offset: 5 + 1 + len(seedtext) + 1 + 5, Length: len(tags)},
+					{Type: "code", Offset: 5 + 1 + len(seedtext) + 1 + 5 + 1, Length: len(tags)},
 				},
 			}
 			if err == nil {
