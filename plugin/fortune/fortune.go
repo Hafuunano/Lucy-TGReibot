@@ -92,7 +92,7 @@ func init() {
 		})
 	en.OnMessageFullMatchGroup([]string{"运势", "抽签"}, fcext.DoOnceOnSuccess(
 		func(ctx *rei.Ctx) bool {
-			data, err := file.GetLazyData(omikujson, false)
+			data, err := file.GetLazyData(omikujson, "data/control/stor.spb", false)
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
@@ -102,7 +102,7 @@ func init() {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
 			}
-			_, err = file.GetLazyData(font, true)
+			_, err = file.GetLazyData(font, "data/control/stor.spb", true)
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return false
@@ -124,7 +124,7 @@ func init() {
 			}
 			// 检查背景图片是否存在
 			zipfile := images + kind + ".zip"
-			_, err := file.GetLazyData(zipfile, false)
+			_, err := file.GetLazyData(zipfile, "data/control/stor.spb", false)
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return

@@ -271,8 +271,8 @@ func init() {
 						return
 					}
 				}
+				onlyme = true
 			}
-			onlyme = onlychat
 			key := ctx.State["regex_matched"].([]string)[2]
 			err := os.WriteFile(keyfile, binary.StringToBytes(key), 0644)
 			if err != nil {
@@ -339,8 +339,8 @@ func init() {
 						return
 					}
 				}
+				onlyme = true
 			}
-			onlyme = onlychat
 			mu.Lock()
 			err = ims.Del("k", "WHERE sender="+strconv.FormatInt(id, 10)+" and onlyme="+fmt.Sprint(onlyme))
 			mu.Unlock()
