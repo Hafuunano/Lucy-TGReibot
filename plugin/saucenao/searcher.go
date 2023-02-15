@@ -63,7 +63,7 @@ func init() { // 插件主体
 					"标题: ", illust.Title, "\n",
 					"插画ID: ", illust.Pid, "\n",
 					"画师: ", illust.UserName, "\n",
-					"画师ID: ", illust.UserId,
+					"画师ID: ", illust.UserID,
 				)
 				var imgs []any
 				for i := range illust.ImageUrls {

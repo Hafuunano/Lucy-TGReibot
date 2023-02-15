@@ -20,8 +20,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	fcext "github.com/FloatTech/floatbox/ctxext"
-	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
+	"github.com/FloatTech/imgfactory"
 	ctrl "github.com/FloatTech/zbpctrl"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
@@ -95,14 +95,17 @@ func init() {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return
 			}
-			b, cl := writer.ToBytes(img)
+			b, err := imgfactory.ToBytes(img)
+			if err != nil {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+				return
+			}
 			_, err = ctx.SendPhoto(tgba.FileBytes{Bytes: b}, true, func() string {
 				if mode {
 					return "恭喜你抽到了:\n" + str
 				}
 				return "十连成功~"
 			}())
-			cl()
 			if err != nil {
 				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
 				return

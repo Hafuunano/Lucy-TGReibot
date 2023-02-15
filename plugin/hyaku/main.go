@@ -66,7 +66,7 @@ func init() {
 	go func() {
 		var f *os.File
 		if file.IsNotExist(csvfile) {
-			data, err := web.RequestDataWith(web.NewTLS12Client(), bed+"小倉百人一首.csv", "GET", "gitcode.net", web.RandUA())
+			data, err := web.RequestDataWith(web.NewTLS12Client(), bed+"小倉百人一首.csv", "GET", "gitcode.net", web.RandUA(), nil)
 			if err != nil {
 				_ = os.Remove(csvfile)
 				panic(err)
