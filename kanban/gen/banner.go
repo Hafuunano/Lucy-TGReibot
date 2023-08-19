@@ -18,7 +18,7 @@ var Version = "%s"
 // Banner ...
 var Banner = "* Telegram + ReiBot + Golang\n" +
 	"* Version " + Version + " - %s\n" +
-	"* Unoffical Fork of Lucy (HiMoYo Bot.)" +
+	"* Unoffical Fork of Lucy (HiMoYo Bot.)\n" +
 	"* Copyright © 2020 - %d FloatTech. All Rights Reserved.\n" +
 	"* Project: https://github.com/FloatTech/ReiBot-Plugin"
 `

@@ -11,8 +11,8 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/bilibili_parse"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/chrev"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/emojimix"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/saucenao"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
 	// -----------------------以下为内置依赖，勿动------------------------ //
@@ -27,7 +27,7 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano()) // 全局 seed，其他插件无需再 seed
 
-	token := flag.String("t", "", "telegram api token")
+	token := flag.String("t", "6698655694:AAHyJj6bgketzAOu8GxDTCFOOgOXpNz_lIY", "telegram api token")
 	buffer := flag.Int("b", 256, "message sequence length")
 	debug := flag.Bool("d", false, "enable debug-level log output")
 	offset := flag.Int("o", 0, "the last Update ID to include")
