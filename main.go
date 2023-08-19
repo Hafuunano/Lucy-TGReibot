@@ -8,21 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/b14"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/base64gua"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/baseamasiro"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/bilibili_parse"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/chrev"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/emojimix"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/genshin"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/heisi"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/hyaku"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/manager"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/moegoe"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/novelai"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/runcode"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/saucenao"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
@@ -64,7 +53,7 @@ func main() {
 		sus = append(sus, i)
 	}
 
-	rei.OnMessageCommandGroup([]string{"help", "帮助", "menu", "菜单"}, rei.OnlyToMe).SetBlock(true).
+	rei.OnMessageCommandGroup([]string{"help"}, rei.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			_, _ = ctx.SendPlainMessage(false, kanban.Banner)
 		})
