@@ -63,6 +63,11 @@ func init() {
 	engine.OnMessageCommandGroup([]string{"fortune"}).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getUserName := ctx.Event.Value.(*tgba.Message).From.FirstName + " " + ctx.Event.Value.(*tgba.Message).From.LastName
 		getUserID := ctx.Event.Value.(*tgba.Message).From.ID
+		if ctx.Event.Value.(*tgba.Message).From.FirstName == "Group" {
+			// When The Request's user is The Channel || Group.
+			getUserName = ctx.Event.Value.(*tgba.Message).Chat.FirstName + "" + ctx.Event.Value.(*tgba.Message).Chat.LastName
+			getUserID = ctx.Event.Value.(*tgba.Message).Chat.ID
+		}
 		userPic := strconv.FormatInt(getUserID, 10) + time.Now().Format("20060102") + ".png"
 		picDir, err := os.ReadDir(engine.DataFolder() + "randpic")
 		if err != nil {
@@ -121,6 +126,9 @@ func init() {
 			// draw third round rectangle
 			mainContext.SetRGBA255(91, 57, 83, 255)
 			mainContext.SetFontFace(LoadFontFace(loadNotoSans, 25))
+			if len(getUserName) > 40 {
+				getUserName = getUserName[:40] + "...."
+			}
 			nameLength, _ := mainContext.MeasureString(getUserName)
 			var renderLength float64
 			renderLength = nameLength + 160
@@ -138,9 +146,9 @@ func init() {
 				return
 			}
 			getLengthImage := len(userProfilePhotos.Photos)
-			if getLengthImage == 0 {
+			// WHY TELEGRAM CAN SET NO TO PUBLIC ADMISSION ON AVATAR????
+			if getLengthImage != 0 {
 				// offset draw
-			} else {
 				photo := userProfilePhotos.Photos[0][0]
 				avatar, err := ctx.Caller.GetFileDirectURL(photo.FileID)
 				if err != nil {

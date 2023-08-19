@@ -24,7 +24,7 @@ func init() { // 插件主体
 		Help:             "tracemoe\n- 搜番 | 搜索番剧[图片]",
 	})
 	// 以图搜图
-	engine.OnMessagePrefixGroup([]string{"搜番", "搜索番剧"}, rei.MustProvidePhoto("请发送一张图片", "获取图片失败!")).SetBlock(true).
+	engine.OnMessageCommand("tracemoe", rei.MustProvidePhoto("请发送一张图片", "获取图片失败!")).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			// 开始搜索图片
 			_, _ = ctx.SendPlainMessage(false, "少女祈祷中...")

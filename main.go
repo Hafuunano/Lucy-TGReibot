@@ -10,7 +10,6 @@ import (
 
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/bilibili_parse"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/chrev"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/emojimix"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
