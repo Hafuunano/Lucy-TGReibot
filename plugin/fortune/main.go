@@ -63,10 +63,19 @@ func init() {
 	engine.OnMessageCommandGroup([]string{"fortune"}).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getUserName := ctx.Event.Value.(*tgba.Message).From.FirstName + " " + ctx.Event.Value.(*tgba.Message).From.LastName
 		getUserID := ctx.Event.Value.(*tgba.Message).From.ID
+		var setGroupStat = false
+		var chatPhoto *tgba.ChatPhoto
 		if ctx.Event.Value.(*tgba.Message).From.FirstName == "Group" {
 			// When The Request's user is The Channel || Group.
-			getUserName = ctx.Event.Value.(*tgba.Message).Chat.FirstName + "" + ctx.Event.Value.(*tgba.Message).Chat.LastName
-			getUserID = ctx.Event.Value.(*tgba.Message).Chat.ID
+			setGroupStat = true
+			getGroupChatConfig := tgba.ChatInfoConfig{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}
+			chatGroupInfo, err := ctx.Caller.GetChat(getGroupChatConfig)
+			if err != nil {
+				panic(err)
+			}
+			getUserName = chatGroupInfo.Title
+			getUserID = chatGroupInfo.ID
+			chatPhoto = chatGroupInfo.Photo
 		}
 		userPic := strconv.FormatInt(getUserID, 10) + time.Now().Format("20060102") + ".png"
 		picDir, err := os.ReadDir(engine.DataFolder() + "randpic")
@@ -88,15 +97,14 @@ func init() {
 		} else {
 			info = card.Info.ReverseDescription
 		}
-		user := getUserID
-		userS := strconv.FormatInt(user, 10)
+		userS := strconv.FormatInt(getUserID, 10)
 		now := time.Now().Format("20060102")
 		// modify this possibility to 40-100, don't be to low.
 		randEveryone := RandSenderPerDayN(getUserID, 50)
 		var si = now + userS // use map to store.
 		loadNotoSans := engine.DataFolder() + "NotoSansCJKsc-Regular.otf"
 		if signTF[si] == 0 {
-			result[user] = randEveryone + 50
+			result[getUserID] = randEveryone + 50
 			// background
 			img, err := gg.LoadImage(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
 			if err != nil {
@@ -126,8 +134,8 @@ func init() {
 			// draw third round rectangle
 			mainContext.SetRGBA255(91, 57, 83, 255)
 			mainContext.SetFontFace(LoadFontFace(loadNotoSans, 25))
-			if len(getUserName) > 40 {
-				getUserName = getUserName[:40] + "...."
+			if len(getUserName) > 60 {
+				getUserName = getUserName[:60] + "...."
 			}
 			nameLength, _ := mainContext.MeasureString(getUserName)
 			var renderLength float64
@@ -137,20 +145,33 @@ func init() {
 			}
 			mainContext.DrawRoundedRectangle(50, float64(mainContextHight-175), renderLength, 250, 20)
 			mainContext.Fill()
-			userProfilePhotosConfig := tgba.UserProfilePhotosConfig{
-				UserID: getUserID,
-			}
-			userProfilePhotos, err := ctx.Caller.GetUserProfilePhotos(userProfilePhotosConfig)
-			if err != nil {
-				_, _ = ctx.SendPlainMessage(false, "Something wrong while rendering pic? avatar IO err.")
-				return
-			}
-			getLengthImage := len(userProfilePhotos.Photos)
-			// WHY TELEGRAM CAN SET NO TO PUBLIC ADMISSION ON AVATAR????
-			if getLengthImage != 0 {
-				// offset draw
-				photo := userProfilePhotos.Photos[0][0]
-				avatar, err := ctx.Caller.GetFileDirectURL(photo.FileID)
+			if !setGroupStat {
+				userProfilePhotosConfig := tgba.UserProfilePhotosConfig{
+					UserID: getUserID,
+				}
+				userProfilePhotos, err := ctx.Caller.GetUserProfilePhotos(userProfilePhotosConfig)
+				if err != nil {
+					_, _ = ctx.SendPlainMessage(false, "Something wrong while rendering pic? avatar IO err.")
+					return
+				}
+				getLengthImage := len(userProfilePhotos.Photos)
+				// WHY TELEGRAM CAN SET NO TO PUBLIC ADMISSION ON AVATAR????
+				if getLengthImage != 0 {
+					// offset draw
+					photo := userProfilePhotos.Photos[0][0]
+					avatar, err := ctx.Caller.GetFileDirectURL(photo.FileID)
+					if err != nil {
+						panic(err)
+					}
+					datas, err := http.Get(avatar)
+					// avatar
+					avatarByteUni, _, _ := image.Decode(datas.Body)
+					avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
+					mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
+				}
+
+			} else {
+				avatar, err := ctx.Caller.GetFileDirectURL(chatPhoto.SmallFileID)
 				if err != nil {
 					panic(err)
 				}
@@ -160,6 +181,7 @@ func init() {
 				avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
 				mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
 			}
+
 			// avatar draw end.
 			mainContext.SetRGBA255(255, 255, 255, 255)
 			mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui

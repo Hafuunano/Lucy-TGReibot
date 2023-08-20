@@ -66,7 +66,7 @@ func init() {
 			return 0
 		}),
 		rei.WithPostFn[int64](func(ctx *rei.Ctx) {
-			_, _ = ctx.SendPlainMessage(false, "有其他萝莉操作正在执行中, 不要着急哦")
+			_, _ = ctx.SendPlainMessage(false, "有其他操作正在执行中, 不要着急哦")
 		})))
 	en.OnMessageCommand("lolicon").SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {

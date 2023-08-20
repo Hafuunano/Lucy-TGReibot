@@ -16,7 +16,7 @@ func init() {
 		Help:             "字符翻转\n- 翻转 I love you",
 	})
 	// 处理字符翻转指令
-	engine.OnMessageRegex(`^翻转\s*([A-Za-z\s]*)$`).SetBlock(true).
+	engine.OnMessageRegex(`^/chrev\s*([A-Za-z\s]*)$`).SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
 			// 获取需要翻转的字符串
 			str := ctx.State["regex_matched"].([]string)[1]

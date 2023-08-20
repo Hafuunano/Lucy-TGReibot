@@ -12,6 +12,7 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/chrev"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tools"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
 	// -----------------------以下为内置依赖，勿动------------------------ //
