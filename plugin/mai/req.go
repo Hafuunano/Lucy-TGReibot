@@ -13,11 +13,6 @@ type DivingFishB50UserName struct {
 	B50      bool   `json:"b50"`
 }
 
-type TelegramSaver struct {
-	Username   string `json:"username"`
-	TelegramID string `json:"tgid"`
-}
-
 func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error) {
 	// packed json and sent.
 	jsonStruct := DivingFishB50UserName{Username: username, B50: true}

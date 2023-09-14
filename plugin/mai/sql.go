@@ -15,11 +15,6 @@ type DataHostSQL struct {
 	Background string `db:"bg"`         // bg
 }
 
-type QuerySaver struct {
-	TelegramId int64  `db:"telegramid"` // telegramid
-	Username   string `db:"username"`   // maimai user id ,query from this one.
-}
-
 var (
 	maiDatabase = &sql.Sqlite{}
 	maiLocker   = sync.Mutex{}
@@ -34,8 +29,8 @@ func init() {
 	_ = InitDataBase()
 }
 
-func FormatUserDataBase(tgid int64, plate string, bg string) *DataHostSQL {
-	return &DataHostSQL{TelegramId: tgid, Plate: plate, Background: bg}
+func FormatUserDataBase(tgid int64, plate string, bg string, username string) *DataHostSQL {
+	return &DataHostSQL{TelegramId: tgid, Plate: plate, Background: bg, Username: username}
 }
 
 func InitDataBase() error {
@@ -51,6 +46,18 @@ func GetUserInfoFromDatabase(userID int64) string {
 	userIDStr := strconv.FormatInt(userID, 10)
 	_ = maiDatabase.Find("userinfo", &infosql, "where telegramid is "+userIDStr)
 	return infosql.Plate
+}
+
+func GetUserInfoNameFromDatabase(userID int64) string {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	var infosql DataHostSQL
+	userIDStr := strconv.FormatInt(userID, 10)
+	_ = maiDatabase.Find("userinfo", &infosql, "where telegramid is "+userIDStr)
+	if infosql.Username == "" {
+		return ""
+	}
+	return infosql.Username
 }
 
 func GetUserDefaultinfoFromDatabase(userID int64) string {

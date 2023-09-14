@@ -23,6 +23,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
+	transform "github.com/FloatTech/ReiBot-Plugin/utils/transform"
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 )
@@ -55,11 +56,17 @@ func init() {
 	signTF = make(map[string]int)
 	result = make(map[int64]int)
 	// onload fortune mapset.
-	data, err := os.ReadFile(engine.DataFolder() + "tarots.json")
+	data, err := os.ReadFile(transform.ReturnLucyMainDataIndex("funwork") + "tarots.json")
 	if err != nil {
-		return
+		panic(err)
 	}
 	_ = json.Unmarshal(data, &cardMap)
+	picDir, err := os.ReadDir(transform.ReturnLucyMainDataIndex("funwork") + "randpic")
+	if err != nil {
+		panic(err)
+	}
+	picDirNum := len(picDir)
+	reg := regexp.MustCompile(`[^.]+`)
 	engine.OnMessageCommandGroup([]string{"fortune"}).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getUserName := ctx.Event.Value.(*tgba.Message).From.FirstName + " " + ctx.Event.Value.(*tgba.Message).From.LastName
 		getUserID := ctx.Event.Value.(*tgba.Message).From.ID
@@ -78,15 +85,8 @@ func init() {
 			chatPhoto = chatGroupInfo.Photo
 		}
 		userPic := strconv.FormatInt(getUserID, 10) + time.Now().Format("20060102") + ".png"
-		picDir, err := os.ReadDir(engine.DataFolder() + "randpic")
-		if err != nil {
-			_, _ = ctx.SendPlainMessage(false, "ERROR:", err)
-			return
-		}
-		picDirNum := len(picDir)
 		usersRandPic := RandSenderPerDayN(getUserID, picDirNum)
 		picDirName := picDir[usersRandPic].Name()
-		reg := regexp.MustCompile(`[^.]+`)
 		list := reg.FindAllString(picDirName, -1)
 		p := rand.Intn(2)
 		is := rand.Intn(77)
@@ -102,11 +102,11 @@ func init() {
 		// modify this possibility to 40-100, don't be to low.
 		randEveryone := RandSenderPerDayN(getUserID, 50)
 		var si = now + userS // use map to store.
-		loadNotoSans := engine.DataFolder() + "NotoSansCJKsc-Regular.otf"
+		loadNotoSans := transform.ReturnLucyMainDataIndex("funwork") + "NotoSansCJKsc-Regular.otf"
 		if signTF[si] == 0 {
 			result[getUserID] = randEveryone + 50
 			// background
-			img, err := gg.LoadImage(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
+			img, err := gg.LoadImage(transform.ReturnLucyMainDataIndex("funwork") + "randpic" + "/" + list[0] + ".png")
 			if err != nil {
 				panic(err)
 			}
@@ -134,8 +134,29 @@ func init() {
 			// draw third round rectangle
 			mainContext.SetRGBA255(91, 57, 83, 255)
 			mainContext.SetFontFace(LoadFontFace(loadNotoSans, 25))
-			if len(getUserName) > 60 {
-				getUserName = getUserName[:60] + "...."
+			charCount := 0.0
+			setBreaker := false
+			var truncated string
+			var UserFloatNum float64
+			// set rune count
+			for _, runeValue := range getUserName {
+				charWidth := utf8.RuneLen(runeValue)
+				if charWidth == 3 {
+					UserFloatNum = 1.5
+				} else {
+					UserFloatNum = float64(charWidth)
+				}
+				if charCount+UserFloatNum > 24 {
+					setBreaker = true
+					break
+				}
+				truncated += string(runeValue)
+				charCount += UserFloatNum
+			}
+			if setBreaker {
+				getUserName = truncated + "..."
+			} else {
+				getUserName = truncated
 			}
 			nameLength, _ := mainContext.MeasureString(getUserName)
 			var renderLength float64
@@ -169,7 +190,6 @@ func init() {
 					avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
 					mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
 				}
-
 			} else {
 				avatar, err := ctx.Caller.GetFileDirectURL(chatPhoto.SmallFileID)
 				if err != nil {
@@ -181,7 +201,6 @@ func init() {
 				avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
 				mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
 			}
-
 			// avatar draw end.
 			mainContext.SetRGBA255(255, 255, 255, 255)
 			mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
@@ -197,30 +216,15 @@ func init() {
 			}
 			formatTimeDate := time.Now().Format("2006 / 01 / 02")
 			formatTimeCurrent := time.Now().Format("15 : 04 : 05")
-			//	formatTimeLength, _ := mainContext.MeasureString(formatTimeDate)
 			formatTimeWeek := time.Now().Weekday().String()
 			mainContext.SetFontFace(LoadFontFace(loadNotoSans, 35))
-			/*
-				var setOutlineColor color.Color
-				if IsDark(color.RGBA(setInlineColor)) {
-					setOutlineColor = color.White
-				} else {
-					setOutlineColor = color.Black
-				}
-
-			*/
 			setOutlineColor := color.White
-			/*
-				mainContext.DrawStringAnchored(formatTimeCurrent, float64(mainContextWidth-50), 40, 1, 0.5)
-				mainContext.DrawStringAnchored(formatTimeDate, float64(mainContextWidth-50), 90, 1, 0.5)
-				mainContext.DrawStringAnchored(formatTimeWeek, float64(mainContextWidth-50), 140, 1, 0.5)
-			*/
 			DrawBorderString(mainContext, formatTimeCurrent, 5, float64(mainContextWidth-80), 50, 1, 0.5, setInlineColor, setOutlineColor)
 			DrawBorderString(mainContext, formatTimeDate, 5, float64(mainContextWidth-80), 100, 1, 0.5, setInlineColor, setOutlineColor)
 			DrawBorderString(mainContext, formatTimeWeek, 5, float64(mainContextWidth-80), 150, 1, 0.5, setInlineColor, setOutlineColor)
 			mainContext.FillPreserve()
 			if err != nil {
-				return
+				panic(err)
 			}
 			mainContext.SetFontFace(LoadFontFace(loadNotoSans, 140))
 			DrawBorderString(mainContext, "|", 5, float64(mainContextWidth-30), 65, 1, 0.5, setInlineColor, setOutlineColor)
@@ -256,6 +260,7 @@ func init() {
 		}
 	})
 }
+
 func splitChineseString(s string, length int) []string {
 	results := make([]string, 0)
 	runes := []rune(s)
