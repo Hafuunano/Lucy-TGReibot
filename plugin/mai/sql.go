@@ -39,7 +39,8 @@ func InitDataBase() error {
 	return maiDatabase.Create("userinfo", &DataHostSQL{})
 }
 
-func GetUserInfoFromDatabase(userID int64) string {
+// GetUserPlateInfoFromDatabase Get plate data
+func GetUserPlateInfoFromDatabase(userID int64) string {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
 	var infosql DataHostSQL
@@ -48,6 +49,7 @@ func GetUserInfoFromDatabase(userID int64) string {
 	return infosql.Plate
 }
 
+// GetUserInfoNameFromDatabase GetUserName
 func GetUserInfoNameFromDatabase(userID int64) string {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
@@ -60,7 +62,8 @@ func GetUserInfoNameFromDatabase(userID int64) string {
 	return infosql.Username
 }
 
-func GetUserDefaultinfoFromDatabase(userID int64) string {
+// GetUserDefaultBackgroundDataFromDatabase Get Default Background.
+func GetUserDefaultBackgroundDataFromDatabase(userID int64) string {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
 	var infosql DataHostSQL
@@ -69,6 +72,7 @@ func GetUserDefaultinfoFromDatabase(userID int64) string {
 	return infosql.Background
 }
 
+// BindUserDataBase Bind Database only for DataHost Inline code.
 func (info *DataHostSQL) BindUserDataBase() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()

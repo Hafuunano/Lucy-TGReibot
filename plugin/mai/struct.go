@@ -2,16 +2,6 @@ package mai
 
 import (
 	"fmt"
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
-	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/gg"
-	"github.com/FloatTech/imgfactory"
-	rei "github.com/fumiama/ReiBot"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"image"
 	"image/color"
 	"image/png"
@@ -22,8 +12,15 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 	"unicode/utf8"
+
+	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	"github.com/FloatTech/gg"
+	"github.com/FloatTech/imgfactory"
+	rei "github.com/fumiama/ReiBot"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 type player struct {
@@ -97,8 +94,7 @@ var (
 	b50bg             = loadMaiPic + "b50_bg.png"
 	b50Custom         = loadMaiPic + "b50_bg_custom.png"
 	Root              = transform.ReturnLucyMainDataIndex("maidx") + "resources/maimai/"
-	userPlate         = transform.ReturnLucyMainDataIndex("maidx") + "user/"
-	Saved             = "file:///" + file.BOTPATH + "/" + engine.DataFolder() + "save/"
+	userPlate         = engine.DataFolder() + "user/"
 	titleFont         font.Face
 	scoreFont         font.Face
 	rankFont          font.Face
@@ -146,6 +142,7 @@ func init() {
 // FullPageRender  Render Full Page
 func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	// muilt-threading.
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
 	var avatarHandler sync.WaitGroup
 	avatarHandler.Add(1)
 	var getAvatarFormat *gg.Context
@@ -153,55 +150,32 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	go func() {
 		// avatar Round Style
 		defer avatarHandler.Done()
-		userProfilePhotosConfig := tgba.UserProfilePhotosConfig{
-			UserID: ctx.Event.Value.(*tgba.Message).From.ID,
-		}
-		userProfilePhotos, err := ctx.Caller.GetUserProfilePhotos(userProfilePhotosConfig)
-		if err != nil {
-			_, _ = ctx.SendPlainMessage(false, "avatar render error.")
-			return
-		}
-		getLengthImage := len(userProfilePhotos.Photos)
-		// WHY TELEGRAM CAN SET NO TO PUBLIC ADMISSION ON AVATAR????
-		var datas *http.Response
-		if getLengthImage != 0 {
-			// offset draw
-			photo := userProfilePhotos.Photos[0][0]
-			avatar, err := ctx.Caller.GetFileDirectURL(photo.FileID)
-			if err != nil {
-				panic(err)
-			}
-			datas, err = http.Get(avatar)
-		}
-		avatarByteUni, _, _ := image.Decode(datas.Body)
-		avatarFormat := imgfactory.Size(avatarByteUni, 180, 180)
+		avatarFormat := imgfactory.Size(toolchain.GetTargetAvatar(ctx), 180, 180)
 		getAvatarFormat = gg.NewContext(180, 180)
 		getAvatarFormat.DrawRoundedRectangle(0, 0, 178, 178, 20)
 		getAvatarFormat.Clip()
 		getAvatarFormat.DrawImage(avatarFormat.Image(), 0, 0)
 		getAvatarFormat.Fill()
 	}()
-	// userPlatedCustom := GetUserDefaultinfoFromDatabase(ctx.Event.UserID)
+	userPlatedCustom := GetUserDefaultBackgroundDataFromDatabase(getUserID)
 	// render Header.
 	b50Render := gg.NewContext(2090, 1660)
-	// rawPlateData, errs := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
-	/*	if errs == nil {
+	rawPlateData, errs := gg.LoadImage(userPlate + strconv.Itoa(int(getUserID)) + ".png")
+	if errs == nil {
+		b50bg = b50Custom
+		b50Render.DrawImage(rawPlateData, 595, 30)
+		b50Render.Fill()
+	} else {
+		if userPlatedCustom != "" {
 			b50bg = b50Custom
-			b50Render.DrawImage(rawPlateData, 595, 30)
+			images, _ := GetDefaultPlate(userPlatedCustom)
+			b50Render.DrawImage(images, 595, 30)
 			b50Render.Fill()
 		} else {
-			if userPlatedCustom != "" {
-				b50bg = b50Custom
-				images, _ := GetDefaultPlate(userPlatedCustom)
-				b50Render.DrawImage(images, 595, 30)
-				b50Render.Fill()
-			} else {
-				// show nil
-				b50bg = b50bgOriginal
-			}
+			// show nil
+			b50bg = b50bgOriginal
 		}
-	*/
-	b50bg = b50bgOriginal
+	}
 	getContent, _ := gg.LoadImage(b50bg)
 	b50Render.DrawImage(getContent, 0, 0)
 	b50Render.Fill()
@@ -215,18 +189,10 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	b50Render.DrawStringAnchored(strings.Join(strings.Split(data.Nickname, ""), " "), 825, 160, 0, 0)
 	b50Render.Fill()
 	b50Render.SetFontFace(titleFont)
-	/*
-		setPlateLocalStatus := GetUserInfoFromDatabase(ctx.Event.UserID)
-		var dataPlate bool
-		if setPlateLocalStatus != "" {
-			data.Plate = setPlateLocalStatus
-			dataPlate = true
-		} else {
-			dataPlate = false
-		}
-
-	*/
-
+	setPlateLocalStatus := GetUserPlateInfoFromDatabase(getUserID)
+	if setPlateLocalStatus != "" {
+		data.Plate = setPlateLocalStatus
+	}
 	b50Render.DrawStringAnchored(strings.Join(strings.Split(data.Plate, ""), " "), 1050, 207, 0.5, 0.5)
 	b50Render.Fill()
 	getRating := getRatingBg(data.Rating)
@@ -543,22 +509,4 @@ func getRatingBg(rating int) string {
 		index++
 	}
 	return ratingBgFilenames[index]
-}
-
-// PictureHandler MaiPictureHandler Handler Mai Pic
-func PictureHandler(ctx *zero.Ctx) bool {
-	if zero.HasPicture(ctx) {
-		return true
-	}
-	// 没有图片就索取
-	ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请提供一张图片，图片大小比例适应为6:1 (1260x210) ,如果图片不适应将会自动剪辑到合适大小"))
-	next := zero.NewFutureEvent("message", 999, true, ctx.CheckSession(), zero.HasPicture).Next()
-	select {
-	case <-time.After(time.Second * 30):
-		return false
-	case newCtx := <-next:
-		ctx.State["image_url"] = newCtx.State["image_url"]
-		ctx.Event.MessageID = newCtx.Event.MessageID
-		return true
-	}
 }

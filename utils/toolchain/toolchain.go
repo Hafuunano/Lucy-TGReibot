@@ -1,11 +1,15 @@
-// Package toolchain can make it more faster.
+// Package toolchain can make it more easily to code.
 package toolchain
 
 import (
+	"fmt"
+	"image"
+	"io"
+	"net/http"
+	"regexp"
+
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"image"
-	"net/http"
 )
 
 // GetTargetAvatar GetUserTarget ID
@@ -68,4 +72,36 @@ func GetChatUserInfoID(ctx *rei.Ctx) (id int64, name string) {
 		return ctx.Event.Value.(*tgba.Message).From.ID, getUserName + " " + ctx.Event.Value.(*tgba.Message).From.LastName
 	}
 	return 0, ""
+}
+
+// GetNickNameFromUsername Use Sniper, not api.
+func GetNickNameFromUsername(username string) (name string) {
+	// https://github.com/XiaoMengXinX/Telegram_QuoteReply_Bot-Go/blob/master/api/bot.go
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", fmt.Sprintf("https://t.me/%s", username), nil)
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+
+	reName := regexp.MustCompile(`<meta property="og:title" content="([^"]*)"`)
+	match := reName.FindStringSubmatch(string(body))
+	if len(match) > 1 {
+		name = match[1]
+	}
+	pageTitle := ""
+	reTitle1 := regexp.MustCompile(`<title>`)
+	reTitle2 := regexp.MustCompile(`</title>`)
+	start := reTitle1.FindStringIndex(string(body))
+	end := reTitle2.FindStringIndex(string(body))
+	if start != nil && end != nil {
+		pageTitle = string(body)[start[1]:end[0]]
+	}
+
+	if pageTitle == name { // 用户不存在
+		name = ""
+	}
+	return
 }
