@@ -4,6 +4,7 @@ package fortune
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/imgfactory"
 	"github.com/fogleman/gg"
@@ -15,7 +16,6 @@ import (
 	"image/color"
 	"math"
 	"math/rand"
-	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -23,7 +23,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	transform "github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 )
@@ -67,23 +67,8 @@ func init() {
 	}
 	picDirNum := len(picDir)
 	reg := regexp.MustCompile(`[^.]+`)
-	engine.OnMessageCommandGroup([]string{"fortune"}).SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		getUserName := ctx.Event.Value.(*tgba.Message).From.FirstName + " " + ctx.Event.Value.(*tgba.Message).From.LastName
-		getUserID := ctx.Event.Value.(*tgba.Message).From.ID
-		var setGroupStat = false
-		var chatPhoto *tgba.ChatPhoto
-		if ctx.Event.Value.(*tgba.Message).From.FirstName == "Group" {
-			// When The Request's user is The Channel || Group.
-			setGroupStat = true
-			getGroupChatConfig := tgba.ChatInfoConfig{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}
-			chatGroupInfo, err := ctx.Caller.GetChat(getGroupChatConfig)
-			if err != nil {
-				panic(err)
-			}
-			getUserName = chatGroupInfo.Title
-			getUserID = chatGroupInfo.ID
-			chatPhoto = chatGroupInfo.Photo
-		}
+	engine.OnMessageCommand("fortune").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		getUserID, getUserName := toolchain.GetChatUserInfoID(ctx)
 		userPic := strconv.FormatInt(getUserID, 10) + time.Now().Format("20060102") + ".png"
 		usersRandPic := RandSenderPerDayN(getUserID, picDirNum)
 		picDirName := picDir[usersRandPic].Name()
@@ -166,42 +151,11 @@ func init() {
 			}
 			mainContext.DrawRoundedRectangle(50, float64(mainContextHight-175), renderLength, 250, 20)
 			mainContext.Fill()
-			if !setGroupStat {
-				userProfilePhotosConfig := tgba.UserProfilePhotosConfig{
-					UserID: getUserID,
-				}
-				userProfilePhotos, err := ctx.Caller.GetUserProfilePhotos(userProfilePhotosConfig)
-				if err != nil {
-					_, _ = ctx.SendPlainMessage(false, "Something wrong while rendering pic? avatar IO err.")
-					return
-				}
-				getLengthImage := len(userProfilePhotos.Photos)
-				// WHY TELEGRAM CAN SET NO TO PUBLIC ADMISSION ON AVATAR????
-				if getLengthImage != 0 {
-					// offset draw
-					photo := userProfilePhotos.Photos[0][0]
-					avatar, err := ctx.Caller.GetFileDirectURL(photo.FileID)
-					if err != nil {
-						panic(err)
-					}
-					datas, err := http.Get(avatar)
-					// avatar
-					avatarByteUni, _, _ := image.Decode(datas.Body)
-					avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
-					mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
-				}
-			} else {
-				avatar, err := ctx.Caller.GetFileDirectURL(chatPhoto.SmallFileID)
-				if err != nil {
-					panic(err)
-				}
-				datas, err := http.Get(avatar)
-				// avatar
-				avatarByteUni, _, _ := image.Decode(datas.Body)
-				avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
-				mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
-			}
 			// avatar draw end.
+			avatarFormatRaw := toolchain.GetTargetAvatar(ctx)
+			if avatarFormatRaw != nil {
+				mainContext.DrawImage(imgfactory.Size(avatarFormatRaw, 100, 100).Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
+			}
 			mainContext.SetRGBA255(255, 255, 255, 255)
 			mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
 			mainContext.SetRGBA255(155, 121, 147, 255)
@@ -243,7 +197,7 @@ func init() {
 			mainContext.SetRGBA255(155, 121, 147, 255)
 			mainContext.DrawString(card.Name, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+60)
 			mainContext.DrawString(fmt.Sprintf("- %s", position[p]), float64(mainContextWidth-300)+10, float64(mainContextHight-350)+280)
-			placedList := splitChineseString(info, 44)
+			placedList := SplitChineseString(info, 44)
 			for ist, v := range placedList {
 				mainContext.DrawString(v, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+90+float64(ist*30))
 			}
@@ -261,7 +215,8 @@ func init() {
 	})
 }
 
-func splitChineseString(s string, length int) []string {
+// SplitChineseString Split Chinese type chart.
+func SplitChineseString(s string, length int) []string {
 	results := make([]string, 0)
 	runes := []rune(s)
 	start := 0
