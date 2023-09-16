@@ -17,6 +17,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/wdvxdr1123/ZeroBot v1.6.9
 	golang.org/x/image v0.11.0
+	golang.org/x/text v0.12.0
 )
 
 require (
@@ -33,11 +34,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
-	github.com/tidwall/gjson v1.14.4 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
 	modernc.org/libc v1.21.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.4.0 // indirect
