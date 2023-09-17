@@ -3,11 +3,16 @@ package toolchain
 
 import (
 	"fmt"
+	"hash/crc64"
 	"image"
 	"io"
+	"math/rand"
 	"net/http"
 	"regexp"
+	"time"
+	"unsafe"
 
+	"github.com/FloatTech/floatbox/binary"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -15,46 +20,27 @@ import (
 // GetTargetAvatar GetUserTarget ID
 func GetTargetAvatar(ctx *rei.Ctx) image.Image {
 	getUserName := ctx.Event.Value.(*tgba.Message).From.FirstName
-	switch {
-	case getUserName == "Group" || getUserName == "Channel":
-		getGroupChatConfig := tgba.ChatInfoConfig{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}
-		chatGroupInfo, err := ctx.Caller.GetChat(getGroupChatConfig)
-		if err != nil {
-			panic(err)
-		}
-		chatPhoto := chatGroupInfo.Photo.SmallFileID
-		avatar, err := ctx.Caller.GetFileDirectURL(chatPhoto)
-		if err != nil {
-			panic(err)
-		}
-		datas, err := http.Get(avatar)
-		// avatar
-		avatarByteUni, _, _ := image.Decode(datas.Body)
-		return avatarByteUni
-	default:
-		userProfilePhotosConfig := tgba.UserProfilePhotosConfig{
-			UserID: ctx.Event.Value.(*tgba.Message).From.ID,
-		}
-		userProfilePhotos, err := ctx.Caller.GetUserProfilePhotos(userProfilePhotosConfig)
-		if err != nil {
-			return nil
-		}
-		getLengthImage := len(userProfilePhotos.Photos)
-		// WHY TELEGRAM CAN SET NO TO PUBLIC ADMISSION ON AVATAR????
-		if getLengthImage != 0 {
-			// offset draw
-			photo := userProfilePhotos.Photos[0][0]
-			avatar, err := ctx.Caller.GetFileDirectURL(photo.FileID)
-			if err != nil {
-				panic(err)
-			}
-			datas, err := http.Get(avatar)
-			// avatar
-			avatarByteUni, _, _ := image.Decode(datas.Body)
-			return avatarByteUni
-		}
+	userID := ctx.Event.Value.(*tgba.Message).From.ID
+	if getUserName == "Group" || getUserName == "Channel" {
+		userID = ctx.Message.Chat.ID
 	}
-	return nil
+	getGroupChatConfig := tgba.ChatInfoConfig{ChatConfig: tgba.ChatConfig{ChatID: userID}}
+	chatGroupInfo, err := ctx.Caller.GetChat(getGroupChatConfig)
+	if err != nil {
+		return nil
+	}
+	if chatGroupInfo.Photo == nil {
+		return nil
+	}
+	chatPhoto := chatGroupInfo.Photo.SmallFileID
+	avatar, err := ctx.Caller.GetFileDirectURL(chatPhoto)
+	if err != nil {
+		panic(err)
+	}
+	datas, err := http.Get(avatar)
+	// avatar
+	avatarByteUni, _, _ := image.Decode(datas.Body)
+	return avatarByteUni
 }
 
 // GetChatUserInfoID GetID and UserName, support Channel | Userself and Annoy Group
@@ -104,4 +90,13 @@ func GetNickNameFromUsername(username string) (name string) {
 		name = ""
 	}
 	return
+}
+
+// RandSenderPerDayN 每个用户每天随机数
+func RandSenderPerDayN(uid int64, n int) int {
+	sum := crc64.New(crc64.MakeTable(crc64.ISO))
+	sum.Write(binary.StringToBytes(time.Now().Format("20060102")))
+	sum.Write((*[8]byte)(unsafe.Pointer(&uid))[:])
+	r := rand.New(rand.NewSource(int64(sum.Sum64())))
+	return r.Intn(n)
 }

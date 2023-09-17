@@ -4,13 +4,6 @@ package fortune
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
-	"github.com/FloatTech/floatbox/binary"
-	"github.com/FloatTech/imgfactory"
-	"github.com/fogleman/gg"
-	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"hash/crc64"
 	"image"
 	"image/color"
@@ -22,6 +15,14 @@ import (
 	"time"
 	"unicode/utf8"
 	"unsafe"
+
+	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/imgfactory"
+	"github.com/fogleman/gg"
+	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -121,6 +122,8 @@ func init() {
 			mainContext.SetFontFace(LoadFontFace(loadNotoSans, 25))
 			charCount := 0.0
 			setBreaker := false
+			emojiRegex := regexp.MustCompile(`[\x{1F600}-\x{1F64F}|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F700}-\x{1F77F}]|[\x{1F780}-\x{1F7FF}]|[\x{1F800}-\x{1F8FF}]|[\x{1F900}-\x{1F9FF}]|[\x{1FA00}-\x{1FA6F}]|[\x{1FA70}-\x{1FAFF}]|[\x{1FB00}-\x{1FBFF}]|[\x{1F170}-\x{1F251}]|[\x{1F300}-\x{1F5FF}]|[\x{1F600}-\x{1F64F}]|[\x{1FC00}-\x{1FCFF}]|[\x{1F004}-\x{1F0CF}]|[\x{1F170}-\x{1F251}]]+`)
+			getUserName = emojiRegex.ReplaceAllString(getUserName, "")
 			var truncated string
 			var UserFloatNum float64
 			// set rune count

@@ -151,12 +151,15 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	go func() {
 		// avatar Round Style
 		defer avatarHandler.Done()
-		avatarFormat := imgfactory.Size(toolchain.GetTargetAvatar(ctx), 180, 180)
-		getAvatarFormat = gg.NewContext(180, 180)
-		getAvatarFormat.DrawRoundedRectangle(0, 0, 178, 178, 20)
-		getAvatarFormat.Clip()
-		getAvatarFormat.DrawImage(avatarFormat.Image(), 0, 0)
-		getAvatarFormat.Fill()
+		getAvatar := toolchain.GetTargetAvatar(ctx)
+		if getAvatar != nil {
+			avatarFormat := imgfactory.Size(getAvatar, 180, 180)
+			getAvatarFormat = gg.NewContext(180, 180)
+			getAvatarFormat.DrawRoundedRectangle(0, 0, 178, 178, 20)
+			getAvatarFormat.Clip()
+			getAvatarFormat.DrawImage(avatarFormat.Image(), 0, 0)
+			getAvatarFormat.Fill()
+		}
 	}()
 	userPlatedCustom := GetUserDefaultBackgroundDataFromDatabase(getUserID)
 	// render Header.
@@ -182,8 +185,10 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	b50Render.Fill()
 	// render user info
 	avatarHandler.Wait()
-	b50Render.DrawImage(getAvatarFormat.Image(), 610, 50)
-	b50Render.Fill()
+	if getAvatarFormat != nil {
+		b50Render.DrawImage(getAvatarFormat.Image(), 610, 50)
+		b50Render.Fill()
+	}
 	// render Userinfo
 	b50Render.SetFontFace(nameTypeFont)
 	b50Render.SetColor(color.Black)
