@@ -320,7 +320,7 @@ func RenderCard(data playerData, num int) image.Image {
 	drawBackGround.FillPreserve()
 	// draw rest of card.
 	drawBackGround.SetFontFace(levelFont)
-	drawBackGround.DrawString(strconv.FormatFloat(data.Ds, 'f', -1, 64), 195, 111)
+	drawBackGround.DrawString(strconv.FormatFloat(data.Ds, 'f', 1, 64), 195, 111)
 	drawBackGround.FillPreserve()
 	drawBackGround.SetFontFace(ratingFont)
 	drawBackGround.DrawString("▶", 235, 111)
