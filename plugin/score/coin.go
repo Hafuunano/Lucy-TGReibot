@@ -77,7 +77,7 @@ func init() {
 		getCoinsStr := referpg.Coins
 		getCoinsInt, _ := strconv.Atoi(getCoinsStr)
 		getDesc := referpg.Desc
-		addNewCoins := si.Coins + getCoinsInt - 200
+		addNewCoins := si.Coins + getCoinsInt - 60
 		_ = coins.InsertUserCoins(sdb, uid, addNewCoins)
 		ctx.SendPlainMessage(true, " 嗯哼~来玩抽奖了哦w 看看能抽到什么呢w")
 		time.Sleep(time.Second * 3)
