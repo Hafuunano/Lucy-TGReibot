@@ -10,6 +10,7 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/mai"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/phigros"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/score"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tools"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
