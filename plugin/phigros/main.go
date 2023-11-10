@@ -188,7 +188,7 @@ func init() {
 		_ = FormatUserDataBase(getQQID, getSessionID, time.Now().Unix()).BindUserDataBase()
 		ctx.SendPlainMessage(true, "绑定成功～")
 	})
-	engine.OnMessageRegex("^[! ！/]pgr$").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("pgr").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getUserId, _ := toolchain.GetChatUserInfoID(ctx)
 		data := GetUserInfoFromDatabase(getUserId)
 		getDataSession := data.PhiSession

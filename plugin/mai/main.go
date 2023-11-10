@@ -22,25 +22,7 @@ var engine = rei.Register("mai", &ctrl.Options[*rei.Ctx]{
 })
 
 func init() {
-	engine.OnMessageCommand("^[! /]mai$").SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		// query data from sql
-		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-		getUsername := GetUserInfoNameFromDatabase(getUserID)
-		if getUsername == "" {
-			ctx.SendPlainMessage(true, "你还没有绑定呢！")
-			return
-		}
-		getUserData, err := QueryMaiBotDataFromUserName(getUsername)
-		if err != nil {
-			ctx.SendPlainMessage(true, err)
-			return
-		}
-		var data player
-		_ = json.Unmarshal(getUserData, &data)
-		renderImg := FullPageRender(data, ctx)
-		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")
-		ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
-	})
+
 	engine.OnMessageRegex(`^[! /]mai\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		matched := ctx.State["regex_matched"].([]string)[1]
 		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
@@ -112,5 +94,23 @@ func init() {
 		FormatUserDataBase(getUserID, GetUserPlateInfoFromDatabase(getUserID), getDefaultInfo, GetUserInfoNameFromDatabase(getUserID)).BindUserDataBase()
 		ctx.SendPlainMessage(true, "已经设定好了哦w~ ")
 	})
-
+	engine.OnMessageCommand("mai").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		// query data from sql
+		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+		getUsername := GetUserInfoNameFromDatabase(getUserID)
+		if getUsername == "" {
+			ctx.SendPlainMessage(true, "你还没有绑定呢！")
+			return
+		}
+		getUserData, err := QueryMaiBotDataFromUserName(getUsername)
+		if err != nil {
+			ctx.SendPlainMessage(true, err)
+			return
+		}
+		var data player
+		_ = json.Unmarshal(getUserData, &data)
+		renderImg := FullPageRender(data, ctx)
+		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")
+		ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
+	})
 }
