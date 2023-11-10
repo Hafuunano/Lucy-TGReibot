@@ -22,7 +22,7 @@ var engine = rei.Register("mai", &ctrl.Options[*rei.Ctx]{
 })
 
 func init() {
-	engine.OnMessageCommand("mai").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("^[! /]mai$").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		// query data from sql
 		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
 		getUsername := GetUserInfoNameFromDatabase(getUserID)

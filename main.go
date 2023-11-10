@@ -14,7 +14,6 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/score"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tools"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
-	_ "github.com/FloatTech/ReiBot-Plugin/plugin/wife"
 
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/slash" // slash should be the last
 
