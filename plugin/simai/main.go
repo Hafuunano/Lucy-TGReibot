@@ -37,7 +37,7 @@ func init() {
 	}
 	var data SimPackData
 	_ = yaml.Unmarshal(dictLoader, &data)
-	engine.OnMessage(rei.OnlyToMe).SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessage(rei.OnlyToMe).SetBlock(false).Handle(func(ctx *rei.Ctx) {
 		msg := ctx.Message.Text
 		var getChartReply []string
 		if GetTiredToken(ctx) < 4 {

@@ -57,9 +57,9 @@ func main() {
 		sus = append(sus, i)
 	}
 
-	rei.OnMessageCommandGroup([]string{"help"}, rei.OnlyToMe).SetBlock(true).
+	rei.OnMessageCommand("help").SetBlock(true).
 		Handle(func(ctx *rei.Ctx) {
-			_, _ = ctx.SendPlainMessage(false, kanban.Banner)
+			ctx.SendPlainMessage(true, kanban.Banner)
 		})
 	rei.Run(rei.Bot{
 		Token:  *token,
