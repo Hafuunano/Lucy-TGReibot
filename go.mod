@@ -21,6 +21,7 @@ require (
 	github.com/wdvxdr1123/ZeroBot v1.6.9
 	golang.org/x/image v0.11.0
 	golang.org/x/text v0.12.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

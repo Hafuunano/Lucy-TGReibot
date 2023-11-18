@@ -22,95 +22,131 @@ var engine = rei.Register("mai", &ctrl.Options[*rei.Ctx]{
 })
 
 func init() {
-
-	engine.OnMessageRegex(`^[! /]mai\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		matched := ctx.State["regex_matched"].([]string)[1]
-		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-		FormatUserDataBase(getUserID, GetUserPlateInfoFromDatabase(getUserID), GetUserDefaultBackgroundDataFromDatabase(getUserID), matched).BindUserDataBase()
-		ctx.SendPlainMessage(true, "绑定成功~！")
-	})
-	engine.OnMessageRegex(`^[! /]mai\splate\s(.*)$`).SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		getPlateInfo := ctx.State["regex_matched"].([]string)[1]
-		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-		FormatUserDataBase(getUserID, getPlateInfo, GetUserDefaultBackgroundDataFromDatabase(getUserID), GetUserInfoNameFromDatabase(getUserID)).BindUserDataBase()
-		ctx.SendPlainMessage(true, "好哦~ 是个好名称w")
-	})
-	engine.OnMessageRegex(`^[! /]mai\supload`, rei.MustProvidePhoto("请提供一张图片，图片大小比例适应为6:1 (1260x210) ,如果图片不适应将会自动剪辑到合适大小", "没有拿到图片呢 awa")).SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-		ps := ctx.State["photos"].([]tgba.PhotoSize)
-		pic := ps[len(ps)-1]
-		picu, err := ctx.Caller.GetFileDirectURL(pic.FileID)
-		imageData, err := web.GetData(picu)
-		if err != nil {
-			return
-		}
-		getRaw, _, err := image.Decode(bytes.NewReader(imageData))
-		if err != nil {
-			panic(err)
-		}
-		// pic Handler
-		getRenderPlatePicRaw := gg.NewContext(1260, 210)
-		getRenderPlatePicRaw.DrawRoundedRectangle(0, 0, 1260, 210, 10)
-		getRenderPlatePicRaw.Clip()
-		getHeight := getRaw.Bounds().Dy()
-		getLength := getRaw.Bounds().Dx()
-		var getHeightHandler, getLengthHandler int
-		switch {
-		case getHeight < 210 && getLength < 1260:
-			getRaw = Resize(getRaw, 1260, 210)
-			getHeightHandler = 0
-			getLengthHandler = 0
-		case getHeight < 210:
-			getRaw = Resize(getRaw, getLength, 210)
-			getHeightHandler = 0
-			getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1
-		case getLength < 1260:
-			getRaw = Resize(getRaw, 1260, getHeight)
-			getHeightHandler = (getRaw.Bounds().Dy() - 210) / 3 * -1
-			getLengthHandler = 0
-		default:
-			getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1
-			getHeightHandler = (getRaw.Bounds().Dy() - 210) / 3 * -1
-		}
-		getRenderPlatePicRaw.DrawImage(getRaw, getLengthHandler, getHeightHandler)
-		getRenderPlatePicRaw.Fill()
-		// save.
-		_ = getRenderPlatePicRaw.SavePNG(userPlate + strconv.Itoa(int(getUserID)) + ".png")
-		ctx.SendPlainMessage(true, "已经存入了哦w~")
-	})
-	engine.OnMessageRegex(`^[! /]mai\sremove`).SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-		_ = os.Remove(userPlate + strconv.Itoa(int(getUserID)) + ".png")
-		ctx.SendPlainMessage(true, "已经移除了~ ")
-	})
-	engine.OnMessageRegex(`^[! ！/]mai\sdefault\splate\s(.*)$`).SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-		getDefaultInfo := ctx.State["regex_matched"].([]string)[1]
-		_, err := GetDefaultPlate(getDefaultInfo)
-		if err != nil {
-			ctx.SendPlainMessage(true, "设定的预设不正确")
-			return
-		}
-		FormatUserDataBase(getUserID, GetUserPlateInfoFromDatabase(getUserID), getDefaultInfo, GetUserInfoNameFromDatabase(getUserID)).BindUserDataBase()
-		ctx.SendPlainMessage(true, "已经设定好了哦w~ ")
-	})
 	engine.OnMessageCommand("mai").SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		// query data from sql
-		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-		getUsername := GetUserInfoNameFromDatabase(getUserID)
-		if getUsername == "" {
-			ctx.SendPlainMessage(true, "你还没有绑定呢！")
-			return
+		getMsg := ctx.Message.Text
+		getSplitLength, getSplitStringList := toolchain.SplitCommandTo(getMsg, 3)
+		if getSplitLength >= 2 {
+			switch {
+			case getSplitStringList[1] == "bind":
+				BindUserToMaimai(ctx, getSplitStringList[2])
+			case getSplitStringList[1] == "plate":
+				SetUserPlateToLocal(ctx, getSplitStringList[2])
+			case getSplitStringList[1] == "upload":
+				// uploadImage
+				images := toolchain.RequestImageTo(ctx, "请发送指令同时提供一张图片，图片大小比例适应为6:1 (1260x210) ,如果图片不适应将会自动剪辑到合适大小")
+				if images == nil {
+					return
+				}
+				HandlerUserSetsCustomImage(ctx, images)
+			case getSplitStringList[1] == "remove":
+				RemoveUserLocalCustomImage(ctx)
+			case getSplitStringList[1] == "defplate":
+				SetUserDefaultPlateToDatabase(ctx, getSplitStringList[2])
+			default:
+				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
+				break
+			}
+		} else {
+			MaimaiRenderBase(ctx)
 		}
-		getUserData, err := QueryMaiBotDataFromUserName(getUsername)
-		if err != nil {
-			ctx.SendPlainMessage(true, err)
-			return
-		}
-		var data player
-		_ = json.Unmarshal(getUserData, &data)
-		renderImg := FullPageRender(data, ctx)
-		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")
-		ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
 	})
+}
+
+// BindUserToMaimai Bind UserMaiMaiID
+func BindUserToMaimai(ctx *rei.Ctx, bindName string) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	FormatUserDataBase(getUserID, GetUserPlateInfoFromDatabase(getUserID), GetUserDefaultBackgroundDataFromDatabase(getUserID), bindName).BindUserDataBase()
+	ctx.SendPlainMessage(true, "绑定成功~！")
+}
+
+// SetUserPlateToLocal Set Default Plate to Local
+func SetUserPlateToLocal(ctx *rei.Ctx, plateID string) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	FormatUserDataBase(getUserID, plateID, GetUserDefaultBackgroundDataFromDatabase(getUserID), GetUserInfoNameFromDatabase(getUserID)).BindUserDataBase()
+	ctx.SendPlainMessage(true, "好哦~ 是个好名称w")
+}
+
+// HandlerUserSetsCustomImage  Handle User Custom Image and Send To Local
+func HandlerUserSetsCustomImage(ctx *rei.Ctx, ps []tgba.PhotoSize) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	pic := ps[len(ps)-1]
+	picu, err := ctx.Caller.GetFileDirectURL(pic.FileID)
+	imageData, err := web.GetData(picu)
+	if err != nil {
+		return
+	}
+	getRaw, _, err := image.Decode(bytes.NewReader(imageData))
+	if err != nil {
+		panic(err)
+	}
+	// pic Handler
+	getRenderPlatePicRaw := gg.NewContext(1260, 210)
+	getRenderPlatePicRaw.DrawRoundedRectangle(0, 0, 1260, 210, 10)
+	getRenderPlatePicRaw.Clip()
+	getHeight := getRaw.Bounds().Dy()
+	getLength := getRaw.Bounds().Dx()
+	var getHeightHandler, getLengthHandler int
+	switch {
+	case getHeight < 210 && getLength < 1260:
+		getRaw = Resize(getRaw, 1260, 210)
+		getHeightHandler = 0
+		getLengthHandler = 0
+	case getHeight < 210:
+		getRaw = Resize(getRaw, getLength, 210)
+		getHeightHandler = 0
+		getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1
+	case getLength < 1260:
+		getRaw = Resize(getRaw, 1260, getHeight)
+		getHeightHandler = (getRaw.Bounds().Dy() - 210) / 3 * -1
+		getLengthHandler = 0
+	default:
+		getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1
+		getHeightHandler = (getRaw.Bounds().Dy() - 210) / 3 * -1
+	}
+	getRenderPlatePicRaw.DrawImage(getRaw, getLengthHandler, getHeightHandler)
+	getRenderPlatePicRaw.Fill()
+	// save.
+	_ = getRenderPlatePicRaw.SavePNG(userPlate + strconv.Itoa(int(getUserID)) + ".png")
+	ctx.SendPlainMessage(true, "已经存入了哦w~")
+}
+
+// RemoveUserLocalCustomImage Remove User Local Image.
+func RemoveUserLocalCustomImage(ctx *rei.Ctx) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	_ = os.Remove(userPlate + strconv.Itoa(int(getUserID)) + ".png")
+	ctx.SendPlainMessage(true, "已经移除了~ ")
+}
+
+// SetUserDefaultPlateToDatabase Set Default plateID To Database.
+func SetUserDefaultPlateToDatabase(ctx *rei.Ctx, plateName string) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	getDefaultInfo := plateName
+	_, err := GetDefaultPlate(getDefaultInfo)
+	if err != nil {
+		ctx.SendPlainMessage(true, "设定的预设不正确")
+		return
+	}
+	FormatUserDataBase(getUserID, GetUserPlateInfoFromDatabase(getUserID), getDefaultInfo, GetUserInfoNameFromDatabase(getUserID)).BindUserDataBase()
+	ctx.SendPlainMessage(true, "已经设定好了哦w~ ")
+}
+
+// MaimaiRenderBase Render Base Maimai B50.
+func MaimaiRenderBase(ctx *rei.Ctx) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	getUsername := GetUserInfoNameFromDatabase(getUserID)
+	if getUsername == "" {
+		ctx.SendPlainMessage(true, "你还没有绑定呢！")
+		return
+	}
+	getUserData, err := QueryMaiBotDataFromUserName(getUsername)
+	if err != nil {
+		ctx.SendPlainMessage(true, err)
+		return
+	}
+	var data player
+	_ = json.Unmarshal(getUserData, &data)
+	renderImg := FullPageRender(data, ctx)
+	_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")
+	ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
+
 }

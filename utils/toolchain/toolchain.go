@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 	"unsafe"
 
@@ -16,6 +17,22 @@ import (
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+// FutureEvent 是 ZeroBot 交互式的核心，用于异步获取指定事件
+type FutureEvent struct {
+	Type     string
+	Priority int
+	Block    bool
+}
+
+// NewFutureEvent 创建一个FutureEvent, 并返回其指针
+func NewFutureEvent(Type string, Priority int, Block bool) *FutureEvent {
+	return &FutureEvent{
+		Type:     Type,
+		Priority: Priority,
+		Block:    Block,
+	}
+}
 
 // GetTargetAvatar GetUserTarget ID
 func GetTargetAvatar(ctx *rei.Ctx) image.Image {
@@ -99,4 +116,22 @@ func RandSenderPerDayN(uid int64, n int) int {
 	sum.Write((*[8]byte)(unsafe.Pointer(&uid))[:])
 	r := rand.New(rand.NewSource(int64(sum.Sum64())))
 	return r.Intn(n)
+}
+
+// SplitCommandTo Split Command and Adjust To.
+func SplitCommandTo(raw string, setCommandStopper int) (splitCommandLen int, splitInfo []string) {
+	rawSplit := strings.SplitN(raw, " ", setCommandStopper)
+	return len(rawSplit), rawSplit
+}
+
+func RequestImageTo(ctx *rei.Ctx, footpoint string) []tgba.PhotoSize {
+	msg, ok := ctx.Value.(*tgba.Message)
+	if ok && len(msg.Photo) > 0 {
+		ctx.State["photos"] = msg.Photo
+		return ctx.State["photos"].([]tgba.PhotoSize)
+	} else {
+		ctx.SendPlainMessage(true, footpoint)
+		return nil
+	}
+
 }

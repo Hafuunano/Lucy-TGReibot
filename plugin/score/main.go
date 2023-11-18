@@ -20,7 +20,7 @@ import (
 var (
 	engine = rei.Register("score", &ctrl.Options[*rei.Ctx]{
 		DisableOnDefault:  false,
-		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
+		Help:              "Hi NekoPachi!\n说明书: https://lucy-sider.lemonkoi.one",
 		PrivateDataFolder: "score",
 	})
 )

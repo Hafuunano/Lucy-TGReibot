@@ -51,7 +51,7 @@ var (
 func init() {
 	engine := rei.Register("fortune", &ctrl.Options[*rei.Ctx]{
 		DisableOnDefault:  false,
-		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
+		Help:              "Hi NekoPachi!\n说明书: https://lucy-sider.lemonkoi.one",
 		PrivateDataFolder: "fortune",
 	})
 	signTF = make(map[string]int)

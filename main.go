@@ -15,6 +15,8 @@ import (
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tools"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/simai"
+
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/slash" // slash should be the last
 
 	"os"
