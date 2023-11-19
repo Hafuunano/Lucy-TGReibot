@@ -2,18 +2,21 @@
 package toolchain
 
 import (
+	`encoding/json`
 	"fmt"
 	"hash/crc64"
 	"image"
 	"io"
 	"math/rand"
 	"net/http"
+	`os`
 	"regexp"
 	"strings"
 	"time"
 	"unsafe"
 
 	"github.com/FloatTech/floatbox/binary"
+	`github.com/FloatTech/floatbox/file`
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -139,4 +142,56 @@ func FastSendRandMuiltText(ctx *rei.Ctx, raw ...string) error {
 func FastSendRandMuiltPic(ctx *rei.Ctx, raw ...string) error {
 	_, err := ctx.SendPhoto(tgba.FilePath(raw[rand.Intn(len(raw))]), true, "")
 	return err
+}
+
+// StringInArray 检查列表是否有关键词 https://github.com/Kyomotoi/go-ATRI
+func StringInArray(aim string, list []string) bool {
+	for _, i := range list {
+		if i == aim {
+			return true
+		}
+	}
+	return false
+}
+
+// StoreUserNickname Store names in jsons
+func StoreUserNickname(userID string, nickname string) error {
+	var userNicknameData map[string]interface{}
+	filePath := file.BOTPATH + "/data/rbp/users.json"
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			_ = os.WriteFile(filePath, []byte("{}"), 0777)
+		} else {
+			return err
+		}
+	}
+	_ = json.Unmarshal(data, &userNicknameData)
+	userNicknameData[userID] = nickname // setdata.
+	newData, err := json.Marshal(userNicknameData)
+	if err != nil {
+		return err
+	}
+	_ = os.WriteFile(filePath, newData, 0777)
+	return nil
+}
+
+// LoadUserNickname Load UserNames to work it well.
+func LoadUserNickname(userID string) string {
+	var d map[string]string
+	// read main files
+	filePath := file.BOTPATH + "/data/rbp/users.json"
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return "你"
+	}
+	err = json.Unmarshal(data, &d)
+	if err != nil {
+		return "你"
+	}
+	result := d[userID]
+	if result == "" {
+		result = "你"
+	}
+	return result
 }

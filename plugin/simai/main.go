@@ -4,6 +4,7 @@ package simai
 import (
 	"math/rand"
 	"os"
+	`strconv`
 	"strings"
 	"time"
 
@@ -70,6 +71,12 @@ func init() {
 		getReply := getChartReply[rand.Intn(len(getChartReply))]
 		getLucyName := []string{"Lucy", "Lucy酱"}[rand.Intn(2)]
 		getReply = strings.ReplaceAll(getReply, "{segment}", " ")
+		// get name
+		getUserID, getUserName := toolchain.GetChatUserInfoID(ctx)
+		getName := toolchain.LoadUserNickname(strconv.FormatInt(getUserID, 10))
+		if getName == "你" {
+			getName = getUserName
+		}
 		getReply = strings.ReplaceAll(getReply, "{name}", "你")
 		getReply = strings.ReplaceAll(getReply, "{me}", getLucyName)
 		ctx.SendPlainMessage(true, getReply)
