@@ -18,7 +18,7 @@ var (
 
 func init() {
 	engine.OnMessage(rei.OnlyToMe).SetBlock(false).Handle(func(ctx *rei.Ctx) {
-		nickname := "Lucy"
+		nickname := "Lucy" // hardcoded is a good choice ( I will fix it later.(
 		if ctx.Message.Text != "" {
 			fmt.Print(ctx.Message.Text)
 			return

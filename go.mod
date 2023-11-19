@@ -1,6 +1,6 @@
 module github.com/FloatTech/ReiBot-Plugin
 
-go 1.19
+go 1.20
 
 require (
 	github.com/FloatTech/floatbox v0.0.0-20230207080446-026a2f086c74
@@ -56,3 +56,5 @@ require (
 replace modernc.org/sqlite => github.com/fumiama/sqlite3 v1.20.0-with-win386
 
 replace github.com/remyoudompheng/bigfft => github.com/fumiama/bigfft v0.0.0-20211011143303-6e0bfa3c836b
+
+replace github.com/fumiama/ReiBot => github.com/MoYoez/ReiBot v0.0.0-20231119091021-e2efbe76506e
