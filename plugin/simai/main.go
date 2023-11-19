@@ -77,7 +77,7 @@ func init() {
 		if getName == "你" {
 			getName = getUserName
 		}
-		getReply = strings.ReplaceAll(getReply, "{name}", "你")
+		getReply = strings.ReplaceAll(getReply, "{name}", getName)
 		getReply = strings.ReplaceAll(getReply, "{me}", getLucyName)
 		ctx.SendPlainMessage(true, getReply)
 	})
