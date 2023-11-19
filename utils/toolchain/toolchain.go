@@ -18,22 +18,6 @@ import (
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-// FutureEvent 是 ZeroBot 交互式的核心，用于异步获取指定事件
-type FutureEvent struct {
-	Type     string
-	Priority int
-	Block    bool
-}
-
-// NewFutureEvent 创建一个FutureEvent, 并返回其指针
-func NewFutureEvent(Type string, Priority int, Block bool) *FutureEvent {
-	return &FutureEvent{
-		Type:     Type,
-		Priority: Priority,
-		Block:    Block,
-	}
-}
-
 // GetTargetAvatar GetUserTarget ID
 func GetTargetAvatar(ctx *rei.Ctx) image.Image {
 	getUserName := ctx.Event.Value.(*tgba.Message).From.FirstName
@@ -75,6 +59,16 @@ func GetChatUserInfoID(ctx *rei.Ctx) (id int64, name string) {
 		return ctx.Event.Value.(*tgba.Message).From.ID, getUserName + " " + ctx.Event.Value.(*tgba.Message).From.LastName
 	}
 	return 0, ""
+}
+
+// GetThisGroupID Get Group ID
+func GetThisGroupID(ctx *rei.Ctx) (id int64) {
+	getGroupChatConfig := tgba.ChatInfoConfig{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}
+	chatGroupInfo, err := ctx.Caller.GetChat(getGroupChatConfig)
+	if err != nil {
+		panic(err)
+	}
+	return chatGroupInfo.ID
 }
 
 // GetNickNameFromUsername Use Sniper, not api.
@@ -133,5 +127,16 @@ func RequestImageTo(ctx *rei.Ctx, footpoint string) []tgba.PhotoSize {
 		ctx.SendPlainMessage(true, footpoint)
 		return nil
 	}
+}
 
+// FastSendRandMuiltText Send Muilt Text to help/
+func FastSendRandMuiltText(ctx *rei.Ctx, raw ...string) error {
+	_, err := ctx.SendPlainMessage(true, raw[rand.Intn(len(raw))])
+	return err
+}
+
+// FastSendRandMuiltPic Send Multi picture to help/
+func FastSendRandMuiltPic(ctx *rei.Ctx, raw ...string) error {
+	_, err := ctx.SendPhoto(tgba.FilePath(raw[rand.Intn(len(raw))]), true, "")
+	return err
 }

@@ -85,26 +85,31 @@ func init() {
 			"你抽到的是~ "+getName+"\n"+"获得了柠檬片 "+strconv.Itoa(getCoinsInt)+"\n"+getDesc+"\n目前的柠檬片总数为："+strconv.Itoa(addNewCoins))
 		mutex.Unlock()
 	})
-	engine.OnMessageRegex(`^(丢弃|扔掉)(\d+)个柠檬片$`).SetBlock(true).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
-		modifyCoins, _ := strconv.Atoi(ctx.State["regex_matched"].([]string)[2])
+	engine.OnMessageCommand("cointhrow").SetBlock(true).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
+		_, splitText := toolchain.SplitCommandTo(ctx.Message.Text, 2)
+		modifyCoins := splitText[1]
+		modifyCoinsToint, _ := strconv.ParseInt(modifyCoins, 10, 64)
 		userID, _ := toolchain.GetChatUserInfoID(ctx)
 		handleUser := coins.GetSignInByUID(sdb, userID)
 		currentUserCoins := handleUser.Coins
-		if currentUserCoins-modifyCoins < 0 {
+		if currentUserCoins-int(modifyCoinsToint) < 0 {
 			ctx.SendPlainMessage(true, "貌似你的柠檬片不够处理呢(")
 			return
 		}
-		hadModifyCoins := currentUserCoins - modifyCoins
+		hadModifyCoins := currentUserCoins - int(modifyCoinsToint)
 		_ = coins.InsertUserCoins(sdb, handleUser.UID, hadModifyCoins)
 		ctx.SendPlainMessage(true, "已经帮你扔掉了哦")
 	})
-	engine.OnMessageRegex(`^[! /]coin\swager\s?(\d*)`).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("coinwager").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		// 得到本身奖池大小，如果没有或者被get的情况下获胜
 		// this method should deal when we have less starter.
 		userid, _ := toolchain.GetChatUserInfoID(ctx)
-		rawNumber := ctx.State["regex_matched"].([]string)[1]
-		if rawNumber == "" {
+		_, splitText := toolchain.SplitCommandTo(ctx.Message.Text, 2)
+		var rawNumber string
+		if len(splitText) == 1 {
 			rawNumber = "50"
+		} else {
+			rawNumber = splitText[1]
 		}
 		getProtectStatus := CheckUserIsEnabledProtectMode(userid, sdb)
 		if getProtectStatus {

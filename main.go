@@ -7,16 +7,18 @@ import (
 	"github.com/FloatTech/ReiBot-Plugin/kanban"
 	rei "github.com/fumiama/ReiBot"
 
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/chat"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/fortune"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/lolicon"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/mai"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/phigros"
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/reborn"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/score"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tools"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/tracemoe"
 
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/simai"
-
+	_ "github.com/FloatTech/ReiBot-Plugin/plugin/action"
 	_ "github.com/FloatTech/ReiBot-Plugin/plugin/slash" // slash should be the last
 
 	"os"
@@ -61,9 +63,11 @@ func main() {
 		Handle(func(ctx *rei.Ctx) {
 			ctx.SendPlainMessage(true, kanban.Banner)
 		})
+
 	rei.Run(rei.Bot{
-		Token:  *token,
-		Buffer: *buffer,
+		Token:   *token,
+		Botname: "Lucy",
+		Buffer:  *buffer,
 		UpdateConfig: tgba.UpdateConfig{
 			Offset:  *offset,
 			Limit:   0,
