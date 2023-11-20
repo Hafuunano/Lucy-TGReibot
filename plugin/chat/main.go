@@ -1,13 +1,12 @@
 package chat
 
 import (
-	`fmt`
-	`strconv`
-	`time`
+	"strconv"
+	"time"
 
-	`github.com/FloatTech/ReiBot-Plugin/utils/toolchain`
-	ctrl `github.com/FloatTech/zbpctrl`
-	rei `github.com/fumiama/ReiBot`
+	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	ctrl "github.com/FloatTech/zbpctrl"
+	rei "github.com/fumiama/ReiBot"
 )
 
 var (
@@ -21,7 +20,6 @@ func init() {
 	engine.OnMessage(rei.OnlyToMe).SetBlock(false).Handle(func(ctx *rei.Ctx) {
 		nickname := "Lucy" // hardcoded is a good choice ( I will fix it later.(
 		if ctx.Message.Text != "" {
-			fmt.Print(ctx.Message.Text)
 			return
 		}
 		time.Sleep(time.Second * 1)
