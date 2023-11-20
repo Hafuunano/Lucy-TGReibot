@@ -35,8 +35,16 @@ func init() {
 		if getSplitLength >= 2 {
 			switch {
 			case getSplitStringList[1] == "bind":
+				if getSplitLength < 3 {
+					ctx.SendPlainMessage(true, "参数提供不足")
+					return
+				}
 				PhiBind(ctx, getSplitStringList[2])
 			case getSplitStringList[1] == "roll":
+				if getSplitLength < 3 {
+					ctx.SendPlainMessage(true, "参数提供不足")
+					return
+				}
 				RollToRenderPhigros(ctx, getSplitStringList[2])
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")

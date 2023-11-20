@@ -12,7 +12,6 @@ import (
 	coins "github.com/FloatTech/ReiBot-Plugin/utils/coins"
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
 	rei "github.com/fumiama/ReiBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
@@ -39,7 +38,7 @@ func init() {
 	wagerData = make(map[string]int)
 	wagerData["data"] = rand.Intn(2000)
 	sdb := coins.Initialize("./data/score/score.db")
-	data, err := os.ReadFile(transform.ReturnLucyMainDataIndex("score") + "loads.json")
+	data, err := os.ReadFile(engine.DataFolder() + "loads.json")
 	err = json.Unmarshal(data, &pgs)
 	if err != nil {
 		panic(err)
@@ -71,7 +70,7 @@ func init() {
 			ctx.SendPlainMessage(true, "本次参与的柠檬片不够哦~请多多打卡w")
 			return
 		}
-		all := rand.Intn(39) // 一共39种可能性
+		all := rand.Intn(43) // 一共44种可能性
 		referpg := pgs[(strconv.Itoa(all))]
 		getName := referpg.Name
 		getCoinsStr := referpg.Coins
@@ -79,9 +78,7 @@ func init() {
 		getDesc := referpg.Desc
 		addNewCoins := si.Coins + getCoinsInt - 60
 		_ = coins.InsertUserCoins(sdb, uid, addNewCoins)
-		ctx.SendPlainMessage(true, " 嗯哼~来玩抽奖了哦w 看看能抽到什么呢w")
-		time.Sleep(time.Second * 3)
-		ctx.SendPlainMessage(true, "呼呼~让咱看看你抽到了什么东西ww\n"+
+		ctx.SendPlainMessage(true, "呼~让咱看看你抽到了什么东西ww\n"+
 			"你抽到的是~ "+getName+"\n"+"获得了柠檬片 "+strconv.Itoa(getCoinsInt)+"\n"+getDesc+"\n目前的柠檬片总数为："+strconv.Itoa(addNewCoins))
 		mutex.Unlock()
 	})

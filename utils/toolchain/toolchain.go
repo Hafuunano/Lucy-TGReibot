@@ -2,21 +2,22 @@
 package toolchain
 
 import (
-	`encoding/json`
+	"encoding/json"
 	"fmt"
 	"hash/crc64"
 	"image"
 	"io"
 	"math/rand"
 	"net/http"
-	`os`
+	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
 
 	"github.com/FloatTech/floatbox/binary"
-	`github.com/FloatTech/floatbox/file`
+	"github.com/FloatTech/floatbox/file"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -121,6 +122,7 @@ func SplitCommandTo(raw string, setCommandStopper int) (splitCommandLen int, spl
 	return len(rawSplit), rawSplit
 }
 
+// RequestImageTo Request Image and return PhotoSize To handle.
 func RequestImageTo(ctx *rei.Ctx, footpoint string) []tgba.PhotoSize {
 	msg, ok := ctx.Value.(*tgba.Message)
 	if ok && len(msg.Photo) > 0 {
@@ -154,7 +156,7 @@ func StringInArray(aim string, list []string) bool {
 	return false
 }
 
-// StoreUserNickname Store names in jsons
+// StoreUserNickname store names in jsons
 func StoreUserNickname(userID string, nickname string) error {
 	var userNicknameData map[string]interface{}
 	filePath := file.BOTPATH + "/data/rbp/users.json"
@@ -176,7 +178,7 @@ func StoreUserNickname(userID string, nickname string) error {
 	return nil
 }
 
-// LoadUserNickname Load UserNames to work it well.
+// LoadUserNickname Load UserNames, it will work on simai plugin
 func LoadUserNickname(userID string) string {
 	var d map[string]string
 	// read main files
@@ -194,4 +196,17 @@ func LoadUserNickname(userID string) string {
 		result = "你"
 	}
 	return result
+}
+
+// GetUserEntitiesID Get User Entities List, remember to check list len and beware panic.
+func GetUserEntitiesID(ctx *rei.Ctx) []string {
+	var newUserList []string
+	getEntities := ctx.Message.Entities
+	for _, entity := range getEntities {
+		if entity.User != nil {
+			newUserList = append(newUserList, strconv.FormatInt(entity.User.ID, 10))
+		}
+
+	}
+	return newUserList
 }

@@ -1,33 +1,32 @@
 package reborn
 
 import (
-	`encoding/json`
-	`fmt`
-	`math/rand`
-	`os`
-	`time`
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"os"
+	"time"
 
-	`github.com/FloatTech/ReiBot-Plugin/utils/toolchain`
-	`github.com/FloatTech/ReiBot-Plugin/utils/transform`
-	ctrl `github.com/FloatTech/zbpctrl`
-	rei `github.com/fumiama/ReiBot`
-	`github.com/sirupsen/logrus`
-	`github.com/wdvxdr1123/ZeroBot/extension/rate`
+	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	ctrl "github.com/FloatTech/zbpctrl"
+	rei "github.com/fumiama/ReiBot"
 	wr "github.com/mroth/weightedrand"
+	"github.com/sirupsen/logrus"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
 
 var (
 	areac     *wr.Chooser
 	gender, _ = wr.NewChooser(
-		wr.Choice{Item: "男孩子", Weight: 33707},
-		wr.Choice{Item: "女孩子", Weight: 39292},
+		wr.Choice{Item: "男孩子", Weight: 23707},
+		wr.Choice{Item: "女孩子", Weight: 49292},
 		wr.Choice{Item: "雌雄同体", Weight: 1001},
-		wr.Choice{Item: "猫猫!", Weight: 10000},
-		wr.Choice{Item: "狗狗!", Weight: 10000},
-		wr.Choice{Item: "🐉~", Weight: 3000},
-		wr.Choice{Item: "龙猫~", Weight: 3000},
+		wr.Choice{Item: "猫猫!", Weight: 15000},
+		wr.Choice{Item: "狗狗!", Weight: 5000},
+		wr.Choice{Item: "龙猫~", Weight: 6000},
 	)
-	rebornTimerManager = rate.NewManager[int64](time.Minute*2, 8)
+	rebornTimerManager = rate.NewManager[int64](time.Minute*2, 5)
 )
 
 type ratego []struct {

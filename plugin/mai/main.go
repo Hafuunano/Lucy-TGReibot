@@ -28,8 +28,16 @@ func init() {
 		if getSplitLength >= 2 {
 			switch {
 			case getSplitStringList[1] == "bind":
+				if getSplitLength < 3 {
+					ctx.SendPlainMessage(true, "参数提供不足")
+					return
+				}
 				BindUserToMaimai(ctx, getSplitStringList[2])
 			case getSplitStringList[1] == "plate":
+				if getSplitLength < 3 {
+					ctx.SendPlainMessage(true, "参数提供不足")
+					return
+				}
 				SetUserPlateToLocal(ctx, getSplitStringList[2])
 			case getSplitStringList[1] == "upload":
 				// uploadImage
@@ -41,6 +49,10 @@ func init() {
 			case getSplitStringList[1] == "remove":
 				RemoveUserLocalCustomImage(ctx)
 			case getSplitStringList[1] == "defplate":
+				if getSplitLength < 3 {
+					SetUserDefaultPlateToDatabase(ctx, "")
+					return
+				}
 				SetUserDefaultPlateToDatabase(ctx, getSplitStringList[2])
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
