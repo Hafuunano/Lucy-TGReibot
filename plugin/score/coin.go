@@ -31,7 +31,6 @@ var (
 	checkLimit     = rate.NewManager[int64](time.Minute*1, 5) // time setup
 	catchLimit     = rate.NewManager[int64](time.Hour*1, 9)   // time setup
 	processLimit   = rate.NewManager[int64](time.Hour*1, 5)   // time setup
-	payLimit       = rate.NewManager[int64](time.Hour*1, 10)  // time setup
 	wagerData      map[string]int
 )
 
@@ -223,10 +222,13 @@ func init() {
 		}
 		// check Lucy's Permission
 		if len(getCommandSplitInt) < 2 {
-			ctx.SendPlainMessage(true, "参数不足")
+			ctx.SendPlainMessage(true, "使用方法为 : /command [@user]")
 			return
 		}
-
+		if !toolchain.GetTheTargetIsNormalUser(ctx) {
+			ctx.SendPlainMessage(true, "暂时不支持匿名身份哦~")
+			return
+		}
 		// getUserInfo
 		acquireEntity := toolchain.ListEntitiesMention(ctx)
 		if len(acquireEntity) == 0 {
@@ -234,7 +236,7 @@ func init() {
 		}
 		getUserData := CoreFactory.GetUserSampleUserinfo(strings.Replace(acquireEntity[0], "@", "", 1))
 		if getUserData.UserID == 0 {
-			ctx.SendPlainMessage(true, "为非正常用户组或者该用户为在Lucy处记录x")
+			ctx.SendPlainMessage(true, "为非正常用户组或者该用户没有在Lucy处记录x~")
 			return
 		}
 		// check the user is in group?
@@ -296,7 +298,7 @@ func init() {
 	engine.OnMessageCommand("coincheat").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		_, info := toolchain.SplitCommandTo(ctx.Message.Text, 3)
 		if len(info) < 3 {
-			ctx.SendPlainMessage(true, "缺少参数")
+			ctx.SendPlainMessage(true, "缺少参数~ 使用方法为 : /command [@user] (number)")
 			return
 		}
 		if !catchLimit.Load(ctx.Message.From.ID).Acquire() {
@@ -310,7 +312,7 @@ func init() {
 		}
 		getEntitiy := toolchain.ListEntitiesMention(ctx)
 		if len(getEntitiy) == 0 {
-			ctx.SendPlainMessage(true, "未指定用户")
+			ctx.SendPlainMessage(true, "未指定用户~ 使用方法为 : /command [@user] (number)")
 			return
 		}
 		getID := toolchain.GetUserIDFromUserName(ctx, getEntitiy[0])
@@ -319,6 +321,7 @@ func init() {
 			return
 		}
 		if !toolchain.GetTheTargetIsNormalUser(ctx) {
+			ctx.SendPlainMessage(true, "暂时不支持匿名身份哦~")
 			return
 		}
 		TargetInt := getID
@@ -380,7 +383,125 @@ func init() {
 		ctx.SendPlainMessage(true, "试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片\n", remindTicket)
 
 	})
+	engine.OnMessageCommand("coinhand").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
+		if !toolchain.GetTheTargetIsNormalUser(ctx) {
+			ctx.SendPlainMessage(true, "暂时不支持匿名身份哦~")
+			return
+		}
+		if !processLimit.Load(ctx.Message.From.ID).Acquire() {
+			ctx.SendPlainMessage(true, "请等一会再转账哦w")
+			return
+		}
+		_, info := toolchain.SplitCommandTo(ctx.Message.Text, 3)
+		if len(info) < 3 {
+			ctx.SendPlainMessage(true, "缺少参数~ 使用方法为 : /command [@user] (number)")
+			return
+		}
+		getProtectStatus := CheckUserIsEnabledProtectMode(ctx.Message.From.ID, sdb)
+		if getProtectStatus {
+			ctx.SendPlainMessage(true, "已经启动保护模式，不允许参与任何抽奖性质类互动")
+			return
+		}
+		getEntitiy := toolchain.ListEntitiesMention(ctx)
+		if len(getEntitiy) == 0 {
+			ctx.SendPlainMessage(true, "未指定用户~ 使用方法为 : /command [@user] (number)")
+			return
+		}
+		getID := toolchain.GetUserIDFromUserName(ctx, getEntitiy[0])
+		if getID == 0 {
+			ctx.SendPlainMessage(true, "未记录此用户id或者此用户不存在于本组")
+			return
+		}
+		TargetInt := getID
 
+		getProtectTargetStatus := CheckUserIsEnabledProtectMode(TargetInt, sdb)
+		if getProtectTargetStatus {
+			ctx.SendPlainMessage(true, "对方已经启动保护模式，不允许此处理操作")
+			return
+		}
+		modifyCoins := int(toolchain.ExtractNumbers(info[2]))
+		if modifyCoins < 1 {
+			ctx.SendPlainMessage(true, "然而你不能转账低于0个柠檬片哦w～ 敲")
+			return
+		}
+		if TargetInt == ctx.Message.From.ID {
+			ctx.SendPlainMessage(true, "不可以给自己转账哦w（敲）")
+			return
+		}
+		uid := ctx.Message.From.ID
+		siEventUser := coins.GetSignInByUID(sdb, uid)        // 获取主用户目前状况信息
+		siTargetUser := coins.GetSignInByUID(sdb, TargetInt) // 获得被转账用户目前情况信息
+		if modifyCoins > siEventUser.Coins {
+			ctx.SendPlainMessage(true, "貌似你的柠檬片数量不够哦~")
+			return
+		}
+		siEventUserName := toolchain.GetNickNameFromUsername(ctx.Message.From.UserName)
+		siTargetUserName := toolchain.GetNickNameFromUsername(getEntitiy[1])
+		ctx.SendPlainMessage(true, "转账成功了哦~\n", siEventUserName, " 变化为 ", siEventUser.Coins, " - ", modifyCoins, "= ", siEventUser.Coins-modifyCoins, "\n", siTargetUserName, " 变化为: ", siTargetUser.Coins, " + ", modifyCoins, "= ", siTargetUser.Coins+modifyCoins)
+		_ = coins.InsertUserCoins(sdb, siEventUser.UID, siEventUser.Coins-modifyCoins)
+		_ = coins.InsertUserCoins(sdb, siTargetUser.UID, siTargetUser.Coins+modifyCoins)
+	})
+	engine.OnMessageCommand("coinsuhand", rei.SuperUserPermission).SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		getEntitiy := toolchain.ListEntitiesMention(ctx)
+		if len(getEntitiy) == 0 {
+			ctx.SendPlainMessage(true, "未指定用户~ 使用方法为 : /command [@user] (number)")
+			return
+		}
+		getID := toolchain.GetUserIDFromUserName(ctx, getEntitiy[0])
+		if getID == 0 {
+			ctx.SendPlainMessage(true, "未记录此用户id或者此用户不存在于本组")
+			return
+		}
+		TargetInt := getID
+		siTargetUser := coins.GetSignInByUID(sdb, TargetInt) // get user info
+		unModifyCoins := siTargetUser.Coins
+		_, modifyCoins := toolchain.SplitCommandTo(ctx.Message.Text, 3)
+		coins.InsertUserCoins(sdb, TargetInt, unModifyCoins+int(toolchain.ExtractNumbers(modifyCoins[2])))
+		ctx.SendPlainMessage(true, "Handle Coins Successfully.\n")
+
+	})
+	engine.OnMessageCommand("coinstaus").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		_, getCodeRaw := toolchain.SplitCommandTo(ctx.Message.Text, 2)
+		getCode := getCodeRaw[1]
+		if getCode != "禁用" && getCode != "disable" && getCode != "enable" && getCode != "启用" {
+			ctx.SendPlainMessage(true, "指令错误 , 应当为 /command (disable|禁用|enable|启用)")
+			return
+		}
+		uid := ctx.Message.From.ID
+		if getCode == "禁用" || getCode == "disable" {
+			getStatus := CheckUserIsEnabledProtectMode(uid, sdb)
+			if getStatus {
+				ctx.SendPlainMessage(true, "你已经关闭了~")
+				return
+			}
+			// start to handle
+			suser := coins.GetProtectModeStatus(sdb, uid)
+			boolStatus := suser.Time+60*60*24 < time.Now().Unix()
+			if !boolStatus {
+				ctx.SendPlainMessage(true, "仅允许24小时修改一次")
+				return
+			} // not the time
+			// handle it.
+			_ = coins.ChangeProtectStatus(sdb, uid, 1)
+			ctx.SendPlainMessage(true, "修改完成~")
+			return
+		}
+		getStatus := CheckUserIsEnabledProtectMode(uid, sdb)
+		if !getStatus {
+			ctx.SendPlainMessage(true, "你已经启用了~")
+			return
+		}
+		// start to handle
+		suser := coins.GetProtectModeStatus(sdb, uid)
+		boolStatus := suser.Time+60*60*24 < time.Now().Unix()
+		if !boolStatus {
+			ctx.SendPlainMessage(true, "仅允许24小时修改一次")
+			return
+		} // not the time
+		// handle it.
+		_ = coins.ChangeProtectStatus(sdb, uid, 0)
+		ctx.SendPlainMessage(true, "修改完成~")
+	})
 }
 
 func RobOrCatchLimitManager(id int64) (ticket int) {

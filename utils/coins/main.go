@@ -101,7 +101,7 @@ func Initialize(dbpath string) *Scoredb {
 	}
 	gdb, err := gorm.Open("sqlite3", dbpath)
 	if err != nil {
-		return
+		return nil
 	}
 	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{}).AutoMigrate(&WagerUserInputTable{}).AutoMigrate(&ProtectModeIndex{})
 	return (*Scoredb)(gdb)

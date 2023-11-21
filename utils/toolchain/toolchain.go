@@ -44,7 +44,7 @@ func GetTargetAvatar(ctx *rei.Ctx) image.Image {
 	chatPhoto := chatGroupInfo.Photo.SmallFileID
 	avatar, err := ctx.Caller.GetFileDirectURL(chatPhoto)
 	if err != nil {
-		return
+		return nil
 	}
 	datas, err := http.Get(avatar)
 	// avatar
@@ -66,7 +66,7 @@ func GetChatUserInfoID(ctx *rei.Ctx) (id int64, name string) {
 	default:
 		return ctx.Event.Value.(*tgba.Message).From.ID, getUserName + " " + ctx.Event.Value.(*tgba.Message).From.LastName
 	}
-	return 0, ""
+
 }
 
 // GetThisGroupID Get Group ID
@@ -213,7 +213,7 @@ func GetBotIsAdminInThisGroup(ctx *rei.Ctx) bool {
 		},
 	)
 	if err != nil {
-		return
+		return false
 	}
 	return getSelfMember.IsCreator() || getSelfMember.IsAdministrator()
 }
@@ -258,7 +258,7 @@ func CheckIfthisUserInThisGroup(userID int64, ctx *rei.Ctx) bool {
 		},
 	)
 	if err != nil {
-		return
+		return false
 	}
 	if getResult.User != nil {
 		return true
