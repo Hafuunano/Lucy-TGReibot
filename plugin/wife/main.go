@@ -3,14 +3,17 @@ package wife
 
 import (
 	"bytes"
+	"image/png"
 	"math/rand"
 	"strconv"
 	"time"
 
 	coins "github.com/FloatTech/ReiBot-Plugin/utils/coins"
 	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	text "github.com/FloatTech/imgfactory"
+
 	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/img/text"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -254,6 +257,9 @@ func init() {
 			return
 		}
 		ChooseAPerson := GetUserListAndChooseOne(ctx)
+		if ChooseAPerson == 0 {
+			return
+		}
 		// ok , go next. || before that we should check this person is in the lucky list?
 		// Luck Path. (Only available in marry action.)
 		getLuckyChance, getLuckyPeople, getLuckyTime := CheckTheOrderListAndBackDetailed(uid, gid)
@@ -467,12 +473,14 @@ func init() {
 			RawMsg += strconv.FormatInt(int64(i+1), 10) + ". " + toolchain.GetNickNameFromUserid(ctx, getUserInt64) + "( " + getList[i][0] + " )" + "  -->  " + toolchain.GetNickNameFromUserid(ctx, getTargetInt64) + "( " + getList[i][1] + " )" + "\n"
 		}
 		headerMsg := "群老婆列表～ For Group( " + strconv.FormatInt(gid, 10) + " )" + " [ " + ctx.Message.Chat.Title + " ]\n\n"
-		base64Font, err := text.RenderToBase64(headerMsg+RawMsg+"\n\n Tips: 此列表将会在 23：00 PM (GMT+8) 重置", text.BoldFontFile, 1920, 45)
+		base64Font, err := text.RenderText(headerMsg+RawMsg+"\n\n Tips: 此列表将会在 23：00 PM (GMT+8) 重置", transform.ReturnLucyMainDataIndex("Font")+"regular-bold.ttf", 1920, 45)
+		var buf bytes.Buffer
+		png.Encode(&buf, base64Font)
 		if err != nil {
 			ctx.SendPlainMessage(true, "ERR: ", err)
 			return
 		}
-		ctx.Caller.Send(tgba.NewChatPhoto(gid, tgba.FileReader{Name: "waifu_" + strconv.FormatInt(gid, 10), Reader: bytes.NewReader(base64Font)}))
+		ctx.Caller.Send(tgba.NewChatPhoto(gid, tgba.FileReader{Name: "waifu_" + strconv.FormatInt(gid, 10), Reader: bytes.NewReader(buf.Bytes())}))
 	})
 	engine.OnMessageCommand("waifu_wish").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getEntities := toolchain.ListEntitiesMention(ctx)

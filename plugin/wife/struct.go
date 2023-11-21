@@ -33,9 +33,8 @@ func init() {
 
 // GetUserListAndChooseOne choose people.
 func GetUserListAndChooseOne(ctx *rei.Ctx) int64 {
-	getThisGroupList := userlist.GetThisGroupList(ctx.Message.Chat.ID)
-	getThisUserID := getThisGroupList[rand.Intn(len(getThisGroupList))]
-	return getThisUserID
+	toint64, _ := strconv.ParseInt(userlist.PickUserOnGroup(strconv.FormatInt(ctx.Message.Chat.ID, 10)), 10, 64)
+	return toint64
 }
 
 // GlobalCDModelCost cd timeManager

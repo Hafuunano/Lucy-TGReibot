@@ -1,7 +1,6 @@
 package userlist
 
 import (
-	"strconv"
 	"sync"
 	"time"
 
@@ -10,7 +9,8 @@ import (
 )
 
 type UserList struct {
-	UserID int64 `db:"userid"`
+	UserID   string `db:"userid"`
+	UserName string `db:"username"`
 }
 
 var (
@@ -26,60 +26,48 @@ func init() {
 	groupSaver.DBPath = filePath
 	err := groupSaver.Open(time.Hour * 24)
 	if err != nil {
-		return
+		panic(err)
 	}
 }
 
 // InitDataGroup Init A group if we cannot find it.
-func InitDataGroup(groupID int64) {
-	groupLocker.Lock()
-	defer groupLocker.Unlock()
-	groupSaver.Create(strconv.FormatInt(groupID, 10), &UserList{})
+func InitDataGroup(groupID string) error {
+
+	return groupSaver.Create("group_"+groupID, &UserList{})
 }
 
-func SaveUserOnList(userid int64, groupID int64) {
-	groupLocker.Lock()
-	defer groupLocker.Unlock()
+func SaveUserOnList(userid string, groupID string, username string) {
+
 	// check the table is existed? if not, create it.
-	err := groupSaver.Insert(strconv.FormatInt(groupID, 10), &UserList{UserID: userid})
-	if err != nil {
-		InitDataGroup(groupID)
-		groupSaver.Insert(strconv.FormatInt(groupID, 10), &UserList{UserID: userid})
-	}
+	InitDataGroup(groupID)
+	groupSaver.Insert("group_"+groupID, &UserList{UserID: userid, UserName: username})
 }
 
-func RemoveUserOnList(userid int64, groupID int64) {
-	groupLocker.Lock()
-	defer groupLocker.Unlock()
+func RemoveUserOnList(userid string, groupID string) {
+
 	// check the table is existed? if not, create it.
-	err := groupSaver.Del(strconv.FormatInt(groupID, 10), "WHERE userid is "+strconv.FormatInt(userid, 10))
-	if err != nil {
-		InitDataGroup(groupID)
-	}
+	groupSaver.Del("group_"+groupID, "WHERE userid is "+userid)
+	InitDataGroup(groupID)
 }
 
-func PickUserOnGroup(gid int64) int64 {
-	groupLocker.Lock()
-	defer groupLocker.Unlock()
+func PickUserOnGroup(gid string) string {
+
 	var PickerAxe UserList
-	err := groupSaver.Pick(strconv.FormatInt(gid, 10), &PickerAxe)
-	if err != nil {
-		InitDataGroup(gid)
-		return 0
-	}
+	groupSaver.Pick("group_"+gid, &PickerAxe)
+	InitDataGroup(gid)
 	return PickerAxe.UserID
 }
 
-func GetThisGroupList(gid int64) []int64 {
-	groupLocker.Lock()
-	defer groupLocker.Unlock()
-	getNum, _ := groupSaver.Count(strconv.FormatInt(gid, 10))
+func GetThisGroupList(gid string) []string {
+
+	getNum, _ := groupSaver.Count("group_" + gid)
 	if getNum == 0 {
 		return nil
 	}
-	var list []int64
+	var list []string
 	var onTemploader UserList
-	_ = groupSaver.FindFor(strconv.FormatInt(gid, 10), &onTemploader, "WHERE id = 0", func() error {
+
+	_ = groupSaver.FindFor("group_"+gid, &onTemploader, "WHERE id = 0", func() error {
 		list = append(list, onTemploader.UserID)
 		return nil
 	})

@@ -46,6 +46,6 @@ func init() {
 			return
 		}
 		ctx.SendPlainMessage(true, "好哦~ ", texts, " ちゃん~~~")
-		
+
 	})
 }

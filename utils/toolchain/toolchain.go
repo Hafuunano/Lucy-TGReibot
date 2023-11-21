@@ -258,21 +258,21 @@ func IsTargetSettedUserName(ctx *rei.Ctx) bool {
 // FastSaveUserStatus I hope this will not ruin my machine. (
 func FastSaveUserStatus(ctx *rei.Ctx) bool {
 	// only save normal user
-	if OnHoldSaver.Load(ctx.Message.From.ID).Tokens() == 0 || !GetTheTargetIsNormalUser(ctx) || !IsTargetSettedUserName(ctx) {
+
+	if !OnHoldSaver.Load(ctx.Message.From.ID).Acquire() || !GetTheTargetIsNormalUser(ctx) || !IsTargetSettedUserName(ctx) {
 		// save database onload time.
 		return false
 	}
-	OnHoldSaver.Load(ctx.Message.From.ID).Acquire()
 	CoreFactory.StoreUserDataBase(ctx.Message.From.ID, ctx.Message.From.UserName)
 	return true
 }
 
 func FastSaveUserGroupList(ctx *rei.Ctx) {
-	if OnGroupSaver.Load(ctx.Message.From.ID).Tokens() == 0 || !GetTheTargetIsNormalUser(ctx) || GetThisGroupID(ctx) == 0 {
+	if !OnGroupSaver.Load(ctx.Message.From.ID).Acquire() || !GetTheTargetIsNormalUser(ctx) || GetThisGroupID(ctx) == 0 {
 		return
 	}
-	userlist.SaveUserOnList(ctx.Message.From.ID, ctx.Message.Chat.ID)
-	OnGroupSaver.Load(ctx.Message.From.ID).Acquire()
+	userlist.SaveUserOnList(strconv.FormatInt(ctx.Message.From.ID, 10), strconv.FormatInt(ctx.Message.Chat.ID, 10), ctx.Message.From.UserName)
+
 }
 
 // CheckIfthisUserInThisGroup Check the user if in this group.
