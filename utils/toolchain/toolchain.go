@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -289,4 +290,12 @@ func GetUserIDFromUserName(ctx *rei.Ctx, userName string) int64 {
 		return 0
 	}
 	return getUserData.UserID
+}
+
+// ExtractNumbers Extract Numbers by using regexp.
+func ExtractNumbers(text string) int64 {
+	re := regexp.MustCompile(`\d+`)
+	numbers := re.FindAllString(text, 1)
+	num, _ := strconv.ParseInt(numbers[0], 10, 64)
+	return num
 }
