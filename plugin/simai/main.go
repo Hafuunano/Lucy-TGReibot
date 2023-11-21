@@ -4,7 +4,7 @@ package simai
 import (
 	"math/rand"
 	"os"
-	`strconv`
+	"strconv"
 	"strings"
 	"time"
 
@@ -34,7 +34,7 @@ func init() {
 	dictLoaderLocation := transform.ReturnLucyMainDataIndex("simai") + "simai.yml"
 	dictLoader, err := os.ReadFile(dictLoaderLocation)
 	if err != nil {
-		panic(err)
+		return
 	}
 	var data SimPackData
 	_ = yaml.Unmarshal(dictLoader, &data)

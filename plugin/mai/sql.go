@@ -24,7 +24,7 @@ func init() {
 	maiDatabase.DBPath = engine.DataFolder() + "maisql.db"
 	err := maiDatabase.Open(time.Hour * 24)
 	if err != nil {
-		panic(err)
+		return
 	}
 	_ = InitDataBase()
 }

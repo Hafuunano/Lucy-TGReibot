@@ -23,12 +23,12 @@ func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error)
 	req, err := http.NewRequest("POST", "https://www.diving-fish.com/api/maimaidxprober/query/player", bytes.NewBuffer(jsonStructData))
 	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
-		panic(err)
+		return
 	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 400 {

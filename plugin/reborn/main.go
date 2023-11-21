@@ -45,7 +45,7 @@ func init() {
 		area := make(ratego, 226)
 		err := load(&area, jsonfile)
 		if err != nil {
-			panic(err)
+			return
 		}
 		choices := make([]wr.Choice, len(area))
 		for i, a := range area {
@@ -54,7 +54,7 @@ func init() {
 		}
 		areac, err = wr.NewChooser(choices...)
 		if err != nil {
-			panic(err)
+			return
 		}
 		logrus.Printf("[Reborn]读取%d个国家/地区", len(area))
 	}()

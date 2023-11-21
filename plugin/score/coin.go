@@ -44,7 +44,7 @@ func init() {
 	data, err := os.ReadFile(engine.DataFolder() + "loads.json")
 	err = json.Unmarshal(data, &pgs)
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	engine.OnMessageCommand("coinroll").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {

@@ -28,7 +28,7 @@ func init() {
 	coreSaver.DBPath = filePath
 	err := coreSaver.Open(time.Hour * 24)
 	if err != nil {
-		panic(err)
+		return
 	}
 	_ = initDatabase()
 
@@ -39,10 +39,7 @@ func GetUserSampleUserinfo(username string) *Data {
 	coreLocker.Lock()
 	defer coreLocker.Unlock()
 	var ResultData Data
-	err := coreSaver.Find("userinfo", &ResultData, "Where username is '"+username+"'")
-	if err != nil {
-		panic(err)
-	}
+	coreSaver.Find("userinfo", &ResultData, "Where username is '"+username+"'")
 	if &ResultData == nil {
 		return nil
 	}

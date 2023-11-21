@@ -23,7 +23,7 @@ func init() {
 	pgrDatabase.DBPath = engine.DataFolder() + "pgrsql.db"
 	err := pgrDatabase.Open(time.Hour * 24)
 	if err != nil {
-		panic(err)
+		return
 	}
 	_ = InitDataBase()
 }

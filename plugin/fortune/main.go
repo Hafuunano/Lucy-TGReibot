@@ -59,12 +59,12 @@ func init() {
 	// onload fortune mapset.
 	data, err := os.ReadFile(transform.ReturnLucyMainDataIndex("funwork") + "tarots.json")
 	if err != nil {
-		panic(err)
+		return
 	}
 	_ = json.Unmarshal(data, &cardMap)
 	picDir, err := os.ReadDir(transform.ReturnLucyMainDataIndex("funwork") + "randpic")
 	if err != nil {
-		panic(err)
+		return
 	}
 	picDirNum := len(picDir)
 	reg := regexp.MustCompile(`[^.]+`)
@@ -94,7 +94,7 @@ func init() {
 			// background
 			img, err := gg.LoadImage(transform.ReturnLucyMainDataIndex("funwork") + "randpic" + "/" + list[0] + ".png")
 			if err != nil {
-				panic(err)
+				return
 			}
 			bgFormat := imgfactory.Limit(img, 1920, 1080)
 			getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB := GetAverageColorAndMakeAdjust(bgFormat)
@@ -181,7 +181,7 @@ func init() {
 			DrawBorderString(mainContext, formatTimeWeek, 5, float64(mainContextWidth-80), 150, 1, 0.5, setInlineColor, setOutlineColor)
 			mainContext.FillPreserve()
 			if err != nil {
-				panic(err)
+				return
 			}
 			mainContext.SetFontFace(LoadFontFace(loadNotoSans, 140))
 			DrawBorderString(mainContext, "|", 5, float64(mainContextWidth-30), 65, 1, 0.5, setInlineColor, setOutlineColor)

@@ -89,7 +89,7 @@ func HandlerUserSetsCustomImage(ctx *rei.Ctx, ps []tgba.PhotoSize) {
 	}
 	getRaw, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
-		panic(err)
+		return
 	}
 	// pic Handler
 	getRenderPlatePicRaw := gg.NewContext(1260, 210)

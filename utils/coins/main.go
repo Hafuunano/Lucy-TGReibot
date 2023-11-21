@@ -95,13 +95,13 @@ func Initialize(dbpath string) *Scoredb {
 		defer func(f *os.File) {
 			err := f.Close()
 			if err != nil {
-				panic(err)
+				return
 			}
 		}(f)
 	}
 	gdb, err := gorm.Open("sqlite3", dbpath)
 	if err != nil {
-		panic(err)
+		return
 	}
 	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{}).AutoMigrate(&WagerUserInputTable{}).AutoMigrate(&ProtectModeIndex{})
 	return (*Scoredb)(gdb)

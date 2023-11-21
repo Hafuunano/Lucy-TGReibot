@@ -121,7 +121,7 @@ func init() {
 	if _, err := os.Stat(userPlate); os.IsNotExist(err) {
 		err := os.MkdirAll(userPlate, 0777)
 		if err != nil {
-			panic(err)
+			return
 		}
 	}
 	nameTypeFont = LoadFontFace(nameFont, 36)
@@ -204,14 +204,14 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	getRating := getRatingBg(data.Rating)
 	getRatingBG, err := gg.LoadImage(loadMaiPic + getRating)
 	if err != nil {
-		panic(err)
+		return
 	}
 	b50Render.DrawImage(getRatingBG, 800, 40)
 	b50Render.Fill()
 	// render Rank
 	imgs, err := GetRankPicRaw(data.AdditionalRating)
 	if err != nil {
-		panic(err)
+		return
 	}
 	b50Render.DrawImage(imgs, 1080, 50)
 	b50Render.Fill()
@@ -393,7 +393,7 @@ func GetCover(id string) (image.Image, error) {
 	defer func(imageFile *os.File) {
 		err := imageFile.Close()
 		if err != nil {
-			panic(err)
+			return
 		}
 	}(imageFile)
 	img, _, err := image.Decode(imageFile)
@@ -465,7 +465,7 @@ func saveImage(img image.Image, path string) {
 	defer func(files *os.File) {
 		err := files.Close()
 		if err != nil {
-			panic(err)
+			return
 		}
 	}(files)
 	err = png.Encode(files, img)
@@ -482,7 +482,7 @@ func downloadImage(url string) (image.Image, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			panic(err)
+			return
 		}
 	}(response.Body)
 	img, _, err := image.Decode(response.Body)
