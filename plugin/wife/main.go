@@ -459,7 +459,7 @@ func init() {
 			return
 		}
 	})
-	engine.OnMessageCommand("waifu_list").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("waifulist").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		gid := ctx.Message.Chat.ID
 		getList, num := GetTheGroupList(gid)
 		var RawMsg string
@@ -482,7 +482,7 @@ func init() {
 		}
 		ctx.Caller.Send(tgba.NewChatPhoto(gid, tgba.FileReader{Name: "waifu_" + strconv.FormatInt(gid, 10), Reader: bytes.NewReader(buf.Bytes())}))
 	})
-	engine.OnMessageCommand("waifu_wish").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("waifuwish").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getEntities := toolchain.ListEntitiesMention(ctx)
 		uid := ctx.Message.From.ID
 		gid := ctx.Message.Chat.ID

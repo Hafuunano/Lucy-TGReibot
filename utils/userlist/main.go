@@ -32,41 +32,41 @@ func init() {
 
 // InitDataGroup Init A group if we cannot find it.
 func InitDataGroup(groupID string) error {
-
 	return groupSaver.Create("group_"+groupID, &UserList{})
 }
 
 func SaveUserOnList(userid string, groupID string, username string) {
-
 	// check the table is existed? if not, create it.
-	InitDataGroup(groupID)
-	groupSaver.Insert("group_"+groupID, &UserList{UserID: userid, UserName: username})
+	err := groupSaver.Insert("group_"+groupID, &UserList{UserID: userid, UserName: username})
+	if err != nil {
+		InitDataGroup(groupID)
+	}
 }
 
 func RemoveUserOnList(userid string, groupID string) {
-
 	// check the table is existed? if not, create it.
-	groupSaver.Del("group_"+groupID, "WHERE userid is "+userid)
-	InitDataGroup(groupID)
+	err := groupSaver.Del("group_"+groupID, "WHERE userid is "+userid)
+	if err != nil {
+		InitDataGroup(groupID)
+	}
 }
 
 func PickUserOnGroup(gid string) string {
-
 	var PickerAxe UserList
-	groupSaver.Pick("group_"+gid, &PickerAxe)
-	InitDataGroup(gid)
+	err := groupSaver.Pick("group_"+gid, &PickerAxe)
+	if err != nil {
+		InitDataGroup(gid)
+	}
 	return PickerAxe.UserID
 }
 
 func GetThisGroupList(gid string) []string {
-
 	getNum, _ := groupSaver.Count("group_" + gid)
 	if getNum == 0 {
 		return nil
 	}
 	var list []string
 	var onTemploader UserList
-
 	_ = groupSaver.FindFor("group_"+gid, &onTemploader, "WHERE id = 0", func() error {
 		list = append(list, onTemploader.UserID)
 		return nil
