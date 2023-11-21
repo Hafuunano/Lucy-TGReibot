@@ -54,6 +54,20 @@ func GetTargetAvatar(ctx *rei.Ctx) image.Image {
 	return avatarByteUni
 }
 
+func GetReferTargetAvatar(ctx *rei.Ctx, uid int64) string {
+	getGroupChatConfig := tgba.ChatInfoConfig{ChatConfig: tgba.ChatConfig{ChatID: uid}}
+	chatGroupInfo, err := ctx.Caller.GetChat(getGroupChatConfig)
+	if err != nil {
+		return ""
+	}
+	if chatGroupInfo.Photo == nil {
+		return ""
+	}
+	chatPhoto := chatGroupInfo.Photo.SmallFileID
+	avatar, err := ctx.Caller.GetFileDirectURL(chatPhoto)
+	return avatar
+}
+
 // GetChatUserInfoID GetID and UserName, support Channel | Userself and Annoy Group
 func GetChatUserInfoID(ctx *rei.Ctx) (id int64, name string) {
 	getUserName := ctx.Event.Value.(*tgba.Message).From.FirstName
@@ -112,6 +126,14 @@ func GetNickNameFromUsername(username string) (name string) {
 		name = ""
 	}
 	return
+}
+
+func GetNickNameFromUserid(ctx *rei.Ctx, userid int64) string {
+	data := CoreFactory.GetUserSampleUserinfobyid(userid)
+	if data == nil {
+		return ""
+	}
+	return GetNickNameFromUsername(data.UserName)
 }
 
 // RandSenderPerDayN 每个用户每天随机数

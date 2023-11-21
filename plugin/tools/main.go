@@ -59,7 +59,7 @@ func init() {
 		CoreFactory.StoreUserDataBase(getUserID, newUserName)
 	})
 	engine.OnMessage().SetBlock(false).Handle(func(ctx *rei.Ctx) {
-
+		toolchain.FastSaveUserGroupList(ctx)
 		toolchain.FastSaveUserStatus(ctx)
 	})
 

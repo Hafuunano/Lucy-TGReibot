@@ -3,11 +3,11 @@ module github.com/FloatTech/ReiBot-Plugin
 go 1.20
 
 require (
-	github.com/FloatTech/floatbox v0.0.0-20230207080446-026a2f086c74
+	github.com/FloatTech/floatbox v0.0.0-20230331064925-9af336a84944
 	github.com/FloatTech/gg v1.1.2
-	github.com/FloatTech/imgfactory v0.2.1
-	github.com/FloatTech/sqlite v1.5.7
-	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
+	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
+	github.com/FloatTech/sqlite v1.6.2
+	github.com/FloatTech/zbpctrl v1.5.3-0.20230514154630-b74e6fcca380
 	github.com/disintegration/imaging v1.6.2
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/ReiBot v0.0.0-20230215122748-dab38cf6b71b
@@ -20,7 +20,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.6.9
+	github.com/wdvxdr1123/ZeroBot v1.7.4
 	golang.org/x/image v0.11.0
 	golang.org/x/text v0.12.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -28,10 +28,11 @@ require (
 
 require (
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
+	github.com/FloatTech/zbputils v1.7.0 // indirect
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/cron v1.3.0 // indirect
-	github.com/fumiama/go-registry v0.2.5 // indirect
+	github.com/fumiama/go-registry v0.2.6 // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/fumiama/imgsz v0.0.2 // indirect
