@@ -63,7 +63,6 @@ func main() {
 		Handle(func(ctx *rei.Ctx) {
 			ctx.SendPlainMessage(true, kanban.Banner)
 		})
-
 	rei.Run(rei.Bot{
 		Token:   *token,
 		Botname: "Lucy",

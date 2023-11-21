@@ -11,16 +11,19 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 	"unsafe"
 
+	"github.com/FloatTech/ReiBot-Plugin/utils/CoreFactory"
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/file"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
+
+var OnHoldSaver = rate.NewManager[int64](time.Hour*24, 1) // only update once.
 
 // GetTargetAvatar GetUserTarget ID
 func GetTargetAvatar(ctx *rei.Ctx) image.Image {
@@ -67,17 +70,18 @@ func GetChatUserInfoID(ctx *rei.Ctx) (id int64, name string) {
 
 // GetThisGroupID Get Group ID
 func GetThisGroupID(ctx *rei.Ctx) (id int64) {
-	getGroupChatConfig := tgba.ChatInfoConfig{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}
-	chatGroupInfo, err := ctx.Caller.GetChat(getGroupChatConfig)
-	if err != nil {
-		panic(err)
+	if !ctx.Message.Chat.IsGroup() && !ctx.Message.Chat.IsSuperGroup() {
+		return 0
 	}
-	return chatGroupInfo.ID
+	return ctx.Message.Chat.ID
 }
 
 // GetNickNameFromUsername Use Sniper, not api.
 func GetNickNameFromUsername(username string) (name string) {
 	// https://github.com/XiaoMengXinX/Telegram_QuoteReply_Bot-Go/blob/master/api/bot.go
+	if !strings.HasPrefix(username, "@") {
+		username = "@" + username
+	}
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", fmt.Sprintf("https://t.me/%s", username), nil)
 	resp, err := client.Do(req)
@@ -198,15 +202,78 @@ func LoadUserNickname(userID string) string {
 	return result
 }
 
-// GetUserEntitiesID Get User Entities List, remember to check list len and beware panic.
-func GetUserEntitiesID(ctx *rei.Ctx) []string {
-	var newUserList []string
-	getEntities := ctx.Message.Entities
-	for _, entity := range getEntities {
-		if entity.User != nil {
-			newUserList = append(newUserList, strconv.FormatInt(entity.User.ID, 10))
-		}
-
+func GetBotIsAdminInThisGroup(ctx *rei.Ctx) bool {
+	getSelfMember, err := ctx.Caller.GetChatMember(
+		tgba.GetChatMemberConfig{
+			ChatConfigWithUser: tgba.ChatConfigWithUser{
+				ChatID: ctx.Message.Chat.ID,
+				UserID: ctx.Caller.Self.ID,
+			},
+		},
+	)
+	if err != nil {
+		panic(err)
 	}
-	return newUserList
+	return getSelfMember.IsCreator() || getSelfMember.IsAdministrator()
+}
+
+func GetTheTargetIsNormalUser(ctx *rei.Ctx) bool {
+	// stop channel to take part in this.
+	getUserChannelStatus := ctx.Event.Value.(*tgba.Message).From.FirstName
+	if getUserChannelStatus == "Group" || getUserChannelStatus == "Channel" {
+		return false
+	}
+	return true
+}
+
+func IsTargetSettedUserName(ctx *rei.Ctx) bool {
+	return ctx.Message.From.UserName != ""
+}
+
+// FastSaveUserStatus I hope this will not ruin my machine. (
+func FastSaveUserStatus(ctx *rei.Ctx) bool {
+	// only save normal user
+	if !OnHoldSaver.Load(ctx.Message.From.ID).Acquire() || !GetTheTargetIsNormalUser(ctx) || !IsTargetSettedUserName(ctx) {
+		// save database onload time.
+		return false
+	}
+	CoreFactory.StoreUserDataBase(ctx.Message.From.ID, ctx.Message.From.UserName)
+	return true
+}
+
+// CheckIfthisUserInThisGroup Check the user if in this group.
+func CheckIfthisUserInThisGroup(userID int64, ctx *rei.Ctx) bool {
+	group := GetThisGroupID(ctx)
+	if group == 0 {
+		// not a group.
+		return false
+	}
+	getResult, err := ctx.Caller.GetChatMember(
+		tgba.GetChatMemberConfig{
+			ChatConfigWithUser: tgba.ChatConfigWithUser{
+				ChatID: group,
+				UserID: userID,
+			},
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
+	if getResult.User != nil {
+		return true
+	}
+	return false
+}
+
+// ListEntitiesMention List Entities and return a simple list with user.
+func ListEntitiesMention(ctx *rei.Ctx) []string {
+	var tempList []string
+	msg := ctx.Message.Text
+	for _, entity := range ctx.Message.Entities {
+		if entity.Type == "mention" {
+			mentionText := msg[entity.Offset : entity.Offset+entity.Length]
+			tempList = append(tempList, mentionText)
+		}
+	}
+	return tempList
 }

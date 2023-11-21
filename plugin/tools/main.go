@@ -1,18 +1,19 @@
 package tools
 
 import (
-	`fmt`
-	`math`
+	"fmt"
+	"math"
 	"strconv"
 	"strings"
-	`time`
+	"time"
 
+	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	`github.com/shirou/gopsutil/cpu`
-	`github.com/shirou/gopsutil/disk`
-	`github.com/shirou/gopsutil/mem`
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/mem"
 )
 
 var engine = rei.Register("tools", &ctrl.Options[*rei.Ctx]{
@@ -43,6 +44,9 @@ func init() {
 			"* RAM Usage: ", memPercent(), "%\n",
 			"* DiskInfo Usage Check: ", diskPercent(), "\n",
 			"  Lucyは、高性能ですから！")
+	})
+	engine.OnMessage().SetBlock(false).Handle(func(ctx *rei.Ctx) {
+		toolchain.FastSaveUserStatus(ctx)
 	})
 }
 

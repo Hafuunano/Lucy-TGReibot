@@ -39,7 +39,6 @@ func init() {
 		}
 		ctx.SendPlainMessage(true, []string{"炖了~鸽子都要恰掉w", "咕咕咕", "不许咕咕咕"}[rand.Intn(3)])
 	})
-
 }
 
 func RandImage(file ...string) string {

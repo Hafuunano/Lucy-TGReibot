@@ -6,13 +6,16 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/FloatTech/ReiBot-Plugin/utils/CoreFactory"
 	coins "github.com/FloatTech/ReiBot-Plugin/utils/coins"
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
 	rei "github.com/fumiama/ReiBot"
+	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
 
@@ -46,6 +49,8 @@ func init() {
 
 	engine.OnMessageCommand("coinroll").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		userID, _ := toolchain.GetChatUserInfoID(ctx)
+		getMsgID := ctx.Message.MessageID // caller
+
 		if !checkLimit.Load(userID).Acquire() {
 			ctx.SendPlainMessage(true, "太贪心了哦~过会试试吧")
 			return
@@ -78,8 +83,12 @@ func init() {
 		getDesc := referpg.Desc
 		addNewCoins := si.Coins + getCoinsInt - 60
 		_ = coins.InsertUserCoins(sdb, uid, addNewCoins)
-		ctx.SendPlainMessage(true, "呼~让咱看看你抽到了什么东西ww\n"+
+		msgUnique, _ := ctx.SendPlainMessage(true, "呼~让咱看看你抽到了什么东西ww\n"+
 			"你抽到的是~ "+getName+"\n"+"获得了柠檬片 "+strconv.Itoa(getCoinsInt)+"\n"+getDesc+"\n目前的柠檬片总数为："+strconv.Itoa(addNewCoins))
+		time.Sleep(time.Second * 20)
+		getReplyMsgID := msgUnique.MessageID
+		ctx.Caller.Request(tgba.NewDeleteMessage(ctx.Message.Chat.ID, getMsgID))
+		ctx.Caller.Request(tgba.NewDeleteMessage(ctx.Message.Chat.ID, getReplyMsgID))
 		mutex.Unlock()
 	})
 	engine.OnMessageCommand("cointhrow").SetBlock(true).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
@@ -196,6 +205,88 @@ func init() {
 		si := coins.GetSignInByUID(sdb, uid)
 		ctx.SendPlainMessage(true, "你的柠檬片数量一共是: "+strconv.Itoa(si.Coins))
 	})
+
+	engine.OnMessageCommand("coinrob").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
+		_, getCommandSplitInt := toolchain.SplitCommandTo(ctx.Message.Text, 3)
+		// handler
+		getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+		if !catchLimit.Load(getUserID).Acquire() {
+			ctx.SendPlainMessage(true, "太贪心了哦~一小时后再来试试吧")
+			return
+		}
+		// check Lucy's Permission
+		if len(getCommandSplitInt) < 2 {
+			ctx.SendPlainMessage(true, "参数不足")
+			return
+		}
+
+		// getUserInfo
+		acquireEntity := toolchain.ListEntitiesMention(ctx)
+		if len(acquireEntity) == 0 {
+			return
+		}
+		getUserData := CoreFactory.GetUserSampleUserinfo(strings.Replace(acquireEntity[0], "@", "", 1))
+		if getUserData.UserID == 0 {
+			ctx.SendPlainMessage(true, "为非正常用户组或者该用户为在Lucy处记录x")
+			return
+		}
+		// check the user is in group?
+		if !toolchain.CheckIfthisUserInThisGroup(getUserData.UserID, ctx) {
+			ctx.SendPlainMessage(true, "该用户不在这个群哦x")
+			return
+		}
+		// the targetUser
+		getTargetID := getUserData.UserID
+		// get UserID.
+
+		if getTargetID == getUserID {
+			ctx.SendPlainMessage(true, "哈? 干嘛骗自己的?坏蛋哦")
+			return
+		}
+
+		// get coin status, origin from Lucy_zerobot.
+		siEventUser := coins.GetSignInByUID(sdb, getUserID)    // 获取主用户目前状况信息
+		siTargetUser := coins.GetSignInByUID(sdb, getTargetID) // 获得被抢用户目前情况信息
+		switch {
+		case siEventUser.Coins < 400:
+			ctx.SendPlainMessage(true, "貌似没有足够的柠檬片去准备哦~请多多打卡w")
+			return
+		case siTargetUser.Coins < 400:
+			ctx.SendPlainMessage(true, "太坏了~试图的对象貌似没有足够多的柠檬片~")
+			return
+		}
+		eventUserName := toolchain.GetNickNameFromUsername(ctx.Message.From.UserName)
+		eventTargetName := toolchain.GetNickNameFromUsername(acquireEntity[0])
+		// token chance.
+		// add more possibility to get the chance (0-200)
+		getTicket := RobOrCatchLimitManager(getUserID) // full is 1 , least 3. level 1,2,3,
+		// however, the total is still 0-400.
+		fullChanceToken := rand.Intn(10)
+		var modifyCoins int
+		if fullChanceToken > 7 { // use it to reduce the chance to lower coins.
+			modifyCoins = rand.Intn(200) + 200
+		} else {
+			modifyCoins = rand.Intn(200)
+		}
+		getRandomNum := rand.Intn(10)
+		PossibilityNum := 6 / getTicket
+		setIsTrue := getRandomNum/PossibilityNum != 0
+		var remindTicket string
+		if getTicket == 3 {
+			remindTicket = "目前已经达到疲倦状态，成功率下调到15%，或许考虑一下不要做一个坏人呢～ ^^ "
+		}
+		if setIsTrue {
+			_ = coins.InsertUserCoins(sdb, siEventUser.UID, siEventUser.Coins-modifyCoins)
+			_ = coins.InsertUserCoins(sdb, siTargetUser.UID, siTargetUser.Coins+modifyCoins)
+			ctx.SendPlainMessage(true, "试着去拿走 ", eventTargetName, " 的柠檬片时,被发现了.\n所以 ", eventUserName, " 失去了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 得到了 ", modifyCoins, " 个柠檬片\n", remindTicket)
+			return
+		}
+		_ = coins.InsertUserCoins(sdb, siEventUser.UID, siEventUser.Coins+modifyCoins)
+		_ = coins.InsertUserCoins(sdb, siTargetUser.UID, siTargetUser.Coins-modifyCoins)
+		ctx.SendPlainMessage(true, "试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片\n", remindTicket)
+
+	})
+
 }
 
 func RobOrCatchLimitManager(id int64) (ticket int) {
