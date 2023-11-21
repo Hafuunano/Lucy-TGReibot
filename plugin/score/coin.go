@@ -380,6 +380,7 @@ func init() {
 		ctx.SendPlainMessage(true, "试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片\n", remindTicket)
 
 	})
+
 }
 
 func RobOrCatchLimitManager(id int64) (ticket int) {

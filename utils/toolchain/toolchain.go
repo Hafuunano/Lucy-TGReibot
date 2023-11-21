@@ -80,8 +80,8 @@ func GetThisGroupID(ctx *rei.Ctx) (id int64) {
 // GetNickNameFromUsername Use Sniper, not api.
 func GetNickNameFromUsername(username string) (name string) {
 	// https://github.com/XiaoMengXinX/Telegram_QuoteReply_Bot-Go/blob/master/api/bot.go
-	if !strings.HasPrefix(username, "@") {
-		username = "@" + username
+	if strings.HasPrefix(username, "@") {
+		username = strings.Replace(username, "@", "", 1)
 	}
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", fmt.Sprintf("https://t.me/%s", username), nil)
