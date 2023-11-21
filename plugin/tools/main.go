@@ -45,9 +45,6 @@ func init() {
 			"* DiskInfo Usage Check: ", diskPercent(), "\n",
 			"  Lucyは、高性能ですから！")
 	})
-	engine.OnMessage().SetBlock(false).Handle(func(ctx *rei.Ctx) {
-		toolchain.FastSaveUserStatus(ctx)
-	})
 	engine.OnMessageCommand("dataupdate").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		if !toolchain.GetTheTargetIsNormalUser(ctx) {
 			return
@@ -61,6 +58,11 @@ func init() {
 		}
 		CoreFactory.StoreUserDataBase(getUserID, newUserName)
 	})
+	engine.OnMessage().SetBlock(false).Handle(func(ctx *rei.Ctx) {
+
+		toolchain.FastSaveUserStatus(ctx)
+	})
+
 }
 
 func cpuPercent() float64 {

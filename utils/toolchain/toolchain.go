@@ -17,6 +17,7 @@ import (
 	"unsafe"
 
 	"github.com/FloatTech/ReiBot-Plugin/utils/CoreFactory"
+	"github.com/FloatTech/ReiBot-Plugin/utils/userlist"
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/file"
 	rei "github.com/fumiama/ReiBot"
@@ -24,7 +25,8 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
 
-var OnHoldSaver = rate.NewManager[int64](time.Hour*24, 1) // only update once.
+var OnHoldSaver = rate.NewManager[int64](time.Hour*24, 1)  // only update once.
+var OnGroupSaver = rate.NewManager[int64](time.Hour*24, 1) // only update once.
 
 // GetTargetAvatar GetUserTarget ID
 func GetTargetAvatar(ctx *rei.Ctx) image.Image {
@@ -234,12 +236,21 @@ func IsTargetSettedUserName(ctx *rei.Ctx) bool {
 // FastSaveUserStatus I hope this will not ruin my machine. (
 func FastSaveUserStatus(ctx *rei.Ctx) bool {
 	// only save normal user
-	if !OnHoldSaver.Load(ctx.Message.From.ID).Acquire() || !GetTheTargetIsNormalUser(ctx) || !IsTargetSettedUserName(ctx) {
+	if OnHoldSaver.Load(ctx.Message.From.ID).Tokens() == 0 || !GetTheTargetIsNormalUser(ctx) || !IsTargetSettedUserName(ctx) {
 		// save database onload time.
 		return false
 	}
+	OnHoldSaver.Load(ctx.Message.From.ID).Acquire()
 	CoreFactory.StoreUserDataBase(ctx.Message.From.ID, ctx.Message.From.UserName)
 	return true
+}
+
+func FastSaveUserGroupList(ctx *rei.Ctx) {
+	if OnGroupSaver.Load(ctx.Message.From.ID).Tokens() == 0 || !GetTheTargetIsNormalUser(ctx) || GetThisGroupID(ctx) == 0 {
+		return
+	}
+	userlist.SaveUserOnList(ctx.Message.From.ID, ctx.Message.Chat.ID)
+	OnGroupSaver.Load(ctx.Message.From.ID).Acquire()
 }
 
 // CheckIfthisUserInThisGroup Check the user if in this group.
