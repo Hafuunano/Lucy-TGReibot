@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FloatTech/ReiBot-Plugin/utils/CoreFactory"
 	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
@@ -22,22 +23,21 @@ var engine = rei.Register("tools", &ctrl.Options[*rei.Ctx]{
 })
 
 func init() {
-	engine.OnMessageCommand("leave", rei.SuperUserPermission).SetBlock(true).
-		Handle(func(ctx *rei.Ctx) {
-			arg := strings.TrimSpace(ctx.State["args"].(string))
-			var gid int64
-			var err error
-			if arg != "" {
-				gid, err = strconv.ParseInt(arg, 10, 64)
-				if err != nil {
-					_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
-					return
-				}
-			} else {
-				gid = ctx.Message.Chat.ID
+	engine.OnMessageCommand("leave", rei.SuperUserPermission).SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		arg := strings.TrimSpace(ctx.State["args"].(string))
+		var gid int64
+		var err error
+		if arg != "" {
+			gid, err = strconv.ParseInt(arg, 10, 64)
+			if err != nil {
+				_, _ = ctx.SendPlainMessage(false, "ERROR: ", err)
+				return
 			}
-			_, _ = ctx.Caller.Send(&tgba.LeaveChatConfig{ChatID: gid})
-		})
+		} else {
+			gid = ctx.Message.Chat.ID
+		}
+		_, _ = ctx.Caller.Send(&tgba.LeaveChatConfig{ChatID: gid})
+	})
 	engine.OnMessageCommand("status").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		ctx.SendPlainMessage(false, "* Hosted On Azure JP Cloud.\n",
 			"* CPU Usage: ", cpuPercent(), "%\n",
@@ -47,6 +47,19 @@ func init() {
 	})
 	engine.OnMessage().SetBlock(false).Handle(func(ctx *rei.Ctx) {
 		toolchain.FastSaveUserStatus(ctx)
+	})
+	engine.OnMessageCommand("dataupdate").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		if !toolchain.GetTheTargetIsNormalUser(ctx) {
+			return
+		}
+		getUserName := ctx.Message.From.UserName
+		getUserID := ctx.Message.From.ID
+		newUserName := CoreFactory.GetUserSampleUserinfobyid(getUserID).UserName
+		if newUserName == getUserName {
+			ctx.SendPlainMessage(true, "不需要更新的~用户名为最新w")
+			return
+		}
+		CoreFactory.StoreUserDataBase(getUserID, newUserName)
 	})
 }
 

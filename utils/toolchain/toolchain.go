@@ -277,3 +277,16 @@ func ListEntitiesMention(ctx *rei.Ctx) []string {
 	}
 	return tempList
 }
+
+// GetUserIDFromUserName with @, only works when the data saved.
+func GetUserIDFromUserName(ctx *rei.Ctx, userName string) int64 {
+	getUserData := CoreFactory.GetUserSampleUserinfo(strings.Replace(userName, "@", "", 1))
+	if getUserData.UserID == 0 {
+		return 0
+	}
+	// check the user is in group?
+	if !CheckIfthisUserInThisGroup(getUserData.UserID, ctx) {
+		return 0
+	}
+	return getUserData.UserID
+}

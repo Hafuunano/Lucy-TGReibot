@@ -205,7 +205,6 @@ func init() {
 		si := coins.GetSignInByUID(sdb, uid)
 		ctx.SendPlainMessage(true, "你的柠檬片数量一共是: "+strconv.Itoa(si.Coins))
 	})
-
 	engine.OnMessageCommand("coinrob").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		_, getCommandSplitInt := toolchain.SplitCommandTo(ctx.Message.Text, 3)
 		// handler
