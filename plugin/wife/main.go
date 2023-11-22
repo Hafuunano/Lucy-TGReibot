@@ -3,8 +3,10 @@ package wife
 
 import (
 	"bytes"
+	"fmt"
 	"image/png"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -16,33 +18,14 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
 
 var (
-	MessageTickerLimiter = rate.NewManager[int64](time.Minute*1, 2)
-	engine               = rei.Register("wife", &ctrl.Options[*rei.Ctx]{
+	engine = rei.Register("wife", &ctrl.Options[*rei.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!",
 		PrivateDataFolder: "wife",
-	}).ApplySingle(ReverseSingle)
-
-	ReverseSingle = rei.NewSingle(
-		rei.WithKeyFn(func(ctx *rei.Ctx) int64 {
-			switch msg := ctx.Value.(type) {
-			case *tgba.Message:
-				return msg.From.ID
-			case *tgba.CallbackQuery:
-				return msg.From.ID
-			}
-			return 0
-		}), rei.WithPostFn[int64](func(ctx *rei.Ctx) {
-			if !MessageTickerLimiter.Load(ctx.Message.Chat.ID).Acquire() {
-				return
-			}
-			_, _ = ctx.SendPlainMessage(false, "正在操作哦～")
-		}),
-	)
+	})
 )
 
 /*
@@ -162,6 +145,7 @@ func init() {
 		// command patterns
 		// marry @user
 		// in telegram, we should consider user more.
+		fmt.Print("")
 		getEntities := toolchain.ListEntitiesMention(ctx)
 		uid := ctx.Message.From.ID
 		if len(getEntities) == 0 {
@@ -233,7 +217,7 @@ func init() {
 		}
 		ResuitTheReferUserAndMakeIt(ctx, dict, fiancee, uid)
 	})
-	engine.OnMessageCommand("waifu").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("wife").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		/*
 			Work:
 			- Check the User Status, if the user is 1 or 0 || 10 ,then pause and do this handler.
@@ -245,6 +229,7 @@ func init() {
 		/*
 			TODO: HIDE MODE TYPE 6
 		*/
+		fmt.Print("start")
 		uid := ctx.Message.From.ID
 		gid := ctx.Message.Chat.ID
 		// Check if Disabled this group.
@@ -467,10 +452,11 @@ func init() {
 			ctx.SendPlainMessage(true, "本群貌似还没有人结婚来着（")
 			return
 		}
+		emojiRegex := regexp.MustCompile(`[\x{1F600}-\x{1F64F}|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F700}-\x{1F77F}]|[\x{1F780}-\x{1F7FF}]|[\x{1F800}-\x{1F8FF}]|[\x{1F900}-\x{1F9FF}]|[\x{1FA00}-\x{1FA6F}]|[\x{1FA70}-\x{1FAFF}]|[\x{1FB00}-\x{1FBFF}]|[\x{1F170}-\x{1F251}]|[\x{1F300}-\x{1F5FF}]|[\x{1F600}-\x{1F64F}]|[\x{1FC00}-\x{1FCFF}]|[\x{1F004}-\x{1F0CF}]|[\x{1F170}-\x{1F251}]]+`)
 		for i := 0; i < num; i++ {
 			getUserInt64, _ := strconv.ParseInt(getList[i][0], 10, 64)
 			getTargetInt64, _ := strconv.ParseInt(getList[i][1], 10, 64)
-			RawMsg += strconv.FormatInt(int64(i+1), 10) + ". " + toolchain.GetNickNameFromUserid(ctx, getUserInt64) + "( " + getList[i][0] + " )" + "  -->  " + toolchain.GetNickNameFromUserid(ctx, getTargetInt64) + "( " + getList[i][1] + " )" + "\n"
+			RawMsg += strconv.FormatInt(int64(i+1), 10) + ". " + emojiRegex.ReplaceAllString(toolchain.GetNickNameFromUserid(ctx, getUserInt64), "") + "( " + getList[i][0] + " )" + "  -->  " + emojiRegex.ReplaceAllString(toolchain.GetNickNameFromUserid(ctx, getTargetInt64), "") + "( " + getList[i][1] + " )" + "\n"
 		}
 		headerMsg := "群老婆列表～ For Group( " + strconv.FormatInt(gid, 10) + " )" + " [ " + ctx.Message.Chat.Title + " ]\n\n"
 		base64Font, err := text.RenderText(headerMsg+RawMsg+"\n\n Tips: 此列表将会在 23：00 PM (GMT+8) 重置", transform.ReturnLucyMainDataIndex("Font")+"regular-bold.ttf", 1920, 45)
@@ -480,7 +466,7 @@ func init() {
 			ctx.SendPlainMessage(true, "ERR: ", err)
 			return
 		}
-		ctx.Caller.Send(tgba.NewChatPhoto(gid, tgba.FileReader{Name: "waifu_" + strconv.FormatInt(gid, 10), Reader: bytes.NewReader(buf.Bytes())}))
+		ctx.SendPhoto(tgba.FileReader{Name: "waifu_" + strconv.FormatInt(gid, 10), Reader: bytes.NewReader(buf.Bytes())}, true, "")
 	})
 	engine.OnMessageCommand("waifuwish").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getEntities := toolchain.ListEntitiesMention(ctx)

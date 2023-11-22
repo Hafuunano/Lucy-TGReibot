@@ -4,7 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -131,7 +133,14 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	aheader := msg + "\n今天你的群" + replyTarget + "是\n"
 	formatAvatar := GenerateUserImageLink(ctx, referTarget)
 	formatReply := "[ " + toolchain.GetNickNameFromUserid(ctx, referTarget) + " ] " + "( " + strconv.FormatInt(referTarget, 10) + " ) 哦w～"
-	ctx.SendPhoto(tgba.FileURL(formatAvatar), true, (aheader + formatReply))
+	datas, _ := http.Get(formatAvatar)
+	// avatar
+	// aheader+formatReply
+	data, err := io.ReadAll(datas.Body)
+	if err != nil {
+		panic(err)
+	}
+	ctx.SendPhoto(tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}, true, aheader+formatReply)
 }
 
 // GenerateMD5 Generate MD5

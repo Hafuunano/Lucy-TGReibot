@@ -436,7 +436,7 @@ func init() {
 			return
 		}
 		siEventUserName := toolchain.GetNickNameFromUsername(ctx.Message.From.UserName)
-		siTargetUserName := toolchain.GetNickNameFromUsername(getEntitiy[1])
+		siTargetUserName := toolchain.GetNickNameFromUsername(getEntitiy[0])
 		ctx.SendPlainMessage(true, "转账成功了哦~\n", siEventUserName, " 变化为 ", siEventUser.Coins, " - ", modifyCoins, "= ", siEventUser.Coins-modifyCoins, "\n", siTargetUserName, " 变化为: ", siTargetUser.Coins, " + ", modifyCoins, "= ", siTargetUser.Coins+modifyCoins)
 		_ = coins.InsertUserCoins(sdb, siEventUser.UID, siEventUser.Coins-modifyCoins)
 		_ = coins.InsertUserCoins(sdb, siTargetUser.UID, siTargetUser.Coins+modifyCoins)
@@ -461,7 +461,11 @@ func init() {
 
 	})
 	engine.OnMessageCommand("coinstaus").SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		_, getCodeRaw := toolchain.SplitCommandTo(ctx.Message.Text, 2)
+		getLength, getCodeRaw := toolchain.SplitCommandTo(ctx.Message.Text, 2)
+		if getLength < 2 {
+			ctx.SendPlainMessage(true, "缺少指令 , 应当为 /command (disable|禁用|enable|启用)")
+			return
+		}
 		getCode := getCodeRaw[1]
 		if getCode != "禁用" && getCode != "disable" && getCode != "enable" && getCode != "启用" {
 			ctx.SendPlainMessage(true, "指令错误 , 应当为 /command (disable|禁用|enable|启用)")
