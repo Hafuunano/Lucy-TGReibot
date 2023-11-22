@@ -66,7 +66,7 @@ func init() {
 	dict["lost_success"] = []string{"好呢w 就这样呢(", "已经成功了哦w"}
 	dict["hide_mode"] = []string{"哼哼～ 哼唧", "喵喵喵？！"}
 
-	engine.OnMessageCommand("bemarry").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("bemarry", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		// command patterns
 		// marry @user
 		// in telegram, we should consider user more.
@@ -141,7 +141,7 @@ func init() {
 		}
 		ResuitTheReferUserAndMakeIt(ctx, dict, uid, fiancee)
 	})
-	engine.OnMessageCommand("marry").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("marry", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		// command patterns
 		// marry @user
 		// in telegram, we should consider user more.
@@ -217,7 +217,7 @@ func init() {
 		}
 		ResuitTheReferUserAndMakeIt(ctx, dict, fiancee, uid)
 	})
-	engine.OnMessageCommand("wife").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("wife", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		/*
 			Work:
 			- Check the User Status, if the user is 1 or 0 || 10 ,then pause and do this handler.
@@ -229,7 +229,6 @@ func init() {
 		/*
 			TODO: HIDE MODE TYPE 6
 		*/
-		fmt.Print("start")
 		uid := ctx.Message.From.ID
 		gid := ctx.Message.Chat.ID
 		// Check if Disabled this group.
@@ -243,7 +242,7 @@ func init() {
 		}
 		ChooseAPerson := GetUserListAndChooseOne(ctx)
 		if ChooseAPerson == 0 {
-			return
+			ctx.SendPlainMessage(true, "貌似你需要等一会试试呢~ Lucy正在确认群里的人数w")
 		}
 		// ok , go next. || before that we should check this person is in the lucky list?
 		// Luck Path. (Only available in marry action.)
@@ -315,7 +314,6 @@ func init() {
 			return
 		}
 		// go next. do something colorful, pls cost something.
-
 		getExistedToken := GlobalCDModelCostLeastReply(ctx)
 		if getExistedToken == 0 {
 			ctx.SendPlainMessage(true, "今天的机会已经使用完了哦～12小时后再来试试吧")
@@ -362,7 +360,7 @@ func init() {
 			_ = InsertUserGlobalMarryList(marryList, gid, uid, uid, 6, generatePairKey)
 		}
 	})
-	engine.OnMessageCommand("divorce").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("divorce", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ctx.Message.From.ID)
 		if getStatusCode == -1 {
 			ctx.SendPlainMessage(true, "貌似？没有对象的样子x")
@@ -389,7 +387,7 @@ func init() {
 			ctx.SendPlainMessage(true, getlostSuccessedMsg)
 		}
 	})
-	engine.OnMessageCommand("chwaifu").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("chwaifu", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		// command patterns
 		// marry @user
 		// in telegram, we should consider user more.
@@ -444,7 +442,7 @@ func init() {
 			return
 		}
 	})
-	engine.OnMessageCommand("waifulist").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("waifulist", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		gid := ctx.Message.Chat.ID
 		getList, num := GetTheGroupList(gid)
 		var RawMsg string
@@ -468,7 +466,7 @@ func init() {
 		}
 		ctx.SendPhoto(tgba.FileReader{Name: "waifu_" + strconv.FormatInt(gid, 10), Reader: bytes.NewReader(buf.Bytes())}, true, "")
 	})
-	engine.OnMessageCommand("waifuwish").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("waifuwish", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getEntities := toolchain.ListEntitiesMention(ctx)
 		uid := ctx.Message.From.ID
 		gid := ctx.Message.Chat.ID

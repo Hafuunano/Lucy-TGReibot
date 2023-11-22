@@ -245,7 +245,7 @@ func GetBotIsAdminInThisGroup(ctx *rei.Ctx) bool {
 func GetTheTargetIsNormalUser(ctx *rei.Ctx) bool {
 	// stop channel to take part in this.
 	getUserChannelStatus := ctx.Event.Value.(*tgba.Message).From.FirstName
-	if getUserChannelStatus == "Group" || getUserChannelStatus == "Channel" {
+	if getUserChannelStatus == "Group" || getUserChannelStatus == "Channel" || ctx.Message.From.ID == 777000 { // unknownUser.
 		return false
 	}
 	return true
@@ -331,4 +331,16 @@ func ExtractNumbers(text string) int64 {
 	numbers := re.FindAllString(text, 1)
 	num, _ := strconv.ParseInt(numbers[0], 10, 64)
 	return num
+}
+
+func GetUserNickNameByIDInGroup(ctx *rei.Ctx, id int64) string {
+	if !CheckIfthisUserInThisGroup(id, ctx) {
+		return ""
+	}
+	chatPrefer, err := ctx.Caller.GetChatMember(tgba.GetChatMemberConfig{ChatConfigWithUser: tgba.ChatConfigWithUser{ChatID: ctx.Message.Chat.ID, UserID: id}})
+	if err != nil {
+		panic(err)
+	}
+	return chatPrefer.User.FirstName + chatPrefer.User.LastName
+
 }

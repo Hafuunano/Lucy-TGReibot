@@ -36,6 +36,21 @@ func init() {
 // GetUserListAndChooseOne choose people.
 func GetUserListAndChooseOne(ctx *rei.Ctx) int64 {
 	toint64, _ := strconv.ParseInt(userlist.PickUserOnGroup(strconv.FormatInt(ctx.Message.Chat.ID, 10)), 10, 64)
+	if !toolchain.CheckIfthisUserInThisGroup(toint64, ctx) {
+		userlist.RemoveUserOnList(strconv.FormatInt(toint64, 10), strconv.FormatInt(ctx.Message.Chat.ID, 10))
+		TrackerCallFuncGetUserListAndChooseOne(ctx)
+	}
+	return toint64
+}
+
+func TrackerCallFuncGetUserListAndChooseOne(ctx *rei.Ctx) int64 {
+	var toint64 int64
+	for i := 0; i < 3; i++ {
+		toint64, _ = strconv.ParseInt(userlist.PickUserOnGroup(strconv.FormatInt(ctx.Message.Chat.ID, 10)), 10, 64)
+		if toolchain.CheckIfthisUserInThisGroup(toint64, ctx) {
+			break
+		}
+	}
 	return toint64
 }
 
@@ -132,7 +147,8 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	}
 	aheader := msg + "\n今天你的群" + replyTarget + "是\n"
 	formatAvatar := GenerateUserImageLink(ctx, referTarget)
-	formatReply := "[ " + toolchain.GetNickNameFromUserid(ctx, referTarget) + " ] " + "( " + strconv.FormatInt(referTarget, 10) + " ) 哦w～"
+
+	formatReply := "[ " + toolchain.GetUserNickNameByIDInGroup(ctx, referTarget) + " ] " + "哦w～"
 	datas, _ := http.Get(formatAvatar)
 	// avatar
 	// aheader+formatReply
@@ -177,7 +193,7 @@ func CheckTheTargetUserStatusAndDoRepeat(ctx *rei.Ctx, ChooseAPerson int64) bool
 	getTargetStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ChooseAPerson) // 判断这个target是否已经和别人在一起了，同时判断Type3
 	switch {
 	case getTargetStatusCode == 1 || getTargetStatusCode == 0:
-		ctx.SendPlainMessage(true, "对方已经有人了哦w～算是运气不好的一次呢,Lucy多给一次机会呢w")
+		ctx.SendPlainMessage(true, "抽到了对方~ 对方已经有人了哦w～算是运气不好的一次呢,Lucy多给一次机会呢w")
 		return false
 	case getTargetStatusCode == 10:
 		ctx.SendPlainMessage(true, "啾啾～今天的对方是单身贵族哦（笑~ Lucy再给你一次机会哦w")
