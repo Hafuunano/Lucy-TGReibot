@@ -147,8 +147,10 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	}
 	aheader := msg + "\n今天你的群" + replyTarget + "是\n"
 	formatAvatar := GenerateUserImageLink(ctx, referTarget)
-
-	formatReply := "[ " + toolchain.GetUserNickNameByIDInGroup(ctx, referTarget) + " ] " + "哦w～"
+	userNickName := toolchain.GetUserNickNameByIDInGroup(ctx, referTarget)
+	senderURI := fmt.Sprintf("tg://user?id=%d", referTarget)
+	userNickName = tgba.EscapeText(tgba.ModeMarkdownV2, userNickName)
+	aheader = aheader + "[" + userNickName + "](" + senderURI + ")" + "哦w～"
 	datas, _ := http.Get(formatAvatar)
 	// avatar
 	// aheader+formatReply
@@ -156,7 +158,7 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	if err != nil {
 		panic(err)
 	}
-	ctx.SendPhoto(tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}, true, aheader+formatReply)
+	ctx.SendPhoto(tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}, true, aheader)
 }
 
 // GenerateMD5 Generate MD5

@@ -3,7 +3,6 @@ package wife
 
 import (
 	"bytes"
-	"fmt"
 	"image/png"
 	"math/rand"
 	"regexp"
@@ -145,7 +144,6 @@ func init() {
 		// command patterns
 		// marry @user
 		// in telegram, we should consider user more.
-		fmt.Print("")
 		getEntities := toolchain.ListEntitiesMention(ctx)
 		uid := ctx.Message.From.ID
 		if len(getEntities) == 0 {
