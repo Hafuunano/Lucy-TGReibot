@@ -65,10 +65,10 @@ func init() {
 	dict["lost_success"] = []string{"好呢w 就这样呢(", "已经成功了哦w"}
 	dict["hide_mode"] = []string{"哼哼～ 哼唧", "喵喵喵？！"}
 
-	engine.OnMessageCommand("bemarry", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
+	engine.OnMessageCommand("marry", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) { // 结婚
 		// command patterns
 		// marry @user
-		// in telegram, we should consider user more.
+		// in telegram, we should consider user more. || marry to someone (you(ctx) are the main.)
 		getEntities := toolchain.ListEntitiesMention(ctx)
 		uid := ctx.Message.From.ID
 		if len(getEntities) == 0 {
@@ -139,81 +139,6 @@ func init() {
 			}
 		}
 		ResuitTheReferUserAndMakeIt(ctx, dict, uid, fiancee)
-	})
-	engine.OnMessageCommand("marry", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) { // 结婚
-		// command patterns
-		// marry @user
-		// in telegram, we should consider user more.
-		getEntities := toolchain.ListEntitiesMention(ctx)
-		uid := ctx.Message.From.ID
-		if len(getEntities) == 0 {
-			ctx.SendPlainMessage(true, "没有找到用户QAQ, help: /command @User")
-			return
-		}
-		fiancee := toolchain.GetUserIDFromUserName(ctx, getEntities[0])
-		if !CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Message.Chat.ID) {
-			ctx.SendPlainMessage(true, "你已经禁用了被随机，所以不可以参与娶群友哦w")
-			return
-		}
-		// fast check
-		if !CheckTheUserStatusAndDoRepeat(ctx) {
-			return
-		}
-		if !CheckTheTargetUserStatusAndDoRepeat(ctx, fiancee) {
-			return
-		}
-		// check the target status.
-		getStatusIfBannned := CheckTheUserIsInBlackListOrGroupList(fiancee, uid, ctx.Message.Chat.ID)
-		/*
-			disabled_Target
-			blacklist_Target
-		*/
-		if getStatusIfBannned {
-			// blocked.
-			GlobalCDModelCost(ctx)
-			getReply := dict["block"][rand.Intn(len(dict["block"]))]
-			ctx.SendPlainMessage(true, getReply)
-			return
-		}
-		if GlobalCDModelCostLeastReply(ctx) == 0 {
-			ctx.SendPlainMessage(true, "今天的机会已经使用完了哦～12小时后再来试试吧")
-			return
-		}
-		if uid == fiancee {
-			switch rand.Intn(5) {
-			case 1:
-				GlobalCDModelCost(ctx)
-				ReplyMeantMode("貌似Lucy故意添加了 --force 的命令，成功了(笑 ", uid, 1, ctx)
-				generatePairKey := GenerateMD5(uid, uid, ctx.Message.Chat.ID)
-				err := InsertUserGlobalMarryList(marryList, ctx.Message.Chat.ID, uid, uid, 3, generatePairKey)
-				if err != nil {
-					panic(err)
-				}
-			default:
-				GlobalCDModelCost(ctx)
-				ctx.SendPlainMessage(true, "笨蛋！娶你自己干什么a")
-			}
-			return
-		}
-		// However Lucy is only available to be married. LOL.
-		if fiancee == ctx.Caller.Self.ID {
-			// not work yet, so just the next path.
-			if rand.Intn(100) > 90 {
-				ctx.SendPlainMessage(true, "笨蛋！不准娶~ ama")
-				GlobalCDModelCost(ctx)
-				return
-			} else {
-				// do it.
-				GlobalCDModelCost(ctx)
-				getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
-				// normal mode. nothing happened.
-				ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx)
-				generatePairKey := GenerateMD5(uid, fiancee, ctx.Message.Chat.ID)
-				_ = InsertUserGlobalMarryList(marryList, ctx.Message.Chat.ID, uid, fiancee, 1, generatePairKey)
-				return
-			}
-		}
-		ResuitTheReferUserAndMakeIt(ctx, dict, fiancee, uid)
 	})
 	engine.OnMessageCommand("wife", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		/*
