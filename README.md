@@ -1,6 +1,6 @@
 ## Lucy_ReiBot
 
-Lucy |  Ver.0.5 (Nightly)
+Lucy |  Ver.1.0 (Nightly)
 
 基于 [ReiBot-Plugin](https://github.com/FloatTech/reiBot-Plugin) **的 三方 Bot 计划 Lucy**
 
