@@ -128,7 +128,7 @@ func GetNickNameFromUsername(username string) (name string) {
 	return
 }
 
-func GetNickNameFromUserid(ctx *rei.Ctx, userid int64) string {
+func GetNickNameFromUserid(userid int64) string {
 	data := CoreFactory.GetUserSampleUserinfobyid(userid)
 	if data == nil {
 		return ""

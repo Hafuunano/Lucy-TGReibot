@@ -65,7 +65,8 @@ func init() {
 	dict["lost_success"] = []string{"好呢w 就这样呢(", "已经成功了哦w"}
 	dict["hide_mode"] = []string{"哼哼～ 哼唧", "喵喵喵？！"}
 
-	engine.OnMessageCommand("marry", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) { // 结婚
+	engine.OnMessageCommand("marry", rei.OnlyGroupOrSuperGroup).SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		// 结婚
 		// command patterns
 		// marry @user
 		// in telegram, we should consider user more. || marry to someone (you(ctx) are the main.)
@@ -166,6 +167,7 @@ func init() {
 		ChooseAPerson := GetUserListAndChooseOne(ctx)
 		if ChooseAPerson == 0 {
 			ctx.SendPlainMessage(true, "貌似你需要等一会试试呢~ Lucy正在确认群里的人数w")
+			return
 		}
 		// ok , go next. || before that we should check this person is in the lucky list?
 		// Luck Path. (Only available in marry action.)
@@ -377,7 +379,7 @@ func init() {
 		for i := 0; i < num; i++ {
 			getUserInt64, _ := strconv.ParseInt(getList[i][0], 10, 64)
 			getTargetInt64, _ := strconv.ParseInt(getList[i][1], 10, 64)
-			RawMsg += strconv.FormatInt(int64(i+1), 10) + ". " + emojiRegex.ReplaceAllString(toolchain.GetNickNameFromUserid(ctx, getUserInt64), "") + "( " + getList[i][0] + " )" + "  -->  " + emojiRegex.ReplaceAllString(toolchain.GetNickNameFromUserid(ctx, getTargetInt64), "") + "( " + getList[i][1] + " )" + "\n"
+			RawMsg += strconv.FormatInt(int64(i+1), 10) + ". " + emojiRegex.ReplaceAllString(toolchain.GetUserNickNameByIDInGroup(ctx, getUserInt64), "") + "( " + getList[i][0] + " )" + "  -->  " + emojiRegex.ReplaceAllString(toolchain.GetUserNickNameByIDInGroup(ctx, getTargetInt64), "") + "( " + getList[i][1] + " )" + "\n"
 		}
 		headerMsg := "群老婆列表～ For Group( " + strconv.FormatInt(gid, 10) + " )" + " [ " + ctx.Message.Chat.Title + " ]\n\n"
 		base64Font, err := text.RenderText(headerMsg+RawMsg+"\n\n Tips: 此列表将会在 23：00 PM (GMT+8) 重置", transform.ReturnLucyMainDataIndex("Font")+"regular-bold.ttf", 1920, 45)
@@ -429,7 +431,7 @@ func init() {
 		_ = coins.InsertUserCoins(sdb, uid, si.Coins-1000)
 		timeStamp := time.Now().Unix() + (6 * 60 * 60)
 		_ = AddOrderToList(marryList, uid, fiancee, strconv.FormatInt(timeStamp, 10), gid)
-		ctx.SendPlainMessage(true, "已经许愿成功了哦～w 给", toolchain.GetNickNameFromUserid(ctx, fiancee), " 的许愿已经生效，将会在6小时后增加70%可能性实现w")
+		ctx.SendPlainMessage(true, "已经许愿成功了哦～w 给", toolchain.GetUserNickNameByIDInGroup(ctx, fiancee), " 的许愿已经生效，将会在6小时后增加70%可能性实现w")
 
 	})
 }
