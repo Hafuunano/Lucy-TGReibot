@@ -158,7 +158,7 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	if err != nil {
 		panic(err)
 	}
-	ctx.SendPhoto(tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}, true, aheader)
+	ctx.Caller.Send(&tgba.PhotoConfig{BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID}, File: tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}}, Caption: aheader, ParseMode: tgba.ModeMarkdownV2})
 }
 
 // GenerateMD5 Generate MD5
