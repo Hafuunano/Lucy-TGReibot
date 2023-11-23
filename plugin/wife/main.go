@@ -394,8 +394,8 @@ func init() {
 			ctx.SendPlainMessage(true, "没有找到用户QAQ, help: /command @User")
 			return
 		}
-		fiancee := toolchain.GetUserIDFromUserName(ctx, getEntities[0])
-		uid := ctx.Message.From.ID
+		uid := toolchain.GetUserIDFromUserName(ctx, getEntities[0])
+		fiancee := ctx.Message.From.ID
 		groupID := ctx.Message.Chat.ID
 		reverseCheckTheUserIsDisabled := CheckDisabledListIsExistedInThisGroup(marryList, uid, groupID)
 		if !reverseCheckTheUserIsDisabled {
