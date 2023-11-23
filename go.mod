@@ -58,4 +58,4 @@ replace modernc.org/sqlite => github.com/fumiama/sqlite3 v1.20.0-with-win386
 
 replace github.com/remyoudompheng/bigfft => github.com/fumiama/bigfft v0.0.0-20211011143303-6e0bfa3c836b
 
-replace github.com/fumiama/ReiBot => github.com/MoYoez/ReiBot v0.0.0-20231121093404-3c4053fa8852
+replace github.com/fumiama/ReiBot => github.com/MoYoez/ReiBot v0.0.0-20231123124827-040a39af6eea
