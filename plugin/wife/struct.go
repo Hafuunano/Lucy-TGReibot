@@ -156,7 +156,14 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	// aheader+formatReply
 	data, err := io.ReadAll(datas.Body)
 	if err != nil {
-		panic(err)
+		ctx.Caller.Send(&tgba.MessageConfig{
+			BaseChat: tgba.BaseChat{
+				ChatID: ctx.Message.Chat.ID,
+			},
+			Text:      aheader,
+			ParseMode: tgba.ModeMarkdownV2,
+		})
+		return
 	}
 	ctx.Caller.Send(&tgba.PhotoConfig{BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID}, File: tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}}, Caption: aheader, ParseMode: tgba.ModeMarkdownV2})
 }
