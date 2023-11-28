@@ -151,10 +151,9 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	senderURI := fmt.Sprintf("tg://user?id=%d", referTarget)
 	userNickName = tgba.EscapeText(tgba.ModeMarkdownV2, userNickName)
 	aheader = aheader + "[" + userNickName + "](" + senderURI + ")" + "哦w～"
-	datas, _ := http.Get(formatAvatar)
+	datas, err := http.Get(formatAvatar)
 	// avatar
 	// aheader+formatReply
-	data, err := io.ReadAll(datas.Body)
 	if err != nil {
 		ctx.Caller.Send(&tgba.MessageConfig{
 			BaseChat: tgba.BaseChat{
@@ -165,6 +164,7 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 		})
 		return
 	}
+	data, _ := io.ReadAll(datas.Body)
 	ctx.Caller.Send(&tgba.PhotoConfig{BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID}, File: tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}}, Caption: aheader, ParseMode: tgba.ModeMarkdownV2})
 }
 
@@ -202,7 +202,7 @@ func CheckTheTargetUserStatusAndDoRepeat(ctx *rei.Ctx, ChooseAPerson int64) bool
 	getTargetStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ChooseAPerson) // 判断这个target是否已经和别人在一起了，同时判断Type3
 	switch {
 	case getTargetStatusCode == 1 || getTargetStatusCode == 0:
-		ctx.SendPlainMessage(true, "抽到了对方~ 对方已经有人了哦w～算是运气不好的一次呢,Lucy多给一次机会呢w")
+		ctx.SendPlainMessage(true, "aw~ 对方已经有人了哦w～算是运气不好的一次呢,Lucy多给一次机会呢w")
 		return false
 	case getTargetStatusCode == 10:
 		ctx.SendPlainMessage(true, "啾啾～今天的对方是单身贵族哦（笑~ Lucy再给你一次机会哦w")
