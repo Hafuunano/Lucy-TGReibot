@@ -1,6 +1,7 @@
 package score
 
 import (
+	"fmt"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -39,13 +40,14 @@ func init() {
 
 		// not sure what happened
 		getNowUnixFormatElevenThirten := time.Now().Add(time.Minute * 30).Format("20060102")
-		//	today := time.Now().Format("20060102")
+
 		mutex.Lock()
 		si := coins.GetSignInByUID(sdb, uid)
 		mutex.Unlock()
 		// in case
 		drawedFile := cachePath + strconv.FormatInt(uid, 10) + getNowUnixFormatElevenThirten + "signin.png"
 		if si.UpdatedAt.Add(time.Minute*30).Format("20060102") == getNowUnixFormatElevenThirten && si.Count != 0 {
+			fmt.Print("DEBUGGER: " + si.UpdatedAt.Add(time.Minute*30).Format("20060102"))
 			ctx.SendPlainMessage(true, "w~ 你今天已经签到过了哦w")
 			if file.IsExist(drawedFile) {
 				ctx.SendPhoto(tgba.FilePath(drawedFile), true, "~")

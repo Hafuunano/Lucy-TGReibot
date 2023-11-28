@@ -183,7 +183,7 @@ func GetCurrentCount(sdb *Scoredb, times string) (si Globaltable) {
 	return si
 }
 
-// GetWagerStatus Get Status
+// GetWagerStatus Get Status (total)
 func GetWagerStatus(sdb *Scoredb) (si WagerTable) {
 	db := (*gorm.DB)(sdb)
 	db.Debug().Model(&WagerTable{}).FirstOrCreate(&si, "winner = ? ", 0)
