@@ -39,6 +39,14 @@ func init() {
 		}
 		ctx.SendPlainMessage(true, []string{"炖了~鸽子都要恰掉w", "咕咕咕", "不许咕咕咕"}[rand.Intn(3)])
 	})
+	engine.OnMessageKeyword("小情侣").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *rei.Ctx) {
+		if !limit.Load(toolchain.GetThisGroupID(ctx)).Acquire() {
+			return
+		}
+		if rand.Intn(2) == 1 {
+			ctx.SendPlainMessage(true, "唉，小情侣")
+		}
+	})
 }
 
 func RandImage(file ...string) string {
