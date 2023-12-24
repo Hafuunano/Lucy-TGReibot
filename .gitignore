@@ -8,6 +8,7 @@
 .vscode
 # Test binary, built with `go test -c`
 *.test
+/plugin/mai/handler.go
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
