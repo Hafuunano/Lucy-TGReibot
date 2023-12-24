@@ -15,6 +15,13 @@ type DataHostSQL struct {
 	Background string `db:"bg"`         // bg
 }
 
+// UserIDToQQ TIPS: Onebot path, actually it refers to Telegram Userid.
+
+type UserIDToQQ struct {
+	QQ     int64  `db:"user_qq"` // qq nums
+	Userid string `db:"user_id"` // user_id
+}
+
 var (
 	maiDatabase = &sql.Sqlite{}
 	maiLocker   = sync.Mutex{}
@@ -33,11 +40,35 @@ func FormatUserDataBase(tgid int64, plate string, bg string, username string) *D
 	return &DataHostSQL{TelegramId: tgid, Plate: plate, Background: bg, Username: username}
 }
 
+func FormatUserIDDatabase(qq int64, userid string) *UserIDToQQ {
+	return &UserIDToQQ{QQ: qq, Userid: userid}
+}
+
 func InitDataBase() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
-	return maiDatabase.Create("userinfo", &DataHostSQL{})
+	maiDatabase.Create("userinfo", &DataHostSQL{})
+	maiDatabase.Create("useridinfo", &UserIDToQQ{})
+	return nil
 }
+
+// GetUserIDFromDatabase Params: user qq id ==> user maimai id.
+func GetUserIDFromDatabase(userID int64) UserIDToQQ {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	var infosql UserIDToQQ
+	userIDStr := strconv.FormatInt(userID, 10)
+	_ = maiDatabase.Find("useridinfo", &infosql, "where user_qq is "+userIDStr)
+	return infosql
+}
+
+func (info *UserIDToQQ) BindUserIDDataBase() error {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	return maiDatabase.Insert("useridinfo", info)
+}
+
+// maimai origin render base.
 
 // GetUserPlateInfoFromDatabase Get plate data
 func GetUserPlateInfoFromDatabase(userID int64) string {

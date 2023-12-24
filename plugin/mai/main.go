@@ -33,6 +33,31 @@ func init() {
 					return
 				}
 				BindUserToMaimai(ctx, getSplitStringList[2])
+			case getSplitStringList[1] == "userbind":
+				if getSplitLength < 3 {
+					ctx.SendPlainMessage(true, "参数提供不足, /mai userbind <maiTempID> ")
+					return
+				}
+				getID, _ := toolchain.GetChatUserInfoID(ctx)
+				userID := GetUserMaiUserid(getSplitStringList[2])
+				if userID == -1 {
+					ctx.SendPlainMessage(true, "ID 无效或者是过期 ，请使用新的ID或者再次尝试")
+					return
+				}
+				FormatUserIDDatabase(getID, strconv.FormatInt(userID, 10)).BindUserIDDataBase()
+			case getSplitStringList[1] == "unlock":
+				getID, _ := toolchain.GetChatUserInfoID(ctx)
+				getMaiID := GetUserIDFromDatabase(getID)
+				if getMaiID.Userid == "" {
+					ctx.SendPlainMessage(true, "没有绑定~ 绑定方式: /mai userbind <maiTempID>")
+					return
+				}
+				getCode := FastUnlockerMai15mins(getMaiID.Userid)
+				if getCode == 200 {
+					ctx.SendPlainMessage(true, "发信成功，如果未生效请重新尝试")
+				} else {
+					ctx.SendPlainMessage(true, "发信失败，如果未生效请重新尝试")
+				}
 			case getSplitStringList[1] == "plate":
 				if getSplitLength < 3 {
 					ctx.SendPlainMessage(true, "参数提供不足")
