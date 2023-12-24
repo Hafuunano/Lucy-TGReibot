@@ -44,6 +44,7 @@ func init() {
 					ctx.SendPlainMessage(true, "ID 无效或者是过期 ，请使用新的ID或者再次尝试")
 					return
 				}
+				ctx.SendPlainMessage(true, "绑定成功~")
 				FormatUserIDDatabase(getID, strconv.FormatInt(userID, 10)).BindUserIDDataBase()
 			case getSplitStringList[1] == "unlock":
 				getID, _ := toolchain.GetChatUserInfoID(ctx)
