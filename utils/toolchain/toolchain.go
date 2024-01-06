@@ -175,7 +175,7 @@ func FastSendRandMuiltPic(ctx *rei.Ctx, raw ...string) error {
 	return err
 }
 
-// StringInArray 检查列表是否有关键词 https://github.com/Kyomotoi/go-ATRI
+// StringInArray 检查列表是否有关键词
 func StringInArray(aim string, list []string) bool {
 	for _, i := range list {
 		if i == aim {

@@ -149,8 +149,10 @@ func RenderPhi(ctx *rei.Ctx) {
 	getMainBgRender.DrawStringAnchored(getLink, 2021, 430, 0.4, 0.4)
 	// avatar
 	AvatarWaiter.Wait()
-	getMainBgRender.DrawImage(getAvatarFormat.Image(), 2321, 230)
-	getMainBgRender.Fill()
+	if getAvatarFormat != nil {
+		getMainBgRender.DrawImage(getAvatarFormat.Image(), 2321, 230)
+		getMainBgRender.Fill()
+	}
 	// render
 	CardRender(getMainBgRender, phidata)
 	// draw bottom
