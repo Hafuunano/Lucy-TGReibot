@@ -25,7 +25,7 @@ var (
 		Help:              "phigros - | generate phigros b19 | roll ",
 		PrivateDataFolder: "phigros",
 	})
-	router = "https://phi-backend.lemonkoi.one"
+	router = "http://221.131.165.69:51602/"
 )
 
 func init() {

@@ -15,6 +15,16 @@ type DataHostSQL struct {
 	Background string `db:"bg"`         // bg
 }
 
+type UserSwitcherService struct {
+	TGId   int64 `db:"tgid"`
+	IsUsed bool  `db:"isused"` // true == lxns service \ false == Diving Fish.
+}
+
+type UserIDToMaimaiFriendCode struct {
+	TelegramId int64 `db:"telegramid"`
+	MaimaiID   int64 `db:"friendid"`
+}
+
 // UserIDToQQ TIPS: Onebot path, actually it refers to Telegram Userid.
 
 type UserIDToQQ struct {
@@ -44,12 +54,49 @@ func FormatUserIDDatabase(qq int64, userid string) *UserIDToQQ {
 	return &UserIDToQQ{QQ: qq, Userid: userid}
 }
 
+func FormatUserSwitcher(tgid int64, isSwitcher bool) *UserSwitcherService {
+	return &UserSwitcherService{TGId: tgid, IsUsed: isSwitcher}
+}
+
+func FormatMaimaiFriendCode(friendCode int64, tgid int64) *UserIDToMaimaiFriendCode {
+	return &UserIDToMaimaiFriendCode{TelegramId: tgid, MaimaiID: friendCode}
+}
+
 func InitDataBase() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
 	maiDatabase.Create("userinfo", &DataHostSQL{})
 	maiDatabase.Create("useridinfo", &UserIDToQQ{})
+	maiDatabase.Create("userswitchinfo", &UserSwitcherService{})
+	maiDatabase.Create("usermaifriendinfo", &UserIDToMaimaiFriendCode{})
 	return nil
+}
+
+func GetUserMaiFriendID(userid int64) UserIDToMaimaiFriendCode {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	var infosql UserIDToMaimaiFriendCode
+	userIDStr := strconv.FormatInt(userid, 10)
+	_ = maiDatabase.Find("usermaifriendinfo", &infosql, "where telegramid is "+userIDStr)
+	return infosql
+}
+
+func GetUserSwitcherInfoFromDatabase(userid int64) bool {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	var info UserSwitcherService
+	userIDStr := strconv.FormatInt(userid, 10)
+	err := maiDatabase.Find("userswitchinfo", &info, "where tgid is "+userIDStr)
+	if err != nil {
+		return false
+	}
+	return info.IsUsed
+}
+
+func (info *UserSwitcherService) ChangeUserSwitchInfoFromDataBase() error {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	return maiDatabase.Insert("userswitchinfo", info)
 }
 
 // GetUserIDFromDatabase Params: user qq id ==> user maimai id.
@@ -66,6 +113,12 @@ func (info *UserIDToQQ) BindUserIDDataBase() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
 	return maiDatabase.Insert("useridinfo", info)
+}
+
+func (info *UserIDToMaimaiFriendCode) BindUserFriendCode() error {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	return maiDatabase.Insert("usermaifriendinfo", info)
 }
 
 // maimai origin render base.

@@ -33,6 +33,17 @@ func init() {
 					return
 				}
 				BindUserToMaimai(ctx, getSplitStringList[2])
+			case getSplitStringList[1] == "lxbind":
+				if getSplitLength < 3 {
+					ctx.SendPlainMessage(true, "参数提供不足")
+					return
+				}
+				Toint64, err := strconv.ParseInt(getSplitStringList[2], 10, 64)
+				if err != nil {
+					ctx.SendPlainMessage(true, "参数的FriendCode为非法")
+					return
+				}
+				BindFriendCode(ctx, Toint64)
 			case getSplitStringList[1] == "userbind":
 				if getSplitLength < 3 {
 					ctx.SendPlainMessage(true, "参数提供不足, /mai userbind <maiTempID> ")
@@ -60,8 +71,8 @@ func init() {
 					ctx.SendPlainMessage(true, "发信失败，如果未生效请重新尝试")
 				}
 			case getSplitStringList[1] == "plate":
-				if getSplitLength < 3 {
-					ctx.SendPlainMessage(true, "参数提供不足")
+				if getSplitLength == 2 {
+					SetUserPlateToLocal(ctx, "")
 					return
 				}
 				SetUserPlateToLocal(ctx, getSplitStringList[2])
@@ -80,6 +91,8 @@ func init() {
 					return
 				}
 				SetUserDefaultPlateToDatabase(ctx, getSplitStringList[2])
+			case getSplitStringList[1] == "switch":
+				MaimaiSwitcherService(ctx)
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
 				break
@@ -88,6 +101,13 @@ func init() {
 			MaimaiRenderBase(ctx)
 		}
 	})
+}
+
+// BindFriendCode Bind FriendCode To Users
+func BindFriendCode(ctx *rei.Ctx, bindCode int64) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	FormatMaimaiFriendCode(bindCode, getUserID).BindUserFriendCode()
+	ctx.SendPlainMessage(true, "绑定成功~！")
 }
 
 // BindUserToMaimai Bind UserMaiMaiID
@@ -158,6 +178,11 @@ func RemoveUserLocalCustomImage(ctx *rei.Ctx) {
 // SetUserDefaultPlateToDatabase Set Default plateID To Database.
 func SetUserDefaultPlateToDatabase(ctx *rei.Ctx, plateName string) {
 	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	if plateName == "" {
+		FormatUserDataBase(getUserID, GetUserPlateInfoFromDatabase(getUserID), "", GetUserInfoNameFromDatabase(getUserID)).BindUserDataBase()
+		ctx.SendPlainMessage(true, "已经删除了预设~")
+		return
+	}
 	getDefaultInfo := plateName
 	_, err := GetDefaultPlate(getDefaultInfo)
 	if err != nil {
@@ -170,21 +195,63 @@ func SetUserDefaultPlateToDatabase(ctx *rei.Ctx, plateName string) {
 
 // MaimaiRenderBase Render Base Maimai B50.
 func MaimaiRenderBase(ctx *rei.Ctx) {
+	// check the user using.
 	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-	getUsername := GetUserInfoNameFromDatabase(getUserID)
-	if getUsername == "" {
-		ctx.SendPlainMessage(true, "你还没有绑定呢！")
-		return
+	if GetUserSwitcherInfoFromDatabase(getUserID) == true {
+		// use lxns checker service.
+		// check bind first, get user friend id.
+		getFriendID := GetUserMaiFriendID(getUserID)
+		if getFriendID.MaimaiID == 0 {
+			ctx.SendPlainMessage(true, "你还没有绑定呢！使用/mai lxbind <friendcode> 以绑定")
+			return
+		}
+		getUserData := RequestBasicDataFromLxns(getFriendID.MaimaiID)
+		if getUserData.Code != 200 {
+			ctx.SendPlainMessage(true, "aw 出现了一点小错误~：\n - 请检查你是否有上传过数据\n - 请检查你的设置是否允许了第三方查看")
+			return
+		}
+		getGameUserData := RequestB50DataByFriendCode(getUserData.Data.FriendCode)
+		if getGameUserData.Code != 200 {
+			ctx.SendPlainMessage(true, "aw 出现了一点小错误~：\n - 请检查你是否有上传过数据\n - 请检查你的设置是否允许了第三方查看")
+			return
+		}
+		getImager, _ := ReFullPageRender(getGameUserData, getUserData, ctx)
+		_ = gg.NewContextForImage(getImager).SavePNG(engine.DataFolder() + "save/" + "LXNS_" + strconv.Itoa(int(getUserID)) + ".png")
+		ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+"LXNS_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+	} else {
+		// diving fish checker:
+		getUsername := GetUserInfoNameFromDatabase(getUserID)
+		if getUsername == "" {
+			ctx.SendPlainMessage(true, "你还没有绑定呢！使用/mai bind <UserName> 以绑定")
+			return
+		}
+		getUserData, err := QueryMaiBotDataFromUserName(getUsername)
+		if err != nil {
+			ctx.SendPlainMessage(true, err)
+			return
+		}
+		var data player
+		_ = json.Unmarshal(getUserData, &data)
+		renderImg := FullPageRender(data, ctx)
+		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")
+		ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
 	}
-	getUserData, err := QueryMaiBotDataFromUserName(getUsername)
-	if err != nil {
-		ctx.SendPlainMessage(true, err)
-		return
-	}
-	var data player
-	_ = json.Unmarshal(getUserData, &data)
-	renderImg := FullPageRender(data, ctx)
-	_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")
-	ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
+}
 
+// MaimaiSwitcherService True == Lxns Service || False == Diving Fish Service.
+func MaimaiSwitcherService(ctx *rei.Ctx) {
+	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
+	getBool := GetUserSwitcherInfoFromDatabase(getUserID)
+	err := FormatUserSwitcher(getUserID, !getBool).ChangeUserSwitchInfoFromDataBase()
+	if err != nil {
+		panic(err)
+	}
+	var getEventText string
+	// due to it changed, so reverse.
+	if getBool == false {
+		getEventText = "Lxns查分"
+	} else {
+		getEventText = "Diving Fish查分"
+	}
+	ctx.SendPlainMessage(true, "已经修改为"+getEventText)
 }
