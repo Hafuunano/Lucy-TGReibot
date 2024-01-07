@@ -48,7 +48,6 @@ func init() {
 				RollToRenderPhigros(ctx, getSplitStringList[2])
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
-				break
 			}
 		} else {
 			RenderPhi(ctx)

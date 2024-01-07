@@ -95,7 +95,6 @@ func init() {
 				MaimaiSwitcherService(ctx)
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
-				break
 			}
 		} else {
 			MaimaiRenderBase(ctx)
