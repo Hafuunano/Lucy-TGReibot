@@ -351,8 +351,10 @@ func ReFullPageRender(data LxnsMaimaiRequestB50, userData LxnsMaimaiRequestFromF
 	b50Render.Fill()
 	// render user info
 	avatarHandler.Wait()
-	b50Render.DrawImage(getAvatarFormat.Image(), 610, 50)
-	b50Render.Fill()
+	if getAvatarFormat != nil {
+		b50Render.DrawImage(getAvatarFormat.Image(), 610, 50)
+		b50Render.Fill()
+	}
 	// render Userinfo
 	b50Render.SetFontFace(nameTypeFont)
 	b50Render.SetColor(color.Black)

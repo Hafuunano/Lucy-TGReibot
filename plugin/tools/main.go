@@ -65,6 +65,10 @@ func init() {
 	engine.OnMessage().SetBlock(false).Handle(func(ctx *rei.Ctx) {
 		toolchain.FastSaveUserGroupList(ctx) // error
 	})
+	engine.OnMessageCommand("runpanic", rei.SuperUserPermission).Handle(func(ctx *rei.Ctx) {
+		ctx.SendPlainMessage(true, "run panic , check debug.")
+		panic("Test Value ERR")
+	})
 }
 
 func cpuPercent() float64 {
