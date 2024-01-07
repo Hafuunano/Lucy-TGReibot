@@ -274,23 +274,21 @@ func DataPiecesRepacked(data LxnsMaimaiRequestB50, returnTypeIsSD bool, getShoul
 			Type:         data.Data.Standard[getShouldNum].Type,
 			UploadTime:   data.Data.Standard[getShouldNum].UploadTime,
 		}
-	} else {
-		return LxnsMaimaiRequestDataPiece{
-			Id:           data.Data.Dx[getShouldNum].Id,
-			SongName:     data.Data.Dx[getShouldNum].SongName,
-			Level:        data.Data.Dx[getShouldNum].Level,
-			LevelIndex:   data.Data.Dx[getShouldNum].LevelIndex,
-			Achievements: data.Data.Dx[getShouldNum].Achievements,
-			Fc:           data.Data.Dx[getShouldNum].Fc,
-			Fs:           data.Data.Dx[getShouldNum].Fs,
-			DxScore:      data.Data.Dx[getShouldNum].DxScore,
-			DxRating:     data.Data.Dx[getShouldNum].DxRating,
-			Rate:         data.Data.Dx[getShouldNum].Rate,
-			Type:         data.Data.Dx[getShouldNum].Type,
-			UploadTime:   data.Data.Dx[getShouldNum].UploadTime,
-		}
 	}
-
+	return LxnsMaimaiRequestDataPiece{
+		Id:           data.Data.Dx[getShouldNum].Id,
+		SongName:     data.Data.Dx[getShouldNum].SongName,
+		Level:        data.Data.Dx[getShouldNum].Level,
+		LevelIndex:   data.Data.Dx[getShouldNum].LevelIndex,
+		Achievements: data.Data.Dx[getShouldNum].Achievements,
+		Fc:           data.Data.Dx[getShouldNum].Fc,
+		Fs:           data.Data.Dx[getShouldNum].Fs,
+		DxScore:      data.Data.Dx[getShouldNum].DxScore,
+		DxRating:     data.Data.Dx[getShouldNum].DxRating,
+		Rate:         data.Data.Dx[getShouldNum].Rate,
+		Type:         data.Data.Dx[getShouldNum].Type,
+		UploadTime:   data.Data.Dx[getShouldNum].UploadTime,
+	}
 }
 
 func ReFullPageRender(data LxnsMaimaiRequestB50, userData LxnsMaimaiRequestFromFriendCode, ctx *rei.Ctx) (image.Image, bool) {
