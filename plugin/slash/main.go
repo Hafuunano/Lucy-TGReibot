@@ -81,9 +81,9 @@ func QuoteReply(message *rei.Ctx) (replyMsg string) {
 	least := tgba.EscapeText(tgba.ModeMarkdownV2, "~")
 	if len(keywords) < 2 {
 		return fmt.Sprintf("[%s](%s) %s了 [%s](%s) %s ", senderName, senderURI, keywords[0], replyToName, replyToURI, least)
-	} else {
-		return fmt.Sprintf("[%s](%s) %s [%s](%s) %s %s", senderName, senderURI, keywords[0], replyToName, replyToURI, keywords[1], least)
 	}
+	return fmt.Sprintf("[%s](%s) %s [%s](%s) %s %s", senderName, senderURI, keywords[0], replyToName, replyToURI, keywords[1], least)
+
 }
 
 func isASCII(s string) bool {
