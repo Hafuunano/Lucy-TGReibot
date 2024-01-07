@@ -128,16 +128,16 @@ func init() {
 				ctx.SendPlainMessage(true, "笨蛋！不准娶~ ama")
 				GlobalCDModelCost(ctx)
 				return
-			} else {
-				// do it.
-				GlobalCDModelCost(ctx)
-				getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
-				// normal mode. nothing happened.
-				ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx)
-				generatePairKey := GenerateMD5(uid, fiancee, ctx.Message.Chat.ID)
-				_ = InsertUserGlobalMarryList(marryList, ctx.Message.Chat.ID, uid, fiancee, 1, generatePairKey)
-				return
 			}
+			// do it.
+			GlobalCDModelCost(ctx)
+			getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
+			// normal mode. nothing happened.
+			ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx)
+			generatePairKey := GenerateMD5(uid, fiancee, ctx.Message.Chat.ID)
+			_ = InsertUserGlobalMarryList(marryList, ctx.Message.Chat.ID, uid, fiancee, 1, generatePairKey)
+			return
+			
 		}
 		ResuitTheReferUserAndMakeIt(ctx, dict, uid, fiancee)
 	})
@@ -209,15 +209,15 @@ func init() {
 				_ = InsertUserGlobalMarryList(marryList, gid, uid, getLuckyPeople, 1, generatePairKey)
 				_ = RemoveOrderToList(marryList, uid, gid)
 				return
-			} else {
-				// target not -1 (has others.)
-				// didn't do it.
-				GlobalCDModelCost(ctx)
-				_ = RemoveOrderToList(marryList, uid, gid)
-				ctx.SendPlainMessage(true, "抱歉哦～虽然已经使用了愿望池，不过仍然没有成功呢awa～")
-				// handle this chance but no cares
-				return
 			}
+			// target not -1 (has others.)
+			// didn't do it.
+			GlobalCDModelCost(ctx)
+			_ = RemoveOrderToList(marryList, uid, gid)
+			ctx.SendPlainMessage(true, "抱歉哦～虽然已经使用了愿望池，不过仍然没有成功呢awa～")
+			// handle this chance but no cares
+			return
+
 		}
 
 		// Luck Path end.

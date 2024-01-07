@@ -65,9 +65,9 @@ func init() {
 		if GetTiredToken(ctx) < 4 {
 			ctx.SendPlainMessage(true, "咱不想说话 好累awww")
 			return
-		} else {
-			GetCostTiredToken(ctx)
 		}
+		GetCostTiredToken(ctx)
+
 		getReply := getChartReply[rand.Intn(len(getChartReply))]
 		getLucyName := []string{"Lucy", "Lucy酱"}[rand.Intn(2)]
 		getReply = strings.ReplaceAll(getReply, "{segment}", " ")

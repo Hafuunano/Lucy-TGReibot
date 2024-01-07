@@ -189,15 +189,15 @@ func init() {
 			wagerData["data"] = int(math.Round(float64(modifyCoins+getWager.Wagercount)*0.1)) - 200
 			ctx.SendPlainMessage(true, "w！恭喜哦，奖池中奖了ww，一共获得 ", willRunCoins, " 个柠檬片，当前有 ", handleUser.Coins+int(willRunCoins)-modifyCoins, " 个柠檬片 (获胜者得到奖池 x0.9的柠檬片总数)")
 			return
-		} else {
-			_ = coins.WagerCoinsInsert(sdb, getWager.Wagercount+modifyCoins, 0, getExpected)
-			_ = coins.InsertUserCoins(sdb, userid, handleUser.Coins-modifyCoins)
-			if rand.Intn(10) == 8 {
-				ctx.SendPlainMessage(true, "呐～，不会还有大哥哥到现在 "+strconv.Itoa(getWager.Wagercount+modifyCoins)+" 个柠檬片了都没中奖吧？杂鱼～❤，杂鱼～❤")
-			} else {
-				ctx.SendPlainMessage(true, "没有中奖哦~，当前奖池为: ", getWager.Wagercount+modifyCoins)
-			}
 		}
+		_ = coins.WagerCoinsInsert(sdb, getWager.Wagercount+modifyCoins, 0, getExpected)
+		_ = coins.InsertUserCoins(sdb, userid, handleUser.Coins-modifyCoins)
+		if rand.Intn(10) == 8 {
+			ctx.SendPlainMessage(true, "呐～，不会还有大哥哥到现在 "+strconv.Itoa(getWager.Wagercount+modifyCoins)+" 个柠檬片了都没中奖吧？杂鱼～❤，杂鱼～❤")
+		} else {
+			ctx.SendPlainMessage(true, "没有中奖哦~，当前奖池为: ", getWager.Wagercount+modifyCoins)
+		}
+		
 	})
 	engine.OnMessageCommand("coinfull").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		getList := toolchain.ListEntitiesMention(ctx)
@@ -534,7 +534,7 @@ func CheckUserIsEnabledProtectMode(uid int64, sdb *coins.Scoredb) bool {
 	getCode := s.Status
 	if getCode == 0 {
 		return false
-	} else {
-		return true
 	}
+	return true
+
 }

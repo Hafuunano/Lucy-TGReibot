@@ -157,10 +157,10 @@ func RequestImageTo(ctx *rei.Ctx, footpoint string) []tgba.PhotoSize {
 	if ok && len(msg.Photo) > 0 {
 		ctx.State["photos"] = msg.Photo
 		return ctx.State["photos"].([]tgba.PhotoSize)
-	} else {
-		ctx.SendPlainMessage(true, footpoint)
-		return nil
 	}
+	ctx.SendPlainMessage(true, footpoint)
+	return nil
+
 }
 
 // FastSendRandMuiltText Send Muilt Text to help/
