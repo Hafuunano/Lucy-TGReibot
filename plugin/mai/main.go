@@ -93,6 +93,24 @@ func init() {
 				SetUserDefaultPlateToDatabase(ctx, getSplitStringList[2])
 			case getSplitStringList[1] == "switch":
 				MaimaiSwitcherService(ctx)
+			case getSplitStringList[1] == "ticket":
+				if getSplitLength == 2 {
+					ctx.SendPlainMessage(true, "缺少参数哦~ qwq")
+					return
+				}
+				getID, _ := toolchain.GetChatUserInfoID(ctx)
+				getMaiID := GetUserIDFromDatabase(getID)
+				if getMaiID.Userid == "" {
+					ctx.SendPlainMessage(true, "没有绑定~ 绑定方式: /mai userbind <maiTempID>")
+					return
+				}
+				ticketToFormatNum, err := strconv.ParseInt(getSplitStringList[2], 10, 64)
+				if err != nil {
+					ctx.SendPlainMessage(true, "传输的数据不合法~")
+					return
+				}
+				TicketTransformerPackage(getMaiID.Userid, ticketToFormatNum, ctx)
+
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
 			}
