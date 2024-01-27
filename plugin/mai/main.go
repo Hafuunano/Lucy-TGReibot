@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"image"
+	"math"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -13,6 +15,8 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/tidwall/gjson"
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
 var engine = rei.Register("mai", &ctrl.Options[*rei.Ctx]{
@@ -50,7 +54,7 @@ func init() {
 					return
 				}
 				getID, _ := toolchain.GetChatUserInfoID(ctx)
-				userID := GetUserMaiUserid(getSplitStringList[2])
+				userID := GetWahlapUserID(getSplitStringList[2])
 				if userID == -1 {
 					ctx.SendPlainMessage(true, "ID 无效或者是过期 ，请使用新的ID或者再次尝试")
 					return
@@ -64,9 +68,14 @@ func init() {
 					ctx.SendPlainMessage(true, "没有绑定~ 绑定方式: /mai userbind <maiTempID>")
 					return
 				}
-				getCode := FastUnlockerMai15mins(getMaiID.Userid)
-				if getCode == 200 {
-					ctx.SendPlainMessage(true, "发信成功，如果未生效请重新尝试")
+				getCodeRaw, err := strconv.ParseInt(getMaiID.Userid, 10, 64)
+				if err != nil {
+					panic(err)
+				}
+				getCodeStat := Logout(getCodeRaw)
+				getCode := gjson.Get(getCodeStat, "returnCode").Int()
+				if getCode == 1 {
+					ctx.SendPlainMessage(true, "发信成功，服务器返回正常 , 如果未生效请重新尝试")
 				} else {
 					ctx.SendPlainMessage(true, "发信失败，如果未生效请重新尝试")
 				}
@@ -93,6 +102,64 @@ func init() {
 				SetUserDefaultPlateToDatabase(ctx, getSplitStringList[2])
 			case getSplitStringList[1] == "switch":
 				MaimaiSwitcherService(ctx)
+			case getSplitStringList[1] == "update":
+				getID, _ := toolchain.GetChatUserInfoID(ctx)
+				getMaiID := GetUserIDFromDatabase(getID)
+				if getMaiID.Userid == "" {
+					ctx.SendPlainMessage(true, "没有绑定UserID~ 绑定方式: /mai userbind <maiTempID>")
+					return
+				}
+				getTokenId := GetUserToken(strconv.FormatInt(getID, 10))
+				if getTokenId == "" {
+					ctx.SendPlainMessage(true, "请先 /mai tokenbind <token> 绑定水鱼查分器哦")
+					return
+				}
+				if !CheckTheTicketIsValid(getTokenId) {
+					ctx.SendPlainMessage(true, "此 Token 不合法 ，请重新绑定")
+					return
+				}
+				// token is valid, get data.
+				getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
+				getFullData := GetMusicList(getIntID, 0, 300)
+				if gjson.Get(getFullData, "length").Int() > 300 {
+					getFullData = GetMusicList(getIntID, 0, gjson.Get(getFullData, "length").Int())
+				}
+				var unmashellData UserMusicListStruct
+				json.Unmarshal(helper.StringToBytes(getFullData), &unmashellData)
+				getFullDataStruct := convert(unmashellData)
+				jsonDumper := getFullDataStruct
+				jsonDumperFull, err := json.Marshal(jsonDumper)
+				os.WriteFile(engine.DataFolder()+"dump.json", jsonDumperFull, 0777)
+				if err != nil {
+					panic(err)
+				}
+				// upload to diving fish api
+				req, err := http.NewRequest("POST", "https://www.diving-fish.com/api/maimaidxprober/player/update_records", bytes.NewBuffer(jsonDumperFull))
+				if err != nil {
+					// Handle error
+					panic(err)
+				}
+				req.Header.Set("Import-Token", getTokenId)
+				req.Header.Set("Content-Type", "application/json")
+
+				client := &http.Client{}
+				resp, err := client.Do(req)
+				if err != nil {
+					panic(err)
+				}
+				//	NewReader, err := io.ReadAll(resp.Body)
+				if err != nil {
+					panic(err)
+				}
+				ctx.SendPlainMessage(true, "Update CODE:"+strconv.Itoa(resp.StatusCode))
+			case getSplitStringList[1] == "tokenbind":
+				if getSplitLength == 2 {
+					ctx.SendPlainMessage(true, "缺少参数哦~ qwq")
+					return
+				}
+				getID, _ := toolchain.GetChatUserInfoID(ctx)
+				FormatUserToken(strconv.FormatInt(getID, 10), getSplitStringList[2]).BindUserToken()
+				ctx.SendPlainMessage(true, "绑定成功~")
 			case getSplitStringList[1] == "ticket":
 				if getSplitLength == 2 {
 					ctx.SendPlainMessage(true, "缺少参数哦~ qwq")
@@ -109,8 +176,22 @@ func init() {
 					ctx.SendPlainMessage(true, "传输的数据不合法~")
 					return
 				}
-				TicketTransformerPackage(getMaiID.Userid, ticketToFormatNum, ctx)
-
+				getMaiIDInt64, err := strconv.ParseInt(getMaiID.Userid, 10, 64)
+				getCode := TicketGain(getMaiIDInt64, int(ticketToFormatNum))
+				switch {
+				case getCode == 500:
+					ctx.SendPlainMessage(true, "TicketID 为非限定内，可使用 2 | 3 | 5 | 20010 | 20020 ")
+					return
+				case getCode == 102:
+					ctx.SendPlainMessage(true, "请在 华立公众号 生成一次二维码 后使用")
+					return
+				case getCode == 105:
+					ctx.SendPlainMessage(true, "已经有了未使用的Ticket了x")
+					return
+				case getCode == 200:
+					ctx.SendPlainMessage(true, "使用成功~将在下一次游戏时自动使用")
+					return
+				}
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
 			}
@@ -271,4 +352,59 @@ func MaimaiSwitcherService(ctx *rei.Ctx) {
 		getEventText = "Diving Fish查分"
 	}
 	ctx.SendPlainMessage(true, "已经修改为"+getEventText)
+}
+
+func CheckTheTicketIsValid(ticket string) bool {
+	getData, err := web.GetData("https://www.diving-fish.com/api/maimaidxprober/token_available?token=" + ticket)
+	if err != nil {
+		panic(err)
+	}
+	result := gjson.Get(helper.BytesToString(getData), "message").String()
+	if result == "ok" {
+		return true
+	}
+	return false
+}
+
+func convert(listStruct UserMusicListStruct) []InnerStructChanger {
+	getRequest, err := os.ReadFile(engine.DataFolder() + "music_data")
+	if err != nil {
+		panic(err)
+	}
+	var divingfishMusicData []DivingFishMusicDataStruct
+	err = json.Unmarshal(getRequest, &divingfishMusicData)
+	if err != nil {
+		panic(err)
+	}
+	mdMap := make(map[string]DivingFishMusicDataStruct)
+	for _, m := range divingfishMusicData {
+		mdMap[m.Id] = m
+	}
+	var dest []InnerStructChanger
+	for _, musicList := range listStruct.UserMusicList {
+		for _, musicDetailedList := range musicList.UserMusicDetailList {
+			/*
+				for _, userMusicDetail := range musicList.UserMusicDetailList {
+					if _, exists := mdMap[strconv.Itoa(musicDetailedList.MusicId)]; !exists {
+						continue
+					}
+				}
+			*/
+			level := musicDetailedList.Level
+			achievement := math.Min(1010000, float64(musicDetailedList.Achievement))
+			fc := []string{"", "fc", "fcp", "ap", "app"}[musicDetailedList.ComboStatus]
+			fs := []string{"", "fs", "fsp", "fsd", "fsdp"}[musicDetailedList.SyncStatus]
+			dxScore := musicDetailedList.DeluxscoreMax
+			dest = append(dest, InnerStructChanger{
+				Title:        mdMap[strconv.Itoa(musicDetailedList.MusicId)].Title,
+				Type:         mdMap[strconv.Itoa(musicDetailedList.MusicId)].Type,
+				LevelIndex:   level,
+				Achievements: (achievement) / 10000,
+				Fc:           fc,
+				Fs:           fs,
+				DxScore:      dxScore,
+			})
+		}
+	}
+	return dest
 }

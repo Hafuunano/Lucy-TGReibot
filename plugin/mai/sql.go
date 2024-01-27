@@ -32,6 +32,11 @@ type UserIDToQQ struct {
 	Userid string `db:"user_id"` // user_id
 }
 
+type UserIDToToken struct {
+	UserID string `db:"user_id"`
+	Token  string `db:"user_token"`
+}
+
 var (
 	maiDatabase = &sql.Sqlite{}
 	maiLocker   = sync.Mutex{}
@@ -48,6 +53,10 @@ func init() {
 
 func FormatUserDataBase(tgid int64, plate string, bg string, username string) *DataHostSQL {
 	return &DataHostSQL{TelegramId: tgid, Plate: plate, Background: bg, Username: username}
+}
+
+func FormatUserToken(tgid string, token string) *UserIDToToken {
+	return &UserIDToToken{Token: token, UserID: tgid}
 }
 
 func FormatUserIDDatabase(qq int64, userid string) *UserIDToQQ {
@@ -69,6 +78,7 @@ func InitDataBase() error {
 	maiDatabase.Create("useridinfo", &UserIDToQQ{})
 	maiDatabase.Create("userswitchinfo", &UserSwitcherService{})
 	maiDatabase.Create("usermaifriendinfo", &UserIDToMaimaiFriendCode{})
+	maiDatabase.Create("usertokenid", &UserIDToToken{})
 	return nil
 }
 
@@ -119,6 +129,23 @@ func (info *UserIDToMaimaiFriendCode) BindUserFriendCode() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
 	return maiDatabase.Insert("usermaifriendinfo", info)
+}
+
+func GetUserToken(userid string) string {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	var infosql UserIDToToken
+	maiDatabase.Find("usertokenid", &infosql, "where user_id is "+userid)
+	if infosql.Token == "" {
+		return ""
+	}
+	return infosql.Token
+}
+
+func (info *UserIDToToken) BindUserToken() error {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	return maiDatabase.Insert("usertokenid", info)
 }
 
 // maimai origin render base.
