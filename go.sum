@@ -10,8 +10,8 @@ github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJG
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b/go.mod h1:fHZFWGquNXuHttu9dUYoKuNbm3dzLETnIOnm1muSfDs=
 github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52 h1:BrStRXeosWh8L0iA/EjPd8w6xNexDkqki39ITZko/9Q=
 github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52/go.mod h1:qqMLUwR7tKpqnAqsgI7aZbn0hbs2FEVF4ylMXqIpBdY=
-github.com/MoYoez/ReiBot v0.0.0-20231123124827-040a39af6eea h1:L/HRwoBYd5nSPOTOBiUqcQiJI0En1Q9AnFHrhNrEIo0=
-github.com/MoYoez/ReiBot v0.0.0-20231123124827-040a39af6eea/go.mod h1:+QH0VtJBX7SEHriFNmJldFJCcBqM51Abkt/PaMFw8FI=
+github.com/MoYoez/ReiBot v0.0.0-20240223162232-5c2ab46deccd h1:Od/aS1u2T17NFCoCveBFGCTbQEZTBqNV3omnTJF/0dY=
+github.com/MoYoez/ReiBot v0.0.0-20240223162232-5c2ab46deccd/go.mod h1:+QH0VtJBX7SEHriFNmJldFJCcBqM51Abkt/PaMFw8FI=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e h1:wR3MXQ3VbUlPKOOUwLOYgh/QaJThBTYtsl673O3lqSA=
 github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e/go.mod h1:vD7Ra3Q9onRtojoY5sMCLQ7JBgjUsrXDnDKyFxqpf9w=

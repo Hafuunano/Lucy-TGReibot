@@ -69,17 +69,15 @@ func init() {
 					ctx.SendPlainMessage(true, "没有绑定~ 绑定方式: /mai userbind <maiTempID>")
 					return
 				}
-				getCodeRaw, err := strconv.ParseInt(getMaiID.Userid, 10, 64)
+				//	getCodeRaw, err := strconv.ParseInt(getMaiID.Userid, 10, 64)
+				//	if err != nil {
+				//		panic(err)
+				//	}
+				getCodeStat, err := web.GetData("https://maihook.lemonkoi.one/api/idunlocker?userid=" + getMaiID.Userid)
 				if err != nil {
 					panic(err)
 				}
-				getCodeStat := Logout(getCodeRaw)
-				getCode := gjson.Get(getCodeStat, "returnCode").Int()
-				if getCode == 1 {
-					ctx.SendPlainMessage(true, "发信成功，服务器返回正常 , 如果未生效请重新尝试")
-				} else {
-					ctx.SendPlainMessage(true, "发信失败，如果未生效请重新尝试")
-				}
+				ctx.SendPlainMessage(true, string(getCodeStat))
 			case getSplitStringList[1] == "plate":
 				if getSplitLength == 2 {
 					SetUserPlateToLocal(ctx, "")
@@ -110,14 +108,14 @@ func init() {
 					ctx.SendPlainMessage(true, "没有绑定UserID~ 绑定方式: /mai userbind <maiTempID>")
 					return
 				}
-				getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
-				getReplyMsg := GetUserRegion(getIntID)
-				if strings.Contains(getReplyMsg, "{") == false {
-					ctx.SendPlainMessage(true, "返回了错误.png, ERROR:"+getReplyMsg)
+				//	getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
+				getReplyMsg, _ := web.GetData("https://maihook.lemonkoi.one/api/getRegion?userid=" + getMaiID.Userid)
+				if strings.Contains(string(getReplyMsg), "{") == false {
+					ctx.SendPlainMessage(true, "返回了错误.png, ERROR:"+string(getReplyMsg))
 					return
 				}
 				var MixedMagic GetUserRegionStruct
-				json.Unmarshal(helper.StringToBytes(getReplyMsg), &MixedMagic)
+				json.Unmarshal(getReplyMsg, &MixedMagic)
 				var returnText string
 				for _, onlistLoader := range MixedMagic.UserRegionList {
 					returnText = returnText + MixedRegionWriter(onlistLoader.RegionId-1, onlistLoader.PlayCount, onlistLoader.Created) + "\n\n"
@@ -133,14 +131,10 @@ func init() {
 				getZlibError := ReturnZlibError()
 				// 20s one request.
 				var getLucyRespHandler int
-				if getZlibError.Full.Field3 < 180 {
-					getLucyRespHandler = getZlibError.Full.Field3
-				} else {
-					getLucyRespHandler = getZlibError.Full.Field3 - 180
-				}
+				getLucyRespHandler = getZlibError.Full.Field3
 				getLucyRespHandlerStr := strconv.Itoa(getLucyRespHandler)
 				getZlibWord := "Zlib 压缩跳过率: \n" + "10mins (" + ConvertZlib(getZlibError.ZlibError.Field1, getZlibError.Full.Field1) + " Loss)\n" + "30mins (" + ConvertZlib(getZlibError.ZlibError.Field2, getZlibError.Full.Field2) + " Loss)\n" + "60mins (" + ConvertZlib(getZlibError.ZlibError.Field3, getZlibError.Full.Field3) + " Loss)\n"
-				getWebStatusCount := "Web Uptime Ping:\n * MaimaiDXCN: " + ConvertFloat(getWebStatus.Details.MaimaiDXCN.Uptime*100) + "%\n * MaimaiDXCN Main Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNMain.Uptime*100) + "%\n * MaimaiDXCN Title Server: " + ConvertFloat(float64(getWebStatus.Details.MaimaiDXCNTitle.Uptime*100)) + "%\n * MaimaiDXCN Update Server: " + ConvertFloat(float64(getWebStatus.Details.MaimaiDXCNUpdate.Uptime*100)) + "%\n * MaimaiDXCN NetLogin Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNNetLogin.Uptime*100) + "%\n * MaimaiDXCN Net Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNDXNet.Uptime*100) + "%\n"
+				getWebStatusCount := "Web Uptime Ping:\n * MaimaiDXCN: " + ConvertFloat(getWebStatus.Details.MaimaiDXCN.Uptime*100) + "%\n * MaimaiDXCN Main Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNMain.Uptime*100) + "%\n * MaimaiDXCN Title Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNTitle.Uptime*100) + "%\n * MaimaiDXCN Update Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNUpdate.Uptime*100) + "%\n * MaimaiDXCN NetLogin Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNNetLogin.Uptime*100) + "%\n * MaimaiDXCN Net Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNDXNet.Uptime*100) + "%\n"
 				ctx.SendPlainMessage(true, "* Zlib 压缩跳过率可以很好的反馈当前 MaiNet (Wahlap Service) 当前负载的情况\n* Web Uptime Ping 则可以反馈 MaiNet 在外部原因(DDOS) 下造成的负载详情 ( 100% 即代表服务器为稳定, uptime 越低则代表可用性越差 ) \n* 在 1小时 内，Lucy 共处理了 "+getLucyRespHandlerStr+"次 请求💫，其中详细数据如下:\n\n"+getZlibWord+getWebStatusCount+"\n* Title Server 爆炸 容易造成数据获取失败\n* Zlib 3% Loss 以下则 基本上可以正常游玩\n* 10% Loss 则会有明显断网现象(请准备小黑屋工具)\n* 30% Loss 则无法正常游玩(即使使用小黑屋工具) ")
 			case getSplitStringList[1] == "update":
 				getID, _ := toolchain.GetChatUserInfoID(ctx)
@@ -159,11 +153,11 @@ func init() {
 					return
 				}
 				// token is valid, get data.
-				getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
+				// getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
 				// getFullData := GetMusicList(getIntID, 0, 600)
-				getFullData := GetMusicList(getIntID, 0, 1000)
+				getFullData, err := web.GetData("https://maihook.lemonkoi.one/api/getMusicList?userid=" + getMaiID.Userid)
 				var unmashellData UserMusicListStruct
-				json.Unmarshal(helper.StringToBytes(getFullData), &unmashellData)
+				json.Unmarshal(getFullData, &unmashellData)
 				getFullDataStruct := convert(unmashellData)
 				jsonDumper := getFullDataStruct
 				jsonDumperFull, err := json.Marshal(jsonDumper)
@@ -208,32 +202,24 @@ func init() {
 					ctx.SendPlainMessage(true, "没有绑定~ 绑定方式: /mai userbind <maiTempID>")
 					return
 				}
-				ticketToFormatNum, err := strconv.ParseInt(getSplitStringList[2], 10, 64)
+				_, err := strconv.ParseInt(getSplitStringList[2], 10, 64)
 				if err != nil {
 					ctx.SendPlainMessage(true, "传输的数据不合法~")
 					return
 				}
-				getMaiIDInt64, err := strconv.ParseInt(getMaiID.Userid, 10, 64)
-				getCode := TicketGain(getMaiIDInt64, int(ticketToFormatNum))
-				switch {
-				case getCode == 500:
-					ctx.SendPlainMessage(true, "TicketID 为非限定内，可使用 2 | 3 | 5 | 20010 | 20020 ")
-					return
-				case getCode == 102:
-					ctx.SendPlainMessage(true, "请在 华立公众号 生成一次二维码 后使用")
-					return
-				case getCode == 105:
-					ctx.SendPlainMessage(true, "已经有了未使用的Ticket了x")
-					return
-				case getCode == 200:
-					ctx.SendPlainMessage(true, "使用成功~将在下一次游戏时自动使用")
-					return
+				getCodeRaw, err := web.GetData("https://maihook.lemonkoi.one/api/ticket?userid=" + getMaiID.Userid + "&ticket=" + getSplitStringList[2])
+				if err != nil {
+					panic(err)
 				}
+				getCode := string(getCodeRaw)
+				ctx.SendPlainMessage(true, getCode)
+			case getSplitStringList[1] == "raw" || getSplitStringList[1] == "file":
+				MaimaiRenderBase(ctx, true)
 			default:
 				ctx.SendPlainMessage(true, "未知的指令或者指令出现错误~")
 			}
 		} else {
-			MaimaiRenderBase(ctx)
+			MaimaiRenderBase(ctx, false)
 		}
 	})
 }
@@ -329,7 +315,7 @@ func SetUserDefaultPlateToDatabase(ctx *rei.Ctx, plateName string) {
 }
 
 // MaimaiRenderBase Render Base Maimai B50.
-func MaimaiRenderBase(ctx *rei.Ctx) {
+func MaimaiRenderBase(ctx *rei.Ctx, israw bool) {
 	// check the user using.
 	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
 	if GetUserSwitcherInfoFromDatabase(getUserID) == true {
@@ -369,7 +355,20 @@ func MaimaiRenderBase(ctx *rei.Ctx) {
 		_ = json.Unmarshal(getUserData, &data)
 		renderImg := FullPageRender(data, ctx)
 		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")
-		ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
+
+		if israw {
+			getDocumentType := &tgba.DocumentConfig{
+				BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{
+					ChatID: ctx.Message.Chat.ID,
+				},
+					File: tgba.FilePath(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")},
+				Caption:         "",
+				CaptionEntities: nil,
+			}
+			ctx.Send(true, getDocumentType)
+		} else {
+			ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(getUserID))+".png"), true, "")
+		}
 	}
 }
 
