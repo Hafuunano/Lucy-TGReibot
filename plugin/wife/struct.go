@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
-	"github.com/FloatTech/ReiBot-Plugin/utils/userlist"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/userlist"
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	sql "github.com/FloatTech/sqlite"
 	rei "github.com/fumiama/ReiBot"

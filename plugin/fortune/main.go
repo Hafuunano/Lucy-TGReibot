@@ -16,7 +16,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/imgfactory"
 	"github.com/fogleman/gg"
@@ -24,7 +24,7 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 )

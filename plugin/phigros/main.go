@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"

@@ -15,8 +15,8 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
 	rei "github.com/fumiama/ReiBot"

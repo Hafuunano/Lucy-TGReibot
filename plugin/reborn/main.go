@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	wr "github.com/mroth/weightedrand"

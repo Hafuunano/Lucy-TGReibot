@@ -14,7 +14,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"

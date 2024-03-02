@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	coins "github.com/FloatTech/ReiBot-Plugin/utils/coins"
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	coins "github.com/MoYoez/Lucy_reibot/utils/coins"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"

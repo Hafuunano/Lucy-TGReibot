@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"

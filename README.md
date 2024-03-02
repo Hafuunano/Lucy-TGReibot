@@ -2,7 +2,7 @@
 
 Lucy |  Ver.1.0 (Nightly)
 
-基于 [ReiBot-Plugin](https://github.com/FloatTech/reiBot-Plugin) **的 三方 Bot 计划 Lucy**
+基于 [ReiBot-Plugin](https://github.com/MoYoez/Lucy_reibot) **的 三方 Bot 计划 Lucy**
 
 > [Lucy's Doc.](https://side-lucy.lemonkoi.one)
 

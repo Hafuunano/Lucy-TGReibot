@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	coins "github.com/FloatTech/ReiBot-Plugin/utils/coins"
-	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	coins "github.com/MoYoez/Lucy_reibot/utils/coins"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	text "github.com/FloatTech/imgfactory"
 
 	ctrl "github.com/FloatTech/zbpctrl"

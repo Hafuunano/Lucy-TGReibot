@@ -7,7 +7,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/transform"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	"github.com/FloatTech/gg"
 )
 
