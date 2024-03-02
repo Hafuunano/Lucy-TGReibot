@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/CoreFactory"
 	coins "github.com/FloatTech/ReiBot-Plugin/utils/coins"
 	"github.com/FloatTech/ReiBot-Plugin/utils/ctxext"
 	"github.com/FloatTech/ReiBot-Plugin/utils/toolchain"
+	"github.com/FloatTech/ReiBot-Plugin/utils/userpackage"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -197,7 +197,7 @@ func init() {
 		} else {
 			ctx.SendPlainMessage(true, "没有中奖哦~，当前奖池为: ", getWager.Wagercount+modifyCoins)
 		}
-		
+
 	})
 	engine.OnMessageCommand("coinfull").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *rei.Ctx) {
 		getList := toolchain.ListEntitiesMention(ctx)

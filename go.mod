@@ -1,6 +1,6 @@
-module github.com/FloatTech/ReiBot-Plugin
+module github.com/MoYoez/Lucy_reibot
 
-go 1.20
+go 1.21
 
 require (
 	github.com/FloatTech/floatbox v0.0.0-20230207080446-026a2f086c74

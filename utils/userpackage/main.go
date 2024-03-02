@@ -1,4 +1,4 @@
-// Package CoreFactory add simple event listener to database, record user id and some other info to judge user is correct.
+// Package userpackage add simple event listener to database, record user id and some other info to judge user is correct.
 package CoreFactory
 
 import (

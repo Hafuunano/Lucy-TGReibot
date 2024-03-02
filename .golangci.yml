@@ -4,7 +4,7 @@ linters-settings:
     ignoretests: true
 
   goimports:
-    local-prefixes: github.com/FloatTech/ReiBot-Plugin
+    local-prefixes: github.com/MoYoez/lucy_reibot
 
   forbidigo:
     # Forbid the following identifiers

@@ -16,8 +16,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/FloatTech/ReiBot-Plugin/utils/CoreFactory"
 	"github.com/FloatTech/ReiBot-Plugin/utils/userlist"
+	"github.com/FloatTech/ReiBot-Plugin/utils/userpackage"
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/file"
 	rei "github.com/fumiama/ReiBot"
