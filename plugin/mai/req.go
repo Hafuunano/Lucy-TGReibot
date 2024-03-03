@@ -4,13 +4,38 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/FloatTech/floatbox/web"
 	"io"
 	"net/http"
+	"os"
 )
 
 type DivingFishB50UserName struct {
 	Username string `json:"username"`
 	B50      bool   `json:"b50"`
+}
+
+type DivingFishDevFullDataRecords struct {
+	AdditionalRating int    `json:"additional_rating"`
+	Nickname         string `json:"nickname"`
+	Plate            string `json:"plate"`
+	Rating           int    `json:"rating"`
+	Records          []struct {
+		Achievements float64 `json:"achievements"`
+		Ds           float64 `json:"ds"`
+		DxScore      int     `json:"dxScore"`
+		Fc           string  `json:"fc"`
+		Fs           string  `json:"fs"`
+		Level        string  `json:"level"`
+		LevelIndex   int     `json:"level_index"`
+		LevelLabel   string  `json:"level_label"`
+		Ra           int     `json:"ra"`
+		Rate         string  `json:"rate"`
+		SongId       int     `json:"song_id"`
+		Title        string  `json:"title"`
+		Type         string  `json:"type"`
+	} `json:"records"`
+	Username string `json:"username"`
 }
 
 func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error) {
@@ -39,4 +64,17 @@ func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error)
 	}
 	playerDataByte, err := io.ReadAll(resp.Body)
 	return playerDataByte, err
+}
+
+func QueryDevDataFromDivingFish(username string) DivingFishDevFullDataRecords {
+	getData, err := web.RequestDataWithHeaders(web.NewDefaultClient(), "https://www.diving-fish.com/api/maimaidxprober/dev/player/records?username="+username, "GET", func(request *http.Request) error {
+		request.Header.Add("Developer-Token", os.Getenv("dvkey"))
+		return nil
+	}, nil)
+	if err != nil {
+		return DivingFishDevFullDataRecords{}
+	}
+	var handlerData DivingFishDevFullDataRecords
+	json.Unmarshal(getData, &handlerData)
+	return handlerData
 }

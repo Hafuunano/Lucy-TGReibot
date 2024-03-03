@@ -15,10 +15,10 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
-	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	rei "github.com/fumiama/ReiBot"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -272,7 +272,7 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	getInitY := 285
 	var i int
 	for i = 0; i < getSDLength; i++ {
-		b50Render.DrawImage(RenderCard(data.Charts.Sd[i], i+1), getInitX, getInitY)
+		b50Render.DrawImage(RenderCard(data.Charts.Sd[i], i+1, false), getInitX, getInitY)
 		getInitX += 400
 		if getInitX == 2045 {
 			getInitX = 45
@@ -281,7 +281,7 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	}
 
 	for dx := 0; dx < getDXLength; dx++ {
-		b50Render.DrawImage(RenderCard(data.Charts.Dx[dx], dx+1), getDXinitX, getDXinitY)
+		b50Render.DrawImage(RenderCard(data.Charts.Dx[dx], dx+1, false), getDXinitX, getDXinitY)
 		getDXinitX += 400
 		if getDXinitX == 2045 {
 			getDXinitX = 45
@@ -291,8 +291,8 @@ func FullPageRender(data player, ctx *rei.Ctx) (raw image.Image) {
 	return b50Render.Image()
 }
 
-// RenderCard Main Lucy Render Page
-func RenderCard(data playerData, num int) image.Image {
+// RenderCard Main Lucy Render Page , if isSimpleRender == true, then render count will not show here.
+func RenderCard(data playerData, num int, isSimpleRender bool) image.Image {
 	getType := data.Type
 	var CardBackGround string
 	var multiTypeRender sync.WaitGroup
@@ -367,7 +367,9 @@ func RenderCard(data playerData, num int) image.Image {
 	drawBackGround.Fill()
 	drawBackGround.SetFontFace(rankFont)
 	drawBackGround.SetColor(diffColor[data.LevelIndex])
-	drawBackGround.DrawString("#"+strconv.Itoa(num), 130, 111)
+	if isSimpleRender {
+		drawBackGround.DrawString("#"+strconv.Itoa(num), 130, 111)
+	}
 	drawBackGround.FillPreserve()
 	// draw rest of card.
 	drawBackGround.SetFontFace(levelFont)
