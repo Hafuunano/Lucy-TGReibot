@@ -23,10 +23,11 @@ type Scoretable struct {
 
 // Signintable 签到结构体
 type Signintable struct {
-	UID       int64 `gorm:"column:uid;primary_key"`
-	Count     int   `gorm:"column:count;default:0"`
-	Coins     int   `gorm:"column:coins;default:0"`
-	UpdatedAt time.Time
+	UID         int64 `gorm:"column:uid;primary_key"`
+	Count       int   `gorm:"column:count;default:0"`
+	Coins       int   `gorm:"column:coins;default:0"`
+	SignUpdated int64 `gorm:"column:sign;default:0"` // fix : score shown error.
+	UpdatedAt   time.Time
 }
 
 // Globaltable 总体结构体
@@ -107,14 +108,6 @@ func Initialize(dbpath string) *Scoredb {
 	return (*Scoredb)(gdb)
 }
 
-/*
-// Close ...
-func Close(sdb *Scoredb) error {
-	db := (*gorm.DB)(sdb)
-	return db.Close()
-}
-*/
-
 // GetScoreByUID 取得分数
 func GetScoreByUID(sdb *Scoredb, uid int64) (s Scoretable) {
 	db := (*gorm.DB)(sdb)
@@ -190,6 +183,16 @@ func GetWagerStatus(sdb *Scoredb) (si WagerTable) {
 	return si
 }
 
+// GetUserIsSignInToday Check user is signin today.
+func GetUserIsSignInToday(sdb *Scoredb, uid int64) (getStat bool, si Signintable) {
+	db := (*gorm.DB)(sdb)
+	db.Debug().Model(&Signintable{}).FirstOrCreate(&si, "uid = ? ", uid)
+	getLocation, _ := time.LoadLocation("Asia/Shanghai")
+	getDatabaseTime := time.Unix(si.SignUpdated, 0).In(getLocation)
+	getNow := time.Unix(time.Now().Unix(), 0).In(getLocation).Add(time.Minute * 30)
+	return getDatabaseTime.Year() == getNow.Year() && getDatabaseTime.Month() == getNow.Month() && getDatabaseTime.Day() == getNow.Day(), si
+}
+
 // GetWagerUserStatus Get Status
 func GetWagerUserStatus(sdb *Scoredb, uid int64) (si WagerUserInputTable) {
 	db := (*gorm.DB)(sdb)
@@ -257,6 +260,26 @@ func InsertUserCoins(sdb *Scoredb, uid int64, coins int) (err error) { // 修改
 		err = db.Debug().Model(&Signintable{}).Where("uid = ? ", uid).Update(
 			map[string]interface{}{
 				"coins": coins,
+			}).Error
+	}
+	return
+}
+
+func UpdateUserSignInValue(sdb *Scoredb, uid int64) (err error) {
+	db := (*gorm.DB)(sdb)
+	si := Signintable{
+		UID:         uid,
+		SignUpdated: time.Now().Unix(),
+	}
+	if err = db.Debug().Model(&Signintable{}).First(&si, "uid = ? ", uid).Error; err != nil {
+		// error handling...
+		if gorm.IsRecordNotFoundError(err) {
+			db.Debug().Model(&Signintable{}).Create(&si) // newUser not user
+		}
+	} else {
+		err = db.Debug().Model(&Signintable{}).Where("uid = ? ", uid).Update(
+			map[string]interface{}{
+				"sign": time.Now().Unix(),
 			}).Error
 	}
 	return

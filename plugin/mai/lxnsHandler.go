@@ -323,7 +323,7 @@ func ReCardRenderBase(data LxnsMaimaiRequestDataPiece, getNum int, isSimpleRende
 	drawBackGround.DrawString("▶", 235, 111)
 	drawBackGround.FillPreserve()
 	drawBackGround.SetFontFace(ratingFont)
-	drawBackGround.DrawString(strconv.Itoa(data.DxScore), 250, 111)
+	drawBackGround.DrawString(strconv.Itoa(int(data.DxRating)), 250, 111)
 	drawBackGround.FillPreserve()
 	if data.Fc != nil {
 		FcPointer := *data.Fc

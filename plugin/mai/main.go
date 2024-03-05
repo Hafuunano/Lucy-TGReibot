@@ -403,12 +403,11 @@ func init() {
 									ReferSongTypeList = append(ReferSongTypeList, numPosition)
 								}
 							}
-
 							if len(ReferSongTypeList) == 0 {
-								for numPosition, index := range fullDevData.Records {
+								for numPositionOn, indexOn := range fullDevData.Records {
 									for _, songID := range songIDList {
-										if index.Type == "DX" && index.SongId == int(songID) {
-											ReferSongTypeList = append(ReferSongTypeList, numPosition)
+										if indexOn.Type == "DX" && indexOn.SongId == int(songID) {
+											ReferSongTypeList = append(ReferSongTypeList, numPositionOn)
 										}
 									}
 								}
@@ -420,12 +419,11 @@ func init() {
 						}
 
 						if !getReferIndexIsOn {
-							// index a map ==  level_index = "record_diff"
+							// index a map =>  level_index = "record_diff"
 							levelIndexMap := map[int]string{}
 							for _, dataPack := range ReferSongTypeList {
 								levelIndexMap[fullDevData.Records[dataPack].LevelIndex] = strconv.Itoa(dataPack)
 							}
-
 							var trulyReturnedData string
 							for i := 4; i >= 0; i-- {
 								if levelIndexMap[i] != "" {
@@ -433,7 +431,6 @@ func init() {
 									break
 								}
 							}
-
 							getNum, _ := strconv.Atoi(trulyReturnedData)
 							// getNum ==> 0
 							returnPackage := fullDevData.Records[getNum]

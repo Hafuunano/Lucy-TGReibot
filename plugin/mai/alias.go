@@ -201,7 +201,6 @@ func UpdateAliasPackage() {
 			}
 		}
 		// due to AkihaBot use two packed id, so make the id together.
-
 		referListData = append(referListData, listData[1:]...)
 		// add same alias to lxns
 		for _, lxnsAliasRefer := range lxnsAliasData.Aliases {

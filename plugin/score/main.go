@@ -1,19 +1,18 @@
 package score
 
 import (
-	"fmt"
+	"github.com/FloatTech/floatbox/math"
 	"math/rand"
 	"regexp"
 	"strconv"
-	"sync"
 	"time"
 
-	coins "github.com/MoYoez/Lucy_reibot/utils/coins"
-	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
-	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"
+	coins "github.com/MoYoez/Lucy_reibot/utils/coins"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/transform"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -30,7 +29,6 @@ func init() {
 	cachePath := engine.DataFolder() + "scorecache/"
 	sdb := coins.Initialize("./data/score/score.db")
 	engine.OnMessageCommand("sign").SetBlock(true).Handle(func(ctx *rei.Ctx) {
-		var mutex sync.Mutex // 添加读写锁以保证稳定性
 		uid, username := toolchain.GetChatUserInfoID(ctx)
 		// remove emoji.
 		emojiRegex := regexp.MustCompile(`[\x{1F600}-\x{1F64F}|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F700}-\x{1F77F}]|[\x{1F780}-\x{1F7FF}]|[\x{1F800}-\x{1F8FF}]|[\x{1F900}-\x{1F9FF}]|[\x{1FA00}-\x{1FA6F}]|[\x{1FA70}-\x{1FAFF}]|[\x{1FB00}-\x{1FBFF}]|[\x{1F170}-\x{1F251}]|[\x{1F300}-\x{1F5FF}]|[\x{1F600}-\x{1F64F}]|[\x{1FC00}-\x{1FCFF}]|[\x{1F004}-\x{1F0CF}]|[\x{1F170}-\x{1F251}]]+`)
@@ -40,32 +38,28 @@ func init() {
 
 		// not sure what happened
 		getNowUnixFormatElevenThirten := time.Now().Add(time.Minute * 30).Format("20060102")
-
-		mutex.Lock()
+		getStatus, _ := coins.GetUserIsSignInToday(sdb, uid)
 		si := coins.GetSignInByUID(sdb, uid)
-		mutex.Unlock()
-		// in case
 		drawedFile := cachePath + strconv.FormatInt(uid, 10) + getNowUnixFormatElevenThirten + "signin.png"
-		if si.UpdatedAt.Add(time.Minute*30).Format("20060102") == getNowUnixFormatElevenThirten && si.Count != 0 {
-			fmt.Print("DEBUGGER: " + si.UpdatedAt.Add(time.Minute*30).Format("20060102"))
+		if getStatus && si.Count != 0 { // test pattern
 			ctx.SendPlainMessage(true, "w~ 你今天已经签到过了哦w")
 			if file.IsExist(drawedFile) {
 				ctx.SendPhoto(tgba.FilePath(drawedFile), true, "~")
 			}
 			return
 		}
-		coinsGet := 300 + rand.Intn(200)
-		mutex.Lock()
 
-		_ = coins.InsertUserCoins(sdb, uid, si.Coins+coinsGet)
-		_ = coins.InsertOrUpdateSignInCountByUID(sdb, uid, si.Count+1) // 柠檬片获取
+		coinsGet := 300 + rand.Intn(200)
+		coins.UpdateUserSignInValue(sdb, uid)
+		coins.InsertUserCoins(sdb, uid, si.Coins+coinsGet)
+		coins.InsertOrUpdateSignInCountByUID(sdb, uid, si.Count+1) // 柠檬片获取
 		score := coins.GetScoreByUID(sdb, uid).Score
-		score++ //  每日+1
-		_ = coins.InsertOrUpdateScoreByUID(sdb, uid, score)
+		score++
+		coins.InsertOrUpdateScoreByUID(sdb, uid, score)
 		CurrentCountTable := coins.GetCurrentCount(sdb, getNowUnixFormatElevenThirten)
 		handledTodayNum := CurrentCountTable.Counttime + 1
-		_ = coins.UpdateUserTime(sdb, handledTodayNum, getNowUnixFormatElevenThirten)
-		mutex.Unlock()
+		coins.UpdateUserTime(sdb, handledTodayNum, getNowUnixFormatElevenThirten)
+
 		if time.Now().Hour() > 6 && time.Now().Hour() < 19 {
 			// package for test draw.
 			getTimeReplyMsg := coins.GetHourWord(time.Now()) // get time and msg
@@ -90,9 +84,9 @@ func init() {
 			RankGoal := rankNum + 1
 			achieveNextGoal := coins.LevelArray[RankGoal]
 			achievedGoal := coins.LevelArray[rankNum]
-			currentNextGoalMeasure := achieveNextGoal - score  // measure rest of the num. like 20 - currentLink(TestRank 15)
-			measureGoalsLens := achieveNextGoal - achievedGoal // like 20 - 10
-			currentResult := float64(currentNextGoalMeasure) / float64(measureGoalsLens)
+			currentNextGoalMeasure := achieveNextGoal - score            // measure rest of the num. like 20 - currentLink(TestRank 15)
+			measureGoalsLens := math.Abs(achievedGoal - achieveNextGoal) // like 20 - 10
+			currentResult := float64(measureGoalsLens-currentNextGoalMeasure) / float64(measureGoalsLens)
 			// draw this part
 			dayGround.SetRGB255(180, 255, 254)        // aqua color
 			dayGround.DrawRectangle(70, 570, 600, 50) // draw rectangle part1
@@ -103,7 +97,7 @@ func init() {
 			dayGround.SetRGB255(0, 0, 0)
 			dayGround.DrawString("Lv. "+strconv.Itoa(rankNum)+" 签到天数 + 1", 80, 490)
 			_ = dayGround.LoadFontFace(transform.ReturnLucyMainDataIndex("score")+"dyh.ttf", 40)
-			dayGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
+			dayGround.DrawString(strconv.Itoa(measureGoalsLens-currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 			_ = dayGround.SavePNG(drawedFile)
 			ctx.SendPhoto(tgba.FilePath(drawedFile), true, "[sign]签到完毕~")
 		} else {
@@ -125,16 +119,20 @@ func init() {
 			nightGround.DrawStringWrapped(strconv.Itoa(si.Count+1), 990, 275, 1, 1, 0, 1.3, gg.AlignCenter)        // draw second part
 			nightGround.DrawStringWrapped(strconv.Itoa(coinsGet), 225, 360, 1, 1, 0, 1.3, gg.AlignCenter)          // draw third part
 			nightGround.DrawStringWrapped(strconv.Itoa(si.Coins+coinsGet), 720, 360, 1, 1, 0, 1.3, gg.AlignCenter) // draw forth part
+
 			// level array with rectangle work.
 			rankNum := coins.GetLevel(score)
 			RankGoal := rankNum + 1
 			achieveNextGoal := coins.LevelArray[RankGoal]
+
 			achievedGoal := coins.LevelArray[rankNum]
-			currentNextGoalMeasure := achieveNextGoal - score  // measure rest of the num. like 20 - currentLink(TestRank 15)
-			measureGoalsLens := achieveNextGoal - achievedGoal // like 20 - 10
-			currentResult := float64(currentNextGoalMeasure) / float64(measureGoalsLens)
+
+			currentNextGoalMeasure := achieveNextGoal - score            // measure rest of the num. like 20 - currentLink(TestRank 15)
+			measureGoalsLens := math.Abs(achievedGoal - achieveNextGoal) // like 20 - 10
+
+			currentResult := float64(measureGoalsLens-currentNextGoalMeasure) / float64(measureGoalsLens)
 			// draw this part
-			nightGround.SetRGB255(49, 86, 157)          // aqua color
+			nightGround.SetRGB255(49, 86, 157)
 			nightGround.DrawRectangle(70, 570, 600, 50) // draw rectangle part1
 			nightGround.Fill()
 			nightGround.SetRGB255(255, 255, 255)
@@ -143,7 +141,7 @@ func init() {
 			nightGround.SetRGB255(255, 255, 255)
 			nightGround.DrawString("Lv. "+strconv.Itoa(rankNum)+" 签到天数 + 1", 80, 490)
 			_ = nightGround.LoadFontFace(transform.ReturnLucyMainDataIndex("score")+"dyh.ttf", 40)
-			nightGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
+			nightGround.DrawString(strconv.Itoa(measureGoalsLens-currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 			_ = nightGround.SavePNG(drawedFile)
 			ctx.SendPhoto(tgba.FilePath(drawedFile), true, "[sign]签到完成~")
 		}

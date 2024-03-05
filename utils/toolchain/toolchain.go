@@ -16,10 +16,10 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/MoYoez/Lucy_reibot/utils/userlist"
-	"github.com/MoYoez/Lucy_reibot/utils/userpackage"
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/file"
+	"github.com/MoYoez/Lucy_reibot/utils/userlist"
+	"github.com/MoYoez/Lucy_reibot/utils/userpackage"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -95,7 +95,7 @@ func GetThisGroupID(ctx *rei.Ctx) (id int64) {
 
 // GetNickNameFromUsername Use Sniper, not api.
 func GetNickNameFromUsername(username string) (name string) {
-	// https://github.com/XiaoMengXinX/Telegram_QuoteReply_Bot-Go/blob/master/api/bot.go
+	// Method: https://github.com/XiaoMengXinX/Telegram_QuoteReply_Bot-Go/blob/master/api/bot.go
 	if strings.HasPrefix(username, "@") {
 		username = strings.Replace(username, "@", "", 1)
 	}
@@ -107,7 +107,6 @@ func GetNickNameFromUsername(username string) (name string) {
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
-
 	reName := regexp.MustCompile(`<meta property="og:title" content="([^"]*)"`)
 	match := reName.FindStringSubmatch(string(body))
 	if len(match) > 1 {
