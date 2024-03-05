@@ -10,6 +10,7 @@ import (
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/tidwall/gjson"
+
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"image"
 	"math"
@@ -373,11 +374,24 @@ func init() {
 					case getSongType == "standard":
 						for numPosition, index := range fullDevData.Records {
 							for _, songID := range songIDList {
-								if index.Type == "SD" && index.SongId == int(songID) {
-									ReferSongTypeList = append(ReferSongTypeList, numPosition)
+								if index.SongId == songID {
+									if index.Type == "SD" {
+										ReferSongTypeList = append(ReferSongTypeList, numPosition)
+									}
 								}
 							}
-
+						}
+						if len(ReferSongTypeList) == 0 { // try with added num
+							for numPosition, index := range fullDevData.Records {
+								for _, songID := range songIDList {
+									songID = simpleNumHandler(songID)
+									if index.SongId == songID {
+										if index.Type == "SD" {
+											ReferSongTypeList = append(ReferSongTypeList, numPosition)
+										}
+									}
+								}
+							}
 						}
 						if len(ReferSongTypeList) == 0 {
 							ctx.SendPlainMessage(true, "没有发现游玩过的 SD 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
@@ -392,10 +406,21 @@ func init() {
 							}
 						}
 						if len(ReferSongTypeList) == 0 {
+							for numPosition, index := range fullDevData.Records {
+								for _, songID := range songIDList {
+									songID = simpleNumHandler(songID)
+									if index.SongId == songID {
+										if index.Type == "DX" {
+											ReferSongTypeList = append(ReferSongTypeList, numPosition)
+										}
+									}
+								}
+							}
+						}
+						if len(ReferSongTypeList) == 0 {
 							ctx.SendPlainMessage(true, "没有发现游玩过的 DX 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
 							return
 						}
-
 					default: // no settings.
 						for numPosition, index := range fullDevData.Records {
 							for _, songID := range songIDList {
@@ -406,54 +431,76 @@ func init() {
 							if len(ReferSongTypeList) == 0 {
 								for numPositionOn, indexOn := range fullDevData.Records {
 									for _, songID := range songIDList {
-										if indexOn.Type == "DX" && indexOn.SongId == int(songID) {
+										if indexOn.Type == "DX" && indexOn.SongId == songID {
 											ReferSongTypeList = append(ReferSongTypeList, numPositionOn)
 										}
 									}
 								}
 							}
-							if len(ReferSongTypeList) == 0 {
-								ctx.SendPlainMessage(true, "貌似没有发现你玩过这首歌曲呢（")
-								return
+						}
+						if len(ReferSongTypeList) == 0 {
+							for numPosition, index := range fullDevData.Records {
+								for _, songID := range songIDList {
+									songID = simpleNumHandler(songID)
+									if index.Type == "SD" && index.SongId == songID {
+										ReferSongTypeList = append(ReferSongTypeList, numPosition)
+									}
+								}
+								if len(ReferSongTypeList) == 0 {
+									for numPositionOn, indexOn := range fullDevData.Records {
+										for _, songID := range songIDList {
+											songID = simpleNumHandler(songID)
+											if indexOn.Type == "DX" && indexOn.SongId == songID {
+												ReferSongTypeList = append(ReferSongTypeList, numPositionOn)
+											}
+										}
+									}
+								}
 							}
 						}
 
-						if !getReferIndexIsOn {
-							// index a map =>  level_index = "record_diff"
-							levelIndexMap := map[int]string{}
-							for _, dataPack := range ReferSongTypeList {
-								levelIndexMap[fullDevData.Records[dataPack].LevelIndex] = strconv.Itoa(dataPack)
+						if len(ReferSongTypeList) == 0 {
+							ctx.SendPlainMessage(true, "貌似没有发现你玩过这首歌曲呢（")
+							return
+						}
+					}
+
+					if !getReferIndexIsOn {
+						// index a map =>  level_index = "record_diff"
+						levelIndexMap := map[int]string{}
+						for _, dataPack := range ReferSongTypeList {
+							levelIndexMap[fullDevData.Records[dataPack].LevelIndex] = strconv.Itoa(dataPack)
+						}
+						var trulyReturnedData string
+						for i := 4; i >= 0; i-- {
+							if levelIndexMap[i] != "" {
+								trulyReturnedData = levelIndexMap[i]
+								break
 							}
-							var trulyReturnedData string
-							for i := 4; i >= 0; i-- {
-								if levelIndexMap[i] != "" {
-									trulyReturnedData = levelIndexMap[i]
-									break
-								}
-							}
-							getNum, _ := strconv.Atoi(trulyReturnedData)
-							// getNum ==> 0
+						}
+						getNum, _ := strconv.Atoi(trulyReturnedData)
+						// getNum ==> 0
+						returnPackage := fullDevData.Records[getNum]
+						_ = gg.NewContextForImage(RenderCard(returnPackage, 0, true)).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(songIDList[0]) + "_" + strconv.Itoa(int(getUserID)) + ".png")
+						ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(songIDList[0]))+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+					} else {
+						levelIndexMap := map[int]string{}
+						for _, dataPack := range ReferSongTypeList {
+							levelIndexMap[fullDevData.Records[dataPack].LevelIndex] = strconv.Itoa(dataPack)
+						}
+						getDiff, _ := strconv.Atoi(userSettingInterface["level_index"])
+
+						if levelIndexMap[getDiff] != "" {
+							getNum, _ := strconv.Atoi(levelIndexMap[getDiff])
 							returnPackage := fullDevData.Records[getNum]
 							_ = gg.NewContextForImage(RenderCard(returnPackage, 0, true)).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(songIDList[0]) + "_" + strconv.Itoa(int(getUserID)) + ".png")
-							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(songIDList[0]))+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
 						} else {
-							levelIndexMap := map[int]string{}
-							for _, dataPack := range ReferSongTypeList {
-								levelIndexMap[fullDevData.Records[dataPack].LevelIndex] = strconv.Itoa(dataPack)
-							}
-							getDiff, _ := strconv.Atoi(userSettingInterface["level_index"])
-
-							if levelIndexMap[getDiff] != "" {
-								getNum, _ := strconv.Atoi(levelIndexMap[getDiff])
-								returnPackage := fullDevData.Records[getNum]
-								_ = gg.NewContextForImage(RenderCard(returnPackage, 0, true)).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(songIDList[0]) + "_" + strconv.Itoa(int(getUserID)) + ".png")
-								ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
-							} else {
-								ctx.SendPlainMessage(true, "貌似你没有玩过这个难度的曲子哦～")
-							}
+							ctx.SendPlainMessage(true, "貌似你没有玩过这个难度的曲子哦～")
 						}
 					}
 				}
+
 			case getSplitStringList[1] == "aliasupdate":
 				if rei.SuperUserPermission(ctx) {
 					UpdateAliasPackage()

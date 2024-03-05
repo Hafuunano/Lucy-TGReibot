@@ -676,3 +676,15 @@ func ConvertZlib(value, total int) string {
 func ConvertFloat(data float64) string {
 	return strconv.FormatFloat(data, 'f', 3, 64)
 }
+
+func simpleNumHandler(num int) int {
+	if num < 1000 && num > 100 {
+		toint, _ := strconv.Atoi(fmt.Sprintf("10%d", num))
+		return toint
+	}
+	if num > 1000 && num < 10000 {
+		toint, _ := strconv.Atoi(fmt.Sprintf("1%d", num))
+		return toint
+	}
+	return num
+}

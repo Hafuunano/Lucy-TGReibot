@@ -212,6 +212,7 @@ func UpdateAliasPackage() {
 				}
 			}
 		}
+
 		tempList = append(tempList, &MappedListStruct{DingFishId: getInt, SongName: listData[0], Aliases: referListData, SongId: vartiesList})
 	}
 	GeneratedList := map[string]interface{}{
