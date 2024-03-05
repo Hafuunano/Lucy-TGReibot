@@ -367,7 +367,7 @@ func RenderCard(data playerData, num int, isSimpleRender bool) image.Image {
 	drawBackGround.Fill()
 	drawBackGround.SetFontFace(rankFont)
 	drawBackGround.SetColor(diffColor[data.LevelIndex])
-	if isSimpleRender {
+	if !isSimpleRender {
 		drawBackGround.DrawString("#"+strconv.Itoa(num), 130, 111)
 	}
 	drawBackGround.FillPreserve()
