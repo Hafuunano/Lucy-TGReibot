@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
+	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	"github.com/MoYoez/Lucy_reibot/utils/transform"
-	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	wr "github.com/mroth/weightedrand"
 	"github.com/sirupsen/logrus"

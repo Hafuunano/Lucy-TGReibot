@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	"github.com/MoYoez/Lucy_reibot/utils/transform"
-	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"gopkg.in/yaml.v3"

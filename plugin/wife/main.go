@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
+	text "github.com/FloatTech/imgfactory"
 	coins "github.com/MoYoez/Lucy_reibot/utils/coins"
 	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	"github.com/MoYoez/Lucy_reibot/utils/transform"
-	text "github.com/FloatTech/imgfactory"
 
 	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
@@ -137,7 +137,7 @@ func init() {
 			generatePairKey := GenerateMD5(uid, fiancee, ctx.Message.Chat.ID)
 			_ = InsertUserGlobalMarryList(marryList, ctx.Message.Chat.ID, uid, fiancee, 1, generatePairKey)
 			return
-			
+
 		}
 		ResuitTheReferUserAndMakeIt(ctx, dict, uid, fiancee)
 	})
