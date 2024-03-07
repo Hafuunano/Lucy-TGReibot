@@ -249,21 +249,64 @@ func init() {
 				getUserID, _ := toolchain.GetChatUserInfoID(ctx)
 				// check the user is Lxns Service | DivingFish Service.
 				getBool := GetUserSwitcherInfoFromDatabase(getUserID)
-				queryStatus, songIDList, accStat := QueryReferSong(settedSongAlias, getBool)
-				if queryStatus == false {
-					ctx.SendPlainMessage(true, "未找到对应歌曲，可能是数据库未收录（")
-					return
-				}
-				if accStat {
-					ctx.SendPlainMessage(true, "Lucy 似乎发现了多个结果w 尝试不要使用谐意呢（")
-					return
-				}
+				var isIDChecker bool
+				var songIDList []int
 				// first read the config.
 				getLevelIndex := userSettingInterface["level_index"]
 				getSongType := userSettingInterface["song_type"]
 				var getReferIndexIsOn bool
+				var accStat bool
 				if getLevelIndex != "" { // use custom diff
 					getReferIndexIsOn = true
+				}
+				switch {
+				case strings.HasPrefix(settedSongAlias, "id") == true:
+					// useID checker.
+					isIDChecker = true
+					getParse, err := strconv.ParseInt(strings.Replace(settedSongAlias, "id", "", 1), 10, 64)
+					if err != nil {
+						ctx.SendPlainMessage(true, "ID 查找参数非法")
+						return
+					}
+					songIDList = []int{int(getParse)}
+				default:
+					isIDChecker = false
+					queryStatus, songIDLists, accStats, returnListHere := QueryReferSong(settedSongAlias, getBool)
+					songIDList = songIDLists
+					accStat = accStats
+					if queryStatus == false {
+						ctx.SendPlainMessage(true, "未找到对应歌曲，可能是数据库未收录（")
+						return
+					}
+					if accStat {
+						// Handler Which Song user played.
+						var FullList []int
+						for _, list := range returnListHere {
+							for _, listInsider := range list {
+								FullList = append(FullList, listInsider)
+							}
+						}
+
+						FullList = removeIntDuplicates(FullList)
+						// make both song Handler, check this song is from sd | DX pattern.
+						var sampleListShown []int
+						// sometimes list maybe contain dx | SD, but they are same song.
+						if len(FullList) == 2 {
+							for _, listSample := range FullList {
+								sampleListShown = append(sampleListShown, simpleNumHandler(listSample, false)) //  convert to DX pattern.
+							}
+							sampleListShown = removeIntDuplicates(sampleListShown)
+						}
+
+						if len(sampleListShown) == 1 {
+							songIDList = []int{simpleNumHandler(songIDList[0], false)}
+						} else {
+							// varies handler machine,means it has songs.
+							// query them.
+							songIDList = FullList
+						}
+
+					}
 				}
 
 				if getBool { // lxns service.
@@ -272,31 +315,58 @@ func init() {
 						ctx.SendPlainMessage(true, "没有绑定哦～ 使用/mai lxbind <friendcode> 以绑定")
 						return
 					}
+					// to convert it, and it can be read by Lxns.
 					if !getReferIndexIsOn { // no refer then return the last one.
 						var getReport LxnsMaimaiRequestUserReferBestSong
 						switch {
 						case getSongType == "standard":
-							getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIDList[0]), true)
-							if getReport.Code == 404 {
+							for _, songIdInt := range songIDList {
+								getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIdInt), true)
+								if getReport.Code == 200 && len(getReport.Data) != 0 {
+									break
+								}
+							}
+							if len(getReport.Data) == 0 {
 								ctx.SendPlainMessage(true, "没有发现 SD 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
 								return
 							}
 						case getSongType == "dx":
-							getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIDList[0]), false)
-							if getReport.Code != 404 {
+							for _, songIdInt := range songIDList {
+								getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIdInt), false)
+								if getReport.Code == 200 && len(getReport.Data) != 0 {
+									break
+								}
+							}
+							if len(getReport.Data) == 0 {
 								ctx.SendPlainMessage(true, "没有发现 DX 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
 								return
 							}
 						default:
-							getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIDList[0]), false)
+							for _, songIdInt := range songIDList {
+								getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIdInt), false)
+								fmt.Print(getReport.Code)
+								if getReport.Code == 200 && len(getReport.Data) != 0 {
+									break
+								}
+
+							}
+
 							if getReport.Code != 200 {
-								getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIDList[0]), true)
+								for _, songIdInt := range songIDList {
+									getReport = RequestReferSong(getFriendID.MaimaiID, int64(songIdInt), true)
+									if getReport.Code == 200 && len(getReport.Data) != 0 {
+										break
+									}
+								}
 							}
 						}
-
 						getReturnTypeLength := len(getReport.Data)
 						if getReturnTypeLength == 0 {
-							ctx.SendPlainMessage(true, "Lucy 似乎没有查询到你的游玩数据呢（")
+							if !isIDChecker {
+								ctx.SendPlainMessage(true, "Lucy 似乎没有查询到你的游玩数据呢（")
+							} else {
+								ctx.SendPlainMessage(true, "Lucy 查找了对应ID 但是没有发现数据～")
+							}
 							return
 						}
 						// DataGet, convert To MaiPlayData Render.
@@ -316,32 +386,59 @@ func init() {
 						}
 						getFinalPic := ReCardRenderBase(maiRenderPieces, 0, true)
 						_ = gg.NewContextForImage(getFinalPic).SavePNG(engine.DataFolder() + "save/" + "LXNS_PIC_" + strconv.Itoa(songIDList[0]) + "_" + strconv.Itoa(int(getUserID)) + ".png")
-						ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+"LXNS_PIC_"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+						if accStat {
+							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+"LXNS_PIC_"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "Lucy 查询到多个别名，此处默认为您返回了 "+getReport.Data[0].SongName+"谱面")
+						} else {
+							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+"LXNS_PIC_"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+						}
 					} else {
 						var getReport LxnsMaimaiRequestUserReferBestSongIndex
 						getLevelIndexToint, _ := strconv.ParseInt(getLevelIndex, 10, 64)
 						switch {
 						case getSongType == "standard":
-							getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(songIDList[0]), getLevelIndexToint, true)
+							for _, p := range songIDList {
+								getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(p), getLevelIndexToint, true)
+								if getReport.Code == 200 && getReport.Data.SongName != "" {
+									break
+								}
+							}
 							if getReport.Code == 404 {
 								ctx.SendPlainMessage(true, "没有发现 SD 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
 								return
 							}
 						case getSongType == "dx":
-							getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(songIDList[0]), getLevelIndexToint, false)
-							if getReport.Code != 404 {
+							for _, p := range songIDList {
+								getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(p), getLevelIndexToint, false)
+								if getReport.Code == 200 && getReport.Data.SongName != "" {
+									break
+								}
+							}
+							if getReport.Code == 404 {
 								ctx.SendPlainMessage(true, "没有发现 DX 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
 								return
 							}
 						default:
-							getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(songIDList[0]), getLevelIndexToint, false)
+							for _, p := range songIDList {
+								getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(p), getLevelIndexToint, false)
+								if getReport.Code == 200 && getReport.Data.SongName != "" {
+									break
+								}
+							}
 							if getReport.Code != 200 {
-								getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(songIDList[0]), getLevelIndexToint, true)
+								for _, p := range songIDList {
+									getReport = RequestReferSongIndex(getFriendID.MaimaiID, int64(p), getLevelIndexToint, true)
+									if getReport.Code == 200 && getReport.Data.SongName != "" {
+										break
+									}
+								}
 							}
 						}
 						if getReport.Data.SongName == "" { // nil pointer.
-							ctx.SendPlainMessage(true, "Lucy 似乎没有查询到你指定难度的游玩数据呢（")
-							return
+							if !isIDChecker {
+								ctx.SendPlainMessage(true, "Lucy 似乎没有查询到你的游玩数据呢（")
+							} else {
+								ctx.SendPlainMessage(true, "Lucy 查找了对应ID 但是没有发现数据～")
+							}
 						}
 						maiRenderPieces := LxnsMaimaiRequestDataPiece{
 							Id:           getReport.Data.Id,
@@ -359,10 +456,15 @@ func init() {
 						}
 						getFinalPic := ReCardRenderBase(maiRenderPieces, 0, true)
 						_ = gg.NewContextForImage(getFinalPic).SavePNG(engine.DataFolder() + "save/" + "LXNS_PIC_" + strconv.Itoa(songIDList[0]) + "_" + strconv.Itoa(int(getUserID)) + ".png")
-						ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+"LXNS_PIC_"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+						if accStat {
+							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+"LXNS_PIC_"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "Lucy 查询到多个别名，此处默认为您返回了 "+getReport.Data.SongName+"谱面")
+						} else {
+							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+"LXNS_PIC_"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+						}
 					}
+
 				} else {
-					// diving fish checker:
+					// diving fish checker, data rewrite.
 					getUsername := GetUserInfoNameFromDatabase(getUserID)
 					if getUsername == "" {
 						ctx.SendPlainMessage(true, "你还没有绑定呢！使用/mai bind <UserName> 以绑定")
@@ -373,95 +475,80 @@ func init() {
 					var ReferSongTypeList []int
 					switch {
 					case getSongType == "standard":
-						for numPosition, index := range fullDevData.Records {
-							for _, songID := range songIDList {
-								if index.SongId == songID {
-									if index.Type == "SD" {
-										ReferSongTypeList = append(ReferSongTypeList, numPosition)
-									}
-								}
+						// roll songIDList first.
+						for _, songID := range songIDList {
+							if !isIDChecker {
+								songID = simpleNumHandler(songID, false)
 							}
-						}
-						if len(ReferSongTypeList) == 0 { // try with added num
 							for numPosition, index := range fullDevData.Records {
-								for _, songID := range songIDList {
-									songID = simpleNumHandler(songID)
-									if index.SongId == songID {
-										if index.Type == "SD" {
-											ReferSongTypeList = append(ReferSongTypeList, numPosition)
-										}
-									}
+								if index.SongId == songID && index.Type == "SD" {
+									ReferSongTypeList = append(ReferSongTypeList, numPosition)
 								}
 							}
+							if len(ReferSongTypeList) != 0 {
+								break
+							}
+
 						}
+
 						if len(ReferSongTypeList) == 0 {
 							ctx.SendPlainMessage(true, "没有发现游玩过的 SD 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
 							return
 						}
 					case getSongType == "dx":
-						for numPosition, index := range fullDevData.Records {
-							for _, songID := range songIDList {
-								if index.Type == "DX" && index.SongId == songID {
+						for _, songID := range songIDList {
+							if !isIDChecker {
+								songID = simpleNumHandler(songID, true)
+							}
+							for numPosition, index := range fullDevData.Records {
+								if index.SongId == songID && index.Type == "DX" {
 									ReferSongTypeList = append(ReferSongTypeList, numPosition)
 								}
 							}
-						}
-						if len(ReferSongTypeList) == 0 {
-							for numPosition, index := range fullDevData.Records {
-								for _, songID := range songIDList {
-									songID = simpleNumHandler(songID)
-									if index.SongId == songID {
-										if index.Type == "DX" {
-											ReferSongTypeList = append(ReferSongTypeList, numPosition)
-										}
-									}
-								}
+							if len(ReferSongTypeList) != 0 {
+								break
 							}
 						}
+
 						if len(ReferSongTypeList) == 0 {
 							ctx.SendPlainMessage(true, "没有发现游玩过的 DX 谱面～ 如不确定可以忽略请求参数, Lucy会自动识别")
 							return
 						}
 					default: // no settings.
-						for numPosition, index := range fullDevData.Records {
-							for _, songID := range songIDList {
-								if index.Type == "SD" && index.SongId == songID {
+						for _, songID := range songIDList {
+							if !isIDChecker {
+								songID = simpleNumHandler(songID, true)
+							}
+							for numPosition, index := range fullDevData.Records {
+								if index.SongId == songID && index.Type == "DX" {
 									ReferSongTypeList = append(ReferSongTypeList, numPosition)
 								}
 							}
-							if len(ReferSongTypeList) == 0 {
-								for numPositionOn, indexOn := range fullDevData.Records {
-									for _, songID := range songIDList {
-										if indexOn.Type == "DX" && indexOn.SongId == songID {
-											ReferSongTypeList = append(ReferSongTypeList, numPositionOn)
-										}
-									}
-								}
+							if len(ReferSongTypeList) != 0 {
+								break
 							}
 						}
 						if len(ReferSongTypeList) == 0 {
-							for numPosition, index := range fullDevData.Records {
-								for _, songID := range songIDList {
-									songID = simpleNumHandler(songID)
-									if index.Type == "SD" && index.SongId == songID {
+							for _, songID := range songIDList {
+								if !isIDChecker {
+									songID = simpleNumHandler(songID, false)
+								}
+								for numPosition, index := range fullDevData.Records {
+									if index.SongId == songID && index.Type == "SD" {
 										ReferSongTypeList = append(ReferSongTypeList, numPosition)
 									}
 								}
-								if len(ReferSongTypeList) == 0 {
-									for numPositionOn, indexOn := range fullDevData.Records {
-										for _, songID := range songIDList {
-											songID = simpleNumHandler(songID)
-											if indexOn.Type == "DX" && indexOn.SongId == songID {
-												ReferSongTypeList = append(ReferSongTypeList, numPositionOn)
-											}
-										}
-									}
+								if len(ReferSongTypeList) != 0 {
+									break
 								}
 							}
 						}
-
 						if len(ReferSongTypeList) == 0 {
-							ctx.SendPlainMessage(true, "貌似没有发现你玩过这首歌曲呢（")
+							if !isIDChecker {
+								ctx.SendPlainMessage(true, "Lucy 似乎没有查询到你的游玩数据呢（")
+							} else {
+								ctx.SendPlainMessage(true, "Lucy 查找了对应ID 但是没有发现数据～")
+							}
 							return
 						}
 					}
@@ -473,7 +560,7 @@ func init() {
 							levelIndexMap[fullDevData.Records[dataPack].LevelIndex] = strconv.Itoa(dataPack)
 						}
 						var trulyReturnedData string
-						for i := 4; i >= 0; i-- {
+						for i := 4; i >= 0; i-- { // divingfish is reverse.
 							if levelIndexMap[i] != "" {
 								trulyReturnedData = levelIndexMap[i]
 								break
@@ -483,7 +570,11 @@ func init() {
 						// getNum ==> 0
 						returnPackage := fullDevData.Records[getNum]
 						_ = gg.NewContextForImage(RenderCard(returnPackage, 0, true)).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(songIDList[0]) + "_" + strconv.Itoa(int(getUserID)) + ".png")
-						ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(songIDList[0]))+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+						if accStat {
+							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(songIDList[0]))+"_"+strconv.Itoa(int(getUserID))+".png"), true, "Lucy 查询到多个别名，此处默认为您返回了 "+returnPackage.Title+" 谱面")
+						} else {
+							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(int(songIDList[0]))+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+						}
 					} else {
 						levelIndexMap := map[int]string{}
 						for _, dataPack := range ReferSongTypeList {
@@ -495,9 +586,18 @@ func init() {
 							getNum, _ := strconv.Atoi(levelIndexMap[getDiff])
 							returnPackage := fullDevData.Records[getNum]
 							_ = gg.NewContextForImage(RenderCard(returnPackage, 0, true)).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(songIDList[0]) + "_" + strconv.Itoa(int(getUserID)) + ".png")
-							ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+							if accStat {
+								ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "Lucy 查询到多个别名，此处默认为您返回了 "+returnPackage.Title+" 谱面")
+							} else {
+								ctx.SendPhoto(tgba.FilePath(engine.DataFolder()+"save/"+strconv.Itoa(songIDList[0])+"_"+strconv.Itoa(int(getUserID))+".png"), true, "")
+							}
 						} else {
-							ctx.SendPlainMessage(true, "貌似你没有玩过这个难度的曲子哦～")
+							if !isIDChecker {
+								ctx.SendPlainMessage(true, "Lucy 貌似你没有玩过这个难度的曲子哦～")
+							} else {
+								ctx.SendPlainMessage(true, "Lucy 查找了对应ID 在这个难度下没有发现数据～")
+							}
+							return
 						}
 					}
 				}
@@ -725,13 +825,6 @@ func convert(listStruct UserMusicListStruct) []InnerStructChanger {
 	var dest []InnerStructChanger
 	for _, musicList := range listStruct.UserMusicList {
 		for _, musicDetailedList := range musicList.UserMusicDetailList {
-			/*
-				for _, userMusicDetail := range musicList.UserMusicDetailList {
-					if _, exists := mdMap[strconv.Itoa(musicDetailedList.MusicId)]; !exists {
-						continue
-					}
-				}
-			*/
 			level := musicDetailedList.Level
 			achievement := math.Min(1010000, float64(musicDetailedList.Achievement))
 			fc := []string{"", "fc", "fcp", "ap", "app"}[musicDetailedList.ComboStatus]
@@ -751,13 +844,20 @@ func convert(listStruct UserMusicListStruct) []InnerStructChanger {
 	return dest
 }
 
-func simpleNumHandler(num int) int {
-	if num < 1000 && num > 100 {
-		toint, _ := strconv.Atoi(fmt.Sprintf("10%d", num))
-		return toint
-	}
-	if num > 1000 && num < 10000 {
-		toint, _ := strconv.Atoi(fmt.Sprintf("1%d", num))
+func simpleNumHandler(num int, upper bool) int {
+	if upper {
+		if num < 1000 && num > 100 {
+			toint, _ := strconv.Atoi(fmt.Sprintf("10%d", num))
+			return toint
+		}
+		if num > 1000 && num < 10000 {
+			toint, _ := strconv.Atoi(fmt.Sprintf("1%d", num))
+			return toint
+		}
+	} else {
+		getFmt := fmt.Sprintf("%d", num)
+		getFmt = getFmt[2:]
+		toint, _ := strconv.Atoi(getFmt)
 		return toint
 	}
 	return num

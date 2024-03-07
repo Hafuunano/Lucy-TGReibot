@@ -228,7 +228,7 @@ func RequestReferSongIndex(friendID int64, songID int64, diff int64, isSD bool) 
 	} else {
 		getReferType = "dx"
 	}
-	getData, err := web.RequestDataWithHeaders(web.NewDefaultClient(), "https://maimai.lxns.net/api/v0/maimai/player/"+strconv.FormatInt(friendID, 10)+"/bests?song_id="+strconv.FormatInt(songID, 10)+"&song_type="+getReferType+"&level_index="+strconv.FormatInt(diff, 10), "GET", func(request *http.Request) error {
+	getData, err := web.RequestDataWithHeaders(web.NewDefaultClient(), "https://maimai.lxns.net/api/v0/maimai/player/"+strconv.FormatInt(friendID, 10)+"/best?song_id="+strconv.FormatInt(songID, 10)+"&song_type="+getReferType+"&level_index="+strconv.FormatInt(diff, 10), "GET", func(request *http.Request) error {
 		request.Header.Add("Authorization", os.Getenv("lxnskey"))
 		return nil
 	}, nil)
