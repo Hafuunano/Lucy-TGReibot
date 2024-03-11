@@ -50,8 +50,8 @@ func init() { // 插件主体
 				_, _ = ctx.Caller.Send(&tgba.PhotoConfig{
 					BaseFile: tgba.BaseFile{
 						BaseChat: tgba.BaseChat{
-							ChatID:           ctx.Message.Chat.ID,
-							ReplyToMessageID: ctx.Event.Value.(*tgba.Message).MessageID,
+							ChatConfig:      tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
+							ReplyParameters: tgba.ReplyParameters{MessageID: ctx.Event.Value.(*tgba.Message).MessageID},
 						},
 						File: tgba.FileURL(r.Image),
 					},

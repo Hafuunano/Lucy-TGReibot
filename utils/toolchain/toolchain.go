@@ -230,8 +230,8 @@ func GetBotIsAdminInThisGroup(ctx *rei.Ctx) bool {
 	getSelfMember, err := ctx.Caller.GetChatMember(
 		tgba.GetChatMemberConfig{
 			ChatConfigWithUser: tgba.ChatConfigWithUser{
-				ChatID: ctx.Message.Chat.ID,
-				UserID: ctx.Caller.Self.ID,
+				ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
+				UserID:     ctx.Caller.Self.ID,
 			},
 		},
 	)
@@ -284,8 +284,8 @@ func CheckIfthisUserInThisGroup(userID int64, ctx *rei.Ctx) bool {
 	getResult, err := ctx.Caller.GetChatMember(
 		tgba.GetChatMemberConfig{
 			ChatConfigWithUser: tgba.ChatConfigWithUser{
-				ChatID: group,
-				UserID: userID,
+				ChatConfig: tgba.ChatConfig{ChatID: group},
+				UserID:     userID,
 			},
 		},
 	)
@@ -336,7 +336,7 @@ func GetUserNickNameByIDInGroup(ctx *rei.Ctx, id int64) string {
 	if !CheckIfthisUserInThisGroup(id, ctx) {
 		return ""
 	}
-	chatPrefer, err := ctx.Caller.GetChatMember(tgba.GetChatMemberConfig{ChatConfigWithUser: tgba.ChatConfigWithUser{ChatID: ctx.Message.Chat.ID, UserID: id}})
+	chatPrefer, err := ctx.Caller.GetChatMember(tgba.GetChatMemberConfig{ChatConfigWithUser: tgba.ChatConfigWithUser{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}, UserID: id}})
 	if err != nil {
 		panic(err)
 	}

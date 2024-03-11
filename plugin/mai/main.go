@@ -154,8 +154,6 @@ func init() {
 					return
 				}
 				// token is valid, get data.
-				// getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
-				// getFullData := GetMusicList(getIntID, 0, 600)
 				getFullData, err := web.GetData("https://maihook.lemonkoi.one/api/getMusicList?userid=" + getMaiID.Userid)
 				var unmashellData UserMusicListStruct
 				json.Unmarshal(getFullData, &unmashellData)
@@ -735,7 +733,7 @@ func MaimaiRenderBase(ctx *rei.Ctx, israw bool) {
 		if israw {
 			getDocumentType := &tgba.DocumentConfig{
 				BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{
-					ChatID: ctx.Message.Chat.ID,
+					ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
 				},
 					File: tgba.FilePath(engine.DataFolder() + "save/" + "LXNS_" + strconv.Itoa(int(getUserID)) + ".png")},
 				Caption:         "",
@@ -765,7 +763,7 @@ func MaimaiRenderBase(ctx *rei.Ctx, israw bool) {
 		if israw {
 			getDocumentType := &tgba.DocumentConfig{
 				BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{
-					ChatID: ctx.Message.Chat.ID,
+					ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
 				},
 					File: tgba.FilePath(engine.DataFolder() + "save/" + strconv.Itoa(int(getUserID)) + ".png")},
 				Caption:         "",

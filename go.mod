@@ -66,4 +66,6 @@ replace modernc.org/sqlite => github.com/fumiama/sqlite3 v1.20.0-with-win386
 
 replace github.com/remyoudompheng/bigfft => github.com/fumiama/bigfft v0.0.0-20211011143303-6e0bfa3c836b
 
-replace github.com/fumiama/ReiBot => github.com/MoYoez/ReiBot v0.0.0-20240223162232-5c2ab46deccd
+replace github.com/fumiama/ReiBot => github.com/MoYoez/ReiBot v0.0.0-20240311142840-76873b41aa4a
+
+replace github.com/go-telegram-bot-api/telegram-bot-api/v5 => ./telegram-bot-api/

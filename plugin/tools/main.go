@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	"github.com/MoYoez/Lucy_reibot/utils/userpackage"
-	ctrl "github.com/FloatTech/zbpctrl"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shirou/gopsutil/cpu"
@@ -36,7 +36,7 @@ func init() {
 		} else {
 			gid = ctx.Message.Chat.ID
 		}
-		_, _ = ctx.Caller.Send(&tgba.LeaveChatConfig{ChatID: gid})
+		_, _ = ctx.Caller.Send(&tgba.LeaveChatConfig{ChatConfig: tgba.ChatConfig{ChatID: gid}})
 	})
 	engine.OnMessageCommand("status").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		ctx.SendPlainMessage(false, "* Hosted On Azure JP Cloud.\n",

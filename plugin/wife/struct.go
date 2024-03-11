@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
-	"github.com/MoYoez/Lucy_reibot/utils/userlist"
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	sql "github.com/FloatTech/sqlite"
+	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
+	"github.com/MoYoez/Lucy_reibot/utils/userlist"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -157,7 +157,7 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	if err != nil {
 		ctx.Caller.Send(&tgba.MessageConfig{
 			BaseChat: tgba.BaseChat{
-				ChatID: ctx.Message.Chat.ID,
+				ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
 			},
 			Text:      aheader,
 			ParseMode: tgba.ModeMarkdownV2,
@@ -165,7 +165,7 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 		return
 	}
 	data, _ := io.ReadAll(datas.Body)
-	ctx.Caller.Send(&tgba.PhotoConfig{BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID}, File: tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}}, Caption: aheader, ParseMode: tgba.ModeMarkdownV2})
+	ctx.Caller.Send(&tgba.PhotoConfig{BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}, File: tgba.FileBytes{Bytes: data, Name: "IMAGE.png"}}, Caption: aheader, ParseMode: tgba.ModeMarkdownV2})
 }
 
 // GenerateMD5 Generate MD5

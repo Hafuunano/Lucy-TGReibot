@@ -31,7 +31,7 @@ func init() {
 			if err != nil {
 				return
 			}
-			ctx.Caller.Request(tgba.StickerConfig{BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID}, File: tgba.FileID(getStickerPack.Stickers[rand.Intn(len(getStickerPack.Stickers))].FileID)}})
+			ctx.Caller.Request(tgba.StickerConfig{BaseFile: tgba.BaseFile{BaseChat: tgba.BaseChat{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}, File: tgba.FileID(getStickerPack.Stickers[rand.Intn(len(getStickerPack.Stickers))].FileID)}})
 		}
 
 	})

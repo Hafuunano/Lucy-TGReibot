@@ -23,7 +23,7 @@ func init() {
 		if getReply == "" {
 			return
 		}
-		ctx.Caller.Send(&tgba.MessageConfig{BaseChat: tgba.BaseChat{ChatID: ctx.Message.Chat.ID}, Text: getReply, ParseMode: "MarkdownV2", DisableWebPagePreview: true})
+		ctx.Caller.Send(&tgba.MessageConfig{BaseChat: tgba.BaseChat{ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID}}, Text: getReply, ParseMode: "MarkdownV2", LinkPreviewOptions: tgba.LinkPreviewOptions{IsDisabled: true}})
 	})
 
 }
