@@ -408,7 +408,7 @@ func ReFullPageRender(data LxnsMaimaiRequestB50, userData LxnsMaimaiRequestFromF
 			// show nil
 			// check again if user use origin plate
 			if userData.Data.NamePlate.Id != 0 {
-				getImage, err := GetCoverFromLxns("https://maimai.lemonkoi.one/plate/" + strconv.FormatInt(int64(userData.Data.NamePlate.Id), 10) + ".png")
+				getImage, err := GetCoverFromLxns("https://lx-rec-reproxy.lemonkoi.one/maimai/jacket/" + strconv.FormatInt(int64(userData.Data.NamePlate.Id), 10) + ".png")
 				if err != nil {
 					b50bg = b50bgOriginal
 				} else {
@@ -586,6 +586,7 @@ func GetShouldCount(archivement float64) float64 {
 	}
 }
 
+// GetCoverFromLxns Get origin Cover From LXNS Service.
 func GetCoverFromLxns(url string) (images image.Image, err error) {
 	getData, err := web.RequestDataWithHeaders(web.NewDefaultClient(), url, "GET", func(request *http.Request) error {
 		request.Header.Add("Authorization", os.Getenv("lxnskey"))

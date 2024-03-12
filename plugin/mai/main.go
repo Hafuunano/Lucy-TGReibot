@@ -110,7 +110,11 @@ func init() {
 					return
 				}
 				//	getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
-				getReplyMsg, _ := web.GetData("https://maihook.lemonkoi.one/api/getRegion?userid=" + getMaiID.Userid)
+				getReplyMsg, _ := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/getRegion?userid="+getMaiID.Userid, "GET", func(request *http.Request) error {
+					request.Header.Set("valid", os.Getenv("validauth"))
+					return nil
+				}, nil)
+
 				if strings.Contains(string(getReplyMsg), "{") == false {
 					ctx.SendPlainMessage(true, "返回了错误.png, ERROR:"+string(getReplyMsg))
 					return
@@ -154,34 +158,36 @@ func init() {
 					return
 				}
 				// token is valid, get data.
-				getFullData, err := web.GetData("https://maihook.lemonkoi.one/api/getMusicList?userid=" + getMaiID.Userid)
+				//
+				getData, err := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/getMusicList?userid="+getMaiID.Userid+"&index=0", "GET", func(request *http.Request) error {
+					request.Header.Set("valid", os.Getenv("validauth"))
+					return nil
+				}, nil)
+				if err != nil {
+					panic(err)
+				}
+				// update by path.
 				var unmashellData UserMusicListStruct
-				json.Unmarshal(getFullData, &unmashellData)
-				getFullDataStruct := convert(unmashellData)
-				jsonDumper := getFullDataStruct
-				jsonDumperFull, err := json.Marshal(jsonDumper)
-				if err != nil {
-					panic(err)
+				json.Unmarshal(getData, &unmashellData)
+				resp := UpdateHandler(unmashellData, getTokenId)
+				if unmashellData.NextIndex != 0 {
+					for i := unmashellData.NextIndex; i > 0; {
+						var unmashellDataS UserMusicListStruct
+						iStr := strconv.Itoa(i)
+						getDataS, err := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/getMusicList?userid="+getMaiID.Userid+"&index="+iStr, "GET", func(request *http.Request) error {
+							request.Header.Set("valid", os.Getenv("validauth"))
+							return nil
+						}, nil)
+						if err != nil {
+							panic(err)
+						}
+						json.Unmarshal(getDataS, &unmashellDataS)
+						UpdateHandler(unmashellDataS, getTokenId)
+						i = unmashellDataS.NextIndex
+					}
 				}
-				// upload to diving fish api
-				req, err := http.NewRequest("POST", "https://www.diving-fish.com/api/maimaidxprober/player/update_records", bytes.NewBuffer(jsonDumperFull))
-				if err != nil {
-					// Handle error
-					panic(err)
-				}
-				req.Header.Set("Import-Token", getTokenId)
-				req.Header.Set("Content-Type", "application/json")
-
-				client := &http.Client{}
-				resp, err := client.Do(req)
-				if err != nil {
-					panic(err)
-				}
-				//	NewReader, err := io.ReadAll(resp.Body)
-				if err != nil {
-					panic(err)
-				}
-				ctx.SendPlainMessage(true, "Update CODE:"+strconv.Itoa(resp.StatusCode))
+				// if data didn't update perfectly, repeat.
+				ctx.SendPlainMessage(true, "Update CODE:"+strconv.Itoa(resp))
 			case getSplitStringList[1] == "tokenbind":
 				if getSplitLength == 2 {
 					ctx.SendPlainMessage(true, "缺少参数哦~ qwq")
@@ -206,7 +212,13 @@ func init() {
 					ctx.SendPlainMessage(true, "传输的数据不合法~")
 					return
 				}
-				getCodeRaw, err := web.GetData("https://maihook.lemonkoi.one/api/ticket?userid=" + getMaiID.Userid + "&ticket=" + getSplitStringList[2])
+				getCodeRaw, err := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/ticket?userid="+getMaiID.Userid+"&ticket="+getSplitStringList[2], "GET", func(request *http.Request) error {
+					request.Header.Set("valid", os.Getenv("validauth"))
+					return nil
+				}, nil)
+				if err != nil {
+					panic(err)
+				}
 				if err != nil {
 					panic(err)
 				}
@@ -806,6 +818,7 @@ func CheckTheTicketIsValid(ticket string) bool {
 	return false
 }
 
+// convert SongDataTo
 func convert(listStruct UserMusicListStruct) []InnerStructChanger {
 	getRequest, err := os.ReadFile(engine.DataFolder() + "music_data")
 	if err != nil {
@@ -859,4 +872,31 @@ func simpleNumHandler(num int, upper bool) int {
 		return toint
 	}
 	return num
+}
+
+// UpdateHandler Update handler
+func UpdateHandler(userMusicList UserMusicListStruct, getTokenId string) int {
+	getFullDataStruct := convert(userMusicList)
+	jsonDumper := getFullDataStruct
+	jsonDumperFull, err := json.Marshal(jsonDumper)
+	if err != nil {
+		panic(err)
+	}
+	// upload to diving fish api
+	req, err := http.NewRequest("POST", "https://www.diving-fish.com/api/maimaidxprober/player/update_records", bytes.NewBuffer(jsonDumperFull))
+	if err != nil {
+		// Handle error
+		panic(err)
+	}
+	req.Header.Set("Import-Token", getTokenId)
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	if err != nil {
+		panic(err)
+	}
+	return resp.StatusCode
 }
