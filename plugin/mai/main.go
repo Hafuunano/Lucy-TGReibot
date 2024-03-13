@@ -131,16 +131,25 @@ func init() {
 				}
 				ctx.SendPlainMessage(true, "目前查询到您的游玩记录如下: \n\n"+returnText)
 			case getSplitStringList[1] == "status":
-				// getWebStatus
-				getWebStatus := ReturnWebStatus()
 				getZlibError := ReturnZlibError()
+				getPlayedStatus, err := web.GetData("https://maihook.lemonkoi.one/api/calc")
+				if err != nil {
+					return
+				}
+				var playerStatus RealConvertPlay
+				json.Unmarshal(getPlayedStatus, &playerStatus)
 				// 20s one request.
 				var getLucyRespHandler int
-				getLucyRespHandler = getZlibError.Full.Field3
+				if getZlibError.Full.Field3 < 180 {
+					getLucyRespHandler = getZlibError.Full.Field3
+				} else {
+					getLucyRespHandler = getZlibError.Full.Field3 - 180
+				}
 				getLucyRespHandlerStr := strconv.Itoa(getLucyRespHandler)
+
 				getZlibWord := "Zlib 压缩跳过率: \n" + "10mins (" + ConvertZlib(getZlibError.ZlibError.Field1, getZlibError.Full.Field1) + " Loss)\n" + "30mins (" + ConvertZlib(getZlibError.ZlibError.Field2, getZlibError.Full.Field2) + " Loss)\n" + "60mins (" + ConvertZlib(getZlibError.ZlibError.Field3, getZlibError.Full.Field3) + " Loss)\n"
-				getWebStatusCount := "Web Uptime Ping:\n * MaimaiDXCN: " + ConvertFloat(getWebStatus.Details.MaimaiDXCN.Uptime*100) + "%\n * MaimaiDXCN Main Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNMain.Uptime*100) + "%\n * MaimaiDXCN Title Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNTitle.Uptime*100) + "%\n * MaimaiDXCN Update Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNUpdate.Uptime*100) + "%\n * MaimaiDXCN NetLogin Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNNetLogin.Uptime*100) + "%\n * MaimaiDXCN Net Server: " + ConvertFloat(getWebStatus.Details.MaimaiDXCNDXNet.Uptime*100) + "%\n"
-				ctx.SendPlainMessage(true, "* Zlib 压缩跳过率可以很好的反馈当前 MaiNet (Wahlap Service) 当前负载的情况\n* Web Uptime Ping 则可以反馈 MaiNet 在外部原因(DDOS) 下造成的负载详情 ( 100% 即代表服务器为稳定, uptime 越低则代表可用性越差 ) \n* 在 1小时 内，Lucy 共处理了 "+getLucyRespHandlerStr+"次 请求💫，其中详细数据如下:\n\n"+getZlibWord+getWebStatusCount+"\n* Title Server 爆炸 容易造成数据获取失败\n* Zlib 3% Loss 以下则 基本上可以正常游玩\n* 10% Loss 则会有明显断网现象(请准备小黑屋工具)\n* 30% Loss 则无法正常游玩(即使使用小黑屋工具) ")
+				getRealStatus := "\n以下数据来源于mai机台的数据反馈\n"
+				ctx.SendPlainMessage(true, "* Zlib 压缩跳过率可以很好的反馈当前 MaiNet (Wahlap Service) 当前负载的情况，根据样本 + Lucy处理情况 来判断 \n* 错误率收集则来源于 机台游玩数据，反应各地区真实mai游玩错误情况 \n* 在 1小时 内，Lucy 共处理了 "+getLucyRespHandlerStr+"次 请求💫，其中详细数据如下:\n\n"+getZlibWord+getRealStatus+"\n"+ConvertRealPlayWords(playerStatus)+"\n* Zlib 3% Loss 以下则 基本上可以正常游玩\n* 10% Loss 则会有明显断网现象(请准备小黑屋工具)\n* 30% Loss 则无法正常游玩(即使使用小黑屋工具) ")
 			case getSplitStringList[1] == "update":
 				getID, _ := toolchain.GetChatUserInfoID(ctx)
 				getMaiID := GetUserIDFromDatabase(getID)
@@ -607,11 +616,10 @@ func init() {
 							} else {
 								ctx.SendPlainMessage(true, "Lucy 查找了对应ID 在这个难度下没有发现数据～")
 							}
-							return
+
 						}
 					}
 				}
-
 			case getSplitStringList[1] == "aliasupdate":
 				if rei.SuperUserPermission(ctx) {
 					UpdateAliasPackage()
@@ -820,7 +828,7 @@ func CheckTheTicketIsValid(ticket string) bool {
 
 // convert SongDataTo
 func convert(listStruct UserMusicListStruct) []InnerStructChanger {
-	getRequest, err := os.ReadFile(engine.DataFolder() + "music_data")
+	getRequest, err := os.ReadFile(engine.DataFolder() + "music_data") // be aware that this songdata need upgarde.
 	if err != nil {
 		panic(err)
 	}
