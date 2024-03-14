@@ -74,10 +74,10 @@ func init() {
 				//	if err != nil {
 				//		panic(err)
 				//	}
-				getCodeStat, err := web.GetData("https://maihook.lemonkoi.one/api/idunlocker?userid=" + getMaiID.Userid)
-				if err != nil {
-					panic(err)
-				}
+				getCodeStat, _ := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/idunlocker?userid="+getMaiID.Userid, "GET", func(request *http.Request) error {
+					request.Header.Set("valid", os.Getenv("validauth"))
+					return nil
+				}, nil)
 				ctx.SendPlainMessage(true, string(getCodeStat))
 			case getSplitStringList[1] == "plate":
 				if getSplitLength == 2 {
