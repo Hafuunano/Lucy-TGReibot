@@ -408,7 +408,7 @@ func ReFullPageRender(data LxnsMaimaiRequestB50, userData LxnsMaimaiRequestFromF
 			// show nil
 			// check again if user use origin plate
 			if userData.Data.NamePlate.Id != 0 {
-				getImage, err := GetCoverFromLxns("https://lx-rec-reproxy.lemonkoi.one/maimai/jacket/" + strconv.FormatInt(int64(userData.Data.NamePlate.Id), 10) + ".png")
+				getImage, err := GetCoverFromLxns("https://lx-rec-reproxy.lemonkoi.one/maimai/plate/" + strconv.FormatInt(int64(userData.Data.NamePlate.Id), 10) + ".png")
 				if err != nil {
 					b50bg = b50bgOriginal
 				} else {
@@ -503,7 +503,7 @@ func GetCoverLxns(id string) (image.Image, error) {
 	filePath := Root + "coverLxns/" + fileName
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		// Auto download cover from diving fish's site
-		downloadURL := "https://maimai.lemonkoi.one/jacket/" + fileName
+		downloadURL := "https://lx-rec-reproxy.lemonkoi.one/maimai/jacket/" + fileName
 		cover, err := GetCoverFromLxns(downloadURL)
 		if err != nil {
 			return LoadPictureWithResize(defaultCoverLink, 90, 90), nil
@@ -588,7 +588,7 @@ func GetShouldCount(archivement float64) float64 {
 
 // GetCoverFromLxns Get origin Cover From LXNS Service.
 func GetCoverFromLxns(url string) (images image.Image, err error) {
-	getData, err := web.RequestDataWithHeaders(web.NewDefaultClient(), url, "GET", func(request *http.Request) error {
+	getData, _ := web.RequestDataWithHeaders(web.NewDefaultClient(), url, "GET", func(request *http.Request) error {
 		request.Header.Add("Authorization", os.Getenv("lxnskey"))
 		return nil
 	}, nil)

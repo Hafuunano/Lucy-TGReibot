@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/xuri/excelize/v2"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/xuri/excelize/v2"
 )
 
 type MappedListStruct struct {
@@ -138,16 +139,14 @@ func QueryReferSong(Alias string, isLxnet bool) (status bool, id []int, needAcc 
 // UpdateAliasPackage Use simple action to update alias.
 func UpdateAliasPackage() {
 	// get Lxns Data
-	respls, err := http.Get("https://maimai.lxns.net/api/v0/maimai/alias/list")
-	defer respls.Body.Close()
-	getData, err := io.ReadAll(respls.Body)
+	respls, _ := http.Get("https://maimai.lxns.net/api/v0/maimai/alias/list")
+	getData, _ := io.ReadAll(respls.Body)
 	var lxnsAliasData LxnsAliases
 	json.Unmarshal(getData, &lxnsAliasData)
 
 	// get Lxns Data SongListInfo
-	resplsSongList, err := http.Get("https://maimai.lxns.net/api/v0/maimai/song/list")
-	defer respls.Body.Close()
-	getDataSongList, err := io.ReadAll(resplsSongList.Body)
+	resplsSongList, _ := http.Get("https://maimai.lxns.net/api/v0/maimai/song/list")
+	getDataSongList, _ := io.ReadAll(resplsSongList.Body)
 	var lxnsSongListData LxnsSongListInfo
 	json.Unmarshal(getDataSongList, &lxnsSongListData)
 
@@ -159,7 +158,7 @@ func UpdateAliasPackage() {
 		return
 	}
 	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
+	body, _ := io.ReadAll(response.Body)
 	reader := bytes.NewReader(body)
 	f, err := excelize.OpenReader(reader)
 	if err != nil {
@@ -172,7 +171,7 @@ func UpdateAliasPackage() {
 		}
 	}()
 	savedListMap := map[string][]string{}
-	getRows, err := f.GetRows("主表")
+	getRows, _ := f.GetRows("主表")
 	var titleStart bool
 	for _, rows := range getRows {
 		if rows[0] == "ID" {

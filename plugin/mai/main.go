@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -12,13 +13,14 @@ import (
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/tidwall/gjson"
 
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"image"
 	"math"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
 var engine = rei.Register("mai", &ctrl.Options[*rei.Ctx]{
@@ -115,7 +117,7 @@ func init() {
 					return nil
 				}, nil)
 
-				if strings.Contains(string(getReplyMsg), "{") == false {
+				if !strings.Contains(string(getReplyMsg), "{") {
 					ctx.SendPlainMessage(true, "返回了错误.png, ERROR:"+string(getReplyMsg))
 					return
 				}
@@ -228,9 +230,6 @@ func init() {
 				if err != nil {
 					panic(err)
 				}
-				if err != nil {
-					panic(err)
-				}
 				getCode := string(getCodeRaw)
 				ctx.SendPlainMessage(true, getCode)
 			case getSplitStringList[1] == "raw" || getSplitStringList[1] == "file":
@@ -279,7 +278,7 @@ func init() {
 					getReferIndexIsOn = true
 				}
 				switch {
-				case strings.HasPrefix(settedSongAlias, "id") == true:
+				case strings.HasPrefix(settedSongAlias, "id"):
 					// useID checker.
 					isIDChecker = true
 					getParse, err := strconv.ParseInt(strings.Replace(settedSongAlias, "id", "", 1), 10, 64)
@@ -293,7 +292,7 @@ func init() {
 					queryStatus, songIDLists, accStats, returnListHere := QueryReferSong(settedSongAlias, getBool)
 					songIDList = songIDLists
 					accStat = accStats
-					if queryStatus == false {
+					if !queryStatus {
 						ctx.SendPlainMessage(true, "未找到对应歌曲，可能是数据库未收录（")
 						return
 					}
@@ -661,7 +660,7 @@ func SetUserPlateToLocal(ctx *rei.Ctx, plateID string) {
 func HandlerUserSetsCustomImage(ctx *rei.Ctx, ps []tgba.PhotoSize) {
 	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
 	pic := ps[len(ps)-1]
-	picu, err := ctx.Caller.GetFileDirectURL(pic.FileID)
+	picu, _ := ctx.Caller.GetFileDirectURL(pic.FileID)
 	imageData, err := web.GetData(picu)
 	if err != nil {
 		return
@@ -730,7 +729,7 @@ func SetUserDefaultPlateToDatabase(ctx *rei.Ctx, plateName string) {
 func MaimaiRenderBase(ctx *rei.Ctx, israw bool) {
 	// check the user using.
 	getUserID, _ := toolchain.GetChatUserInfoID(ctx)
-	if GetUserSwitcherInfoFromDatabase(getUserID) == true {
+	if GetUserSwitcherInfoFromDatabase(getUserID) {
 		// use lxns checker service.
 		// check bind first, get user friend id.
 		getFriendID := GetUserMaiFriendID(getUserID)
@@ -806,7 +805,7 @@ func MaimaiSwitcherService(ctx *rei.Ctx) {
 	}
 	var getEventText string
 	// due to it changed, so reverse.
-	if getBool == false {
+	if !getBool {
 		getEventText = "Lxns查分"
 	} else {
 		getEventText = "Diving Fish查分"
@@ -820,10 +819,7 @@ func CheckTheTicketIsValid(ticket string) bool {
 		panic(err)
 	}
 	result := gjson.Get(helper.BytesToString(getData), "message").String()
-	if result == "ok" {
-		return true
-	}
-	return false
+	return result == "ok"
 }
 
 // convert SongDataTo
@@ -900,9 +896,6 @@ func UpdateHandler(userMusicList UserMusicListStruct, getTokenId string) int {
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
 	if err != nil {
 		panic(err)
 	}

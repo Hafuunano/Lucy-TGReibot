@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FloatTech/floatbox/web"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
-	"github.com/MoYoez/Lucy_reibot/utils/userpackage"
+	CoreFactory "github.com/MoYoez/Lucy_reibot/utils/userpackage"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shirou/gopsutil/cpu"
@@ -69,6 +70,72 @@ func init() {
 		ctx.SendPlainMessage(true, "run panic , check debug.")
 		panic("Test Value ERR")
 	})
+
+	engine.OnMessageCommand("qpic").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		getLength, List := rei.SplitCommandTo(ctx.Message.Text, 2)
+		if getLength == 2 {
+			getDataRaw, err := web.GetData("https://gchat.qpic.cn/gchatpic_new/0/0-0-" + List[1])
+			if err != nil {
+				ctx.SendPlainMessage(true, "获取对应图片错误,或许是图片已过期")
+				return
+			}
+			ctx.SendPhoto(tgba.FileBytes{Name: List[1], Bytes: getDataRaw}, true, "Link: "+"https://gchat.qpic.cn/gchatpic_new/0/0-0-"+List[1])
+		} else {
+			ctx.SendPlainMessage(true, "缺少参数/ 应当是 /qpic <md5> ")
+		}
+	})
+
+	engine.OnMessageCommand("title").SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		getCutterLength, cutterTypeList := rei.SplitCommandTo(ctx.Message.Text, 2)
+		// Check if Lucy has Permission to modify
+		// get user permissions.
+		_, err := ctx.Caller.Request(tgba.PromoteChatMemberConfig{
+			ChatMemberConfig: tgba.ChatMemberConfig{UserID: ctx.Message.From.ID, ChatConfig: tgba.ChatConfig{
+				ChatID: ctx.Message.Chat.ID,
+			}},
+			CanManageChat: true,
+		})
+		if err != nil {
+			ctx.SendPlainMessage(true, " 发生了一点错误: 将对方提升管理员失效 , Err: ", err)
+			return
+		}
+
+		if getCutterLength == 1 {
+			getendpoint, errs := ctx.Caller.Request(tgba.SetChatAdministratorCustomTitle{
+				ChatMemberConfig: tgba.ChatMemberConfig{
+					ChatConfig: tgba.ChatConfig{
+						ChatID: ctx.Message.Chat.ID,
+					},
+					UserID: ctx.Message.From.ID,
+				},
+				CustomTitle: ctx.Message.From.UserName,
+			})
+			if getendpoint.Ok {
+				ctx.SendPlainMessage(true, "是个不错的头衔呢w~")
+			} else {
+				ctx.SendPlainMessage(true, "貌似出错了( | ", errs)
+			}
+			return
+		}
+
+		getendpoint, err := ctx.Caller.Request(tgba.SetChatAdministratorCustomTitle{
+			ChatMemberConfig: tgba.ChatMemberConfig{
+				ChatConfig: tgba.ChatConfig{
+					ChatID: ctx.Message.Chat.ID,
+				},
+				UserID: ctx.Message.From.ID,
+			},
+			CustomTitle: cutterTypeList[1],
+		})
+
+		if getendpoint.Ok {
+			ctx.SendPlainMessage(true, "返回正常, 帮你贴上去了w 现在的头衔是 ", cutterTypeList[1], " 了")
+		} else {
+			ctx.SendPlainMessage(true, "貌似出错了( | ", err)
+		}
+
+	})
+
 }
 
 func cpuPercent() float64 {
