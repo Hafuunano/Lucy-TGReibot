@@ -3,15 +3,15 @@ module github.com/MoYoez/Lucy_reibot
 go 1.21
 
 require (
-	github.com/FloatTech/floatbox v0.0.0-20230207080446-026a2f086c74
+	github.com/FloatTech/floatbox v0.0.0-20230331064925-9af336a84944
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.1
-	github.com/FloatTech/sqlite v1.5.7
+	github.com/FloatTech/sqlite v1.6.2
 	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
 	github.com/disintegration/imaging v1.6.2
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/ReiBot v0.0.0-00010101000000-000000000000
-	github.com/fumiama/go-base16384 v1.6.4
+	github.com/fumiama/go-base16384 v1.7.0
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/jinzhu/gorm v1.9.16
@@ -20,7 +20,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.6.9
+	github.com/wdvxdr1123/ZeroBot v1.6.11
 	github.com/xuri/excelize/v2 v2.8.1
 	golang.org/x/image v0.14.0
 	golang.org/x/text v0.14.0
@@ -28,11 +28,12 @@ require (
 )
 
 require (
+	github.com/FloatTech/AnimeAPI v1.7.0 // indirect
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/cron v1.3.0 // indirect
-	github.com/fumiama/go-registry v0.2.5 // indirect
+	github.com/fumiama/go-registry v0.2.6 // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/fumiama/imgsz v0.0.2 // indirect
@@ -43,6 +44,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect

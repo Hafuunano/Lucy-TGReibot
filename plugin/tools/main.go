@@ -2,7 +2,9 @@ package tools
 
 import (
 	"fmt"
+	"github.com/MoYoez/Lucy_reibot/utils/bilibili"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -83,6 +85,39 @@ func init() {
 		} else {
 			ctx.SendPlainMessage(true, "缺少参数/ 应当是 /qpic <md5> ")
 		}
+	})
+	engine.OnMessageRegex(`(?:是不是|有没有|好不好|尊嘟假嘟)`).SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		rawRegexPattern := ctx.State["regex_matched"].([]string)[0]
+		randPattern := rand.Intn(2)
+		switch {
+		case rawRegexPattern == "是不是":
+			randPattern += 0
+		case rawRegexPattern == "有没有":
+			randPattern += 2
+		case rawRegexPattern == "好不好":
+			randPattern += 4
+		case rawRegexPattern == "尊嘟假嘟":
+			randPattern += 6
+		}
+		ctx.SendPlainMessage(true, []string{"是", "不是", "有", "没有", "好", "不好", "尊嘟", "假嘟"}[randPattern])
+	})
+
+	engine.OnMessageRegex(`((b23|acg).tv|bili2233.cn)/[0-9a-zA-Z]+`).SetBlock(true).Handle(func(ctx *rei.Ctx) {
+		rawRegexPattern := ctx.State["regex_matched"].([]string)[0]
+		getLink := bilibili.BilibiliFixedLink(rawRegexPattern)
+		ctx.Send(true, &tgba.MessageConfig{
+			BaseChat: tgba.BaseChat{
+				ChatConfig: tgba.ChatConfig{ChatID: ctx.Message.Chat.ID},
+			},
+			Text: "https://" + getLink,
+			LinkPreviewOptions: tgba.LinkPreviewOptions{
+				IsDisabled:       false,
+				URL:              "https://" + getLink,
+				PreferSmallMedia: false,
+				PreferLargeMedia: true,
+				ShowAboveText:    true,
+			},
+		})
 	})
 
 	engine.OnMessageCommand("title").SetBlock(true).Handle(func(ctx *rei.Ctx) {

@@ -683,9 +683,22 @@ func ConvertRealPlayWords(retry RealConvertPlay) string {
 			overallErrorRate = math.Round(overallErrorRate*100) / 100
 			UserReturnLogs = fmt.Sprintf("共 %d 个成功的请求中，有 %d 次未压缩（%.2f%%），有 %d 个请求共 %d 次其他错误（%.2f%%），整体错误率为 %.2f%%。", totalSuccess, word.SkippedCount, skippedRate, word.RetriedCount, word.RetryCountSum, otherErrorRate, overallErrorRate)
 		}
+
 		pickedWords = pickedWords + fmt.Sprintf("\n - 在 %d 分钟内%s", timeCount, UserReturnLogs)
 		count = count + 1
 
 	}
-	return header + pickedWords + "\n"
+	var AdditionReply string
+	switch {
+	case retry.ReturnValue[2].FailedCount > 8:
+		AdditionReply = fmt.Sprintf(" 💥在过去的 60 分钟内 出现 Wahlap Service 在多次尝试访问下未响应 (错误次数: %d 次) , 游戏服务器可能出现严重问题, 目前正在运行的加速方案失效, Bot服务可能会出现未响应错误 ,请耐心等待官方服务器修复 ( ", retry.ReturnValue[2].FailedCount)
+	}
+	if float64(retry.ReturnValue[2].RetryCountSum)/float64(retry.ReturnValue[2].TotalCount-retry.ReturnValue[2].FailedCount+retry.ReturnValue[2].RetryCountSum) > 0.3 && AdditionReply == "" {
+		AdditionReply = "❌ Wahlap Service 重试率较高，所有机台登录和保存成绩时均可能耗时较长, Bot 服务可能会出现长期未响应错误. "
+	}
+	if float64(retry.ReturnValue[2].SkippedCount)/float64(retry.ReturnValue[2].TotalCount-retry.ReturnValue[2].FailedCount) > 0.2 && AdditionReply == "" {
+		AdditionReply = "⚠️ 压缩跳过率较高，部分未加速方案机台可能会出现登陆出现小黑屋 / 加载与保存时间过长或错误的问题, 已加速方案可忽视."
+	}
+
+	return header + pickedWords + "\n\n" + AdditionReply
 }

@@ -13,7 +13,4 @@ var (
 )
 
 func init() {
-	engine.OnMessage().SetBlock(true).Handle(func(ctx *rei.Ctx) {
-
-	})
 }

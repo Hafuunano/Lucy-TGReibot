@@ -140,18 +140,11 @@ func init() {
 				}
 				var playerStatus RealConvertPlay
 				json.Unmarshal(getPlayedStatus, &playerStatus)
-				// 20s one request.
-				var getLucyRespHandler int
-				if getZlibError.Full.Field3 < 180 {
-					getLucyRespHandler = getZlibError.Full.Field3
-				} else {
-					getLucyRespHandler = getZlibError.Full.Field3 - 180
-				}
-				getLucyRespHandlerStr := strconv.Itoa(getLucyRespHandler)
+				getLucyRespHandlerStr := strconv.Itoa(getZlibError.Full.Field3)
 
 				getZlibWord := "Zlib 压缩跳过率: \n" + "10mins (" + ConvertZlib(getZlibError.ZlibError.Field1, getZlibError.Full.Field1) + " Loss)\n" + "30mins (" + ConvertZlib(getZlibError.ZlibError.Field2, getZlibError.Full.Field2) + " Loss)\n" + "60mins (" + ConvertZlib(getZlibError.ZlibError.Field3, getZlibError.Full.Field3) + " Loss)\n"
 				getRealStatus := "\n以下数据来源于mai机台的数据反馈\n"
-				ctx.SendPlainMessage(true, "* Zlib 压缩跳过率可以很好的反馈当前 MaiNet (Wahlap Service) 当前负载的情况，根据样本 + Lucy处理情况 来判断 \n* 错误率收集则来源于 机台游玩数据，反应各地区真实mai游玩错误情况 \n* 在 1小时 内，Lucy 共处理了 "+getLucyRespHandlerStr+"次 请求💫，其中详细数据如下:\n\n"+getZlibWord+getRealStatus+"\n"+ConvertRealPlayWords(playerStatus)+"\n* Zlib 3% Loss 以下则 基本上可以正常游玩\n* 10% Loss 则会有明显断网现象(请准备小黑屋工具)\n* 30% Loss 则无法正常游玩(即使使用小黑屋工具) ")
+				ctx.SendPlainMessage(true, "* Zlib 压缩跳过率可以很好的反馈当前 MaiNet (Wahlap Service) 当前负载的情况，根据样本 + Lucy处理情况 来判断 \n* 错误率收集则来源于 机台游玩数据，反应各地区真实mai游玩错误情况 \n* 在 1小时 内，Lucy 共处理了 "+getLucyRespHandlerStr+"次 请求💫，其中详细数据如下:\n\n"+getZlibWord+getRealStatus+"\n"+ConvertRealPlayWords(playerStatus))
 			case getSplitStringList[1] == "update":
 				getID, _ := toolchain.GetChatUserInfoID(ctx)
 				getMaiID := GetUserIDFromDatabase(getID)
