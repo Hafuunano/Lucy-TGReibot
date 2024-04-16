@@ -74,12 +74,12 @@ func init() {
 	engine.OnMessageCommand("qpic").SetBlock(true).Handle(func(ctx *rei.Ctx) {
 		getLength, List := rei.SplitCommandTo(ctx.Message.Text, 2)
 		if getLength == 2 {
-			getDataRaw, err := web.GetData("https://gchat.qpic.cn/gchatpic_new/0/0-0-" + List[1])
+			getDataRaw, err := web.GetData("https://gchat.qpic.cn/gchatpic_new/0/0-0-" + List[1] + "/0")
 			if err != nil {
 				ctx.SendPlainMessage(true, "获取对应图片错误,或许是图片已过期")
 				return
 			}
-			ctx.SendPhoto(tgba.FileBytes{Name: List[1], Bytes: getDataRaw}, true, "Link: "+"https://gchat.qpic.cn/gchatpic_new/0/0-0-"+List[1])
+			ctx.SendPhoto(tgba.FileBytes{Name: List[1], Bytes: getDataRaw}, true, "Link: "+"https://gchat.qpic.cn/gchatpic_new/0/0-0-"+List[1]+"/0")
 		} else {
 			ctx.SendPlainMessage(true, "缺少参数/ 应当是 /qpic <md5> ")
 		}
