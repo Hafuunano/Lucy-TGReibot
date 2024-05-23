@@ -25,18 +25,6 @@ type UserIDToMaimaiFriendCode struct {
 	MaimaiID   int64 `db:"friendid"`
 }
 
-// UserIDToQQ TIPS: Onebot path, actually it refers to Telegram Userid.
-
-type UserIDToQQ struct {
-	QQ     int64  `db:"user_qq"` // qq nums
-	Userid string `db:"user_id"` // user_id
-}
-
-type UserIDToToken struct {
-	UserID string `db:"user_id"`
-	Token  string `db:"user_token"`
-}
-
 var (
 	maiDatabase = &sql.Sqlite{}
 	maiLocker   = sync.Mutex{}
@@ -55,14 +43,6 @@ func FormatUserDataBase(tgid int64, plate string, bg string, username string) *D
 	return &DataHostSQL{TelegramId: tgid, Plate: plate, Background: bg, Username: username}
 }
 
-func FormatUserToken(tgid string, token string) *UserIDToToken {
-	return &UserIDToToken{Token: token, UserID: tgid}
-}
-
-func FormatUserIDDatabase(qq int64, userid string) *UserIDToQQ {
-	return &UserIDToQQ{QQ: qq, Userid: userid}
-}
-
 func FormatUserSwitcher(tgid int64, isSwitcher bool) *UserSwitcherService {
 	return &UserSwitcherService{TGId: tgid, IsUsed: isSwitcher}
 }
@@ -75,10 +55,10 @@ func InitDataBase() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
 	maiDatabase.Create("userinfo", &DataHostSQL{})
-	maiDatabase.Create("useridinfo", &UserIDToQQ{})
+
 	maiDatabase.Create("userswitchinfo", &UserSwitcherService{})
 	maiDatabase.Create("usermaifriendinfo", &UserIDToMaimaiFriendCode{})
-	maiDatabase.Create("usertokenid", &UserIDToToken{})
+
 	return nil
 }
 
@@ -109,43 +89,10 @@ func (info *UserSwitcherService) ChangeUserSwitchInfoFromDataBase() error {
 	return maiDatabase.Insert("userswitchinfo", info)
 }
 
-// GetUserIDFromDatabase Params: user qq id ==> user maimai id.
-func GetUserIDFromDatabase(userID int64) UserIDToQQ {
-	maiLocker.Lock()
-	defer maiLocker.Unlock()
-	var infosql UserIDToQQ
-	userIDStr := strconv.FormatInt(userID, 10)
-	_ = maiDatabase.Find("useridinfo", &infosql, "where user_qq is "+userIDStr)
-	return infosql
-}
-
-func (info *UserIDToQQ) BindUserIDDataBase() error {
-	maiLocker.Lock()
-	defer maiLocker.Unlock()
-	return maiDatabase.Insert("useridinfo", info)
-}
-
 func (info *UserIDToMaimaiFriendCode) BindUserFriendCode() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
 	return maiDatabase.Insert("usermaifriendinfo", info)
-}
-
-func GetUserToken(userid string) string {
-	maiLocker.Lock()
-	defer maiLocker.Unlock()
-	var infosql UserIDToToken
-	maiDatabase.Find("usertokenid", &infosql, "where user_id is "+userid)
-	if infosql.Token == "" {
-		return ""
-	}
-	return infosql.Token
-}
-
-func (info *UserIDToToken) BindUserToken() error {
-	maiLocker.Lock()
-	defer maiLocker.Unlock()
-	return maiDatabase.Insert("usertokenid", info)
 }
 
 // maimai origin render base.

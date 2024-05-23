@@ -1,6 +1,6 @@
 module github.com/MoYoez/Lucy_reibot
 
-go 1.21
+go 1.22.2
 
 require (
 	github.com/FloatTech/floatbox v0.0.0-20230331064925-9af336a84944
@@ -30,6 +30,7 @@ require (
 require (
 	github.com/FloatTech/AnimeAPI v1.7.0 // indirect
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
+	github.com/MoYoez/LucyBaseRouter-Toolchain v0.0.0-20240513105735-fa25f6949091 // indirect
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/cron v1.3.0 // indirect

@@ -8,6 +8,7 @@ import (
 	rei "github.com/fumiama/ReiBot"
 
 	_ "github.com/MoYoez/Lucy_reibot/plugin/chat"
+	_ "github.com/MoYoez/Lucy_reibot/plugin/chun"
 	_ "github.com/MoYoez/Lucy_reibot/plugin/fortune"
 	_ "github.com/MoYoez/Lucy_reibot/plugin/lolicon"
 	_ "github.com/MoYoez/Lucy_reibot/plugin/mai"

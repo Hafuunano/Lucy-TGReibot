@@ -306,21 +306,15 @@ func PhiBind(ctx *rei.Ctx, bindAcc string) {
 		ctx.SendPlainMessage(true, "12小时内仅允许绑定一次哦")
 		return
 	}
-	indexReply := DecHashToRaw(hash)
 	// get session.
-	if indexReply == "" {
+	if hash == "" {
 		ctx.SendPlainMessage(true, "请前往 https://phi.lemonkoi.one 获取绑定码进行绑定")
 		return
 	}
-	getQQID, getSessionID := RawJsonParse(indexReply)
-	if getQQID != getUserId {
-		ctx.SendPlainMessage(true, "请求Hash中Telegram ID不一致，请使用自己的号重新申请")
-		return
-	}
-	if utf8.RuneCountInString(getSessionID) != 25 {
+	if utf8.RuneCountInString(hash) != 25 {
 		ctx.SendPlainMessage(true, "Session 传入数值出现错误，请重新绑定")
 		return
 	}
-	_ = FormatUserDataBase(getQQID, getSessionID, time.Now().Unix()).BindUserDataBase()
+	_ = FormatUserDataBase(ctx.Message.From.ID, hash, time.Now().Unix()).BindUserDataBase()
 	ctx.SendPlainMessage(true, "绑定成功～")
 }

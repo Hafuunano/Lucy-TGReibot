@@ -1,14 +1,12 @@
 package mai
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"io"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,56 +24,14 @@ import (
 	"golang.org/x/text/width"
 )
 
-type WebPingStauts struct {
-	Details struct {
-		MaimaiDXCN struct {
-			Uptime float64 `json:"uptime"`
-		} `json:"maimai DX CN"`
-		MaimaiDXCNDXNet struct {
-			Uptime float64 `json:"uptime"`
-		} `json:"maimai DX CN DXNet"`
-		MaimaiDXCNMain struct {
-			Uptime float64 `json:"uptime"`
-		} `json:"maimai DX CN Main"`
-		MaimaiDXCNNetLogin struct {
-			Uptime float64 `json:"uptime"`
-		} `json:"maimai DX CN NetLogin"`
-		MaimaiDXCNTitle struct {
-			Uptime float64 `json:"uptime"`
-		} `json:"maimai DX CN Title"`
-		MaimaiDXCNUpdate struct {
-			Uptime float64 `json:"uptime"`
-		} `json:"maimai DX CN Update"`
-	} `json:"details"`
-	Status bool `json:"status"`
+type BaseUserIDStruct struct {
+	UserID int64 `json:"user_id"`
 }
 
-type RealConvertPlay struct {
-	ReturnValue []struct {
-		SkippedCount  int `json:"skippedCount"`
-		RetriedCount  int `json:"retriedCount"`
-		RetryCountSum int `json:"retryCountSum"`
-		TotalCount    int `json:"totalCount"`
-		FailedCount   int `json:"failedCount"`
-	} `json:"returnValue"`
-}
-
-type ZlibErrorStatus struct {
-	Full struct {
-		Field1 int `json:"10"`
-		Field2 int `json:"30"`
-		Field3 int `json:"60"`
-	} `json:"full"`
-	FullError struct {
-		Field1 int `json:"10"`
-		Field2 int `json:"30"`
-		Field3 int `json:"60"`
-	} `json:"full_Error"`
-	ZlibError struct {
-		Field1 int `json:"10"`
-		Field2 int `json:"30"`
-		Field3 int `json:"60"`
-	} `json:"zlib_Error"`
+type GetMusicStruct struct {
+	BaseUserIDStruct
+	GetIndex   int64 `json:"get_index"`
+	GetCounter int64 `json:"get_counter"`
 }
 
 type player struct {
@@ -134,6 +90,21 @@ type playerData struct {
 	SongId       int     `json:"song_id"`
 	Title        string  `json:"title"`
 	Type         string  `json:"type"`
+}
+
+type LxnsUploaderStruct struct {
+	Score []LxnsScoreUploader `json:"scores"`
+}
+
+type LxnsScoreUploader struct {
+	Id           int         `json:"id"`
+	Type         string      `json:"type"`
+	LevelIndex   int         `json:"level_index"`
+	Achievements float64     `json:"achievements"`
+	Fc           interface{} `json:"fc"`
+	Fs           interface{} `json:"fs"`
+	DxScore      int         `json:"dx_score"`
+	PlayTime     string      `json:"play_time"`
 }
 
 var (
@@ -579,126 +550,4 @@ func getRatingBg(rating int) string {
 		index++
 	}
 	return ratingBgFilenames[index]
-}
-
-// MixedRegionWriter Some Mixed Magic, looking for your region information.
-func MixedRegionWriter(regionID int, playCount int, createdDate string) string {
-	getCountryID := returnCountryID(regionID)
-	return fmt.Sprintf(" - 在 regionID 为 %d (%s) 的省/直辖市 游玩过 %d 次, 第一次游玩时间于 %s", regionID+1, getCountryID, playCount, createdDate)
-}
-
-// ReportToEndPoint Report Some Error To Wahlap Server.
-func ReportToEndPoint(getReport int, getReportType string) string {
-	url := "https://maihook.lemonkoi.one/api/zlib?report=" + strconv.Itoa(getReport) + "&reportType=" + getReportType
-	method := "GET"
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		fmt.Println(err)
-		return ""
-	}
-	req.Header.Add("authkey", authKey)
-	req.Header.Add("Accept", "*/*")
-	req.Header.Add("Host", "maihook.lemonkoi.one")
-	req.Header.Add("Connection", "keep-alive")
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return ""
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return ""
-	}
-	return string(body)
-}
-
-// ReturnZlibError Return Zlib ERROR
-func ReturnZlibError() ZlibErrorStatus {
-	url := "https://maihook.lemonkoi.one/api/zlib"
-	method := "GET"
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		fmt.Println(err)
-		return ZlibErrorStatus{}
-	}
-	req.Header.Add("Accept", "*/*")
-	req.Header.Add("Host", "maihook.lemonkoi.one")
-	req.Header.Add("Connection", "keep-alive")
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return ZlibErrorStatus{}
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return ZlibErrorStatus{}
-	}
-	var returnData ZlibErrorStatus
-	json.Unmarshal(body, &returnData)
-	return returnData
-}
-
-func ConvertZlib(value, total int) string {
-	if total == 0 {
-		return "0.000%"
-	}
-	percentage := float64(value) / float64(total) * 100
-	return fmt.Sprintf("%.3f%%", percentage)
-}
-
-func ConvertRealPlayWords(retry RealConvertPlay) string {
-	var pickedWords string
-	var count = 0
-	var header = " - 错误率数据收集自机台的真实网络通信，可以反映舞萌 DX 的网络状况。\n"
-
-	for _, word := range retry.ReturnValue {
-		var timeCount int
-		var UserReturnLogs string
-		switch {
-		case count == 0:
-			timeCount = 10
-		case count == 1:
-			timeCount = 30
-		case count == 2:
-			timeCount = 60
-		}
-
-		if word.TotalCount < 20 {
-			UserReturnLogs = "没有收集到足够的数据进行分析~"
-		} else {
-			totalSuccess := word.TotalCount - word.FailedCount
-			skippedRate := float64(word.SkippedCount) / float64(totalSuccess) * 100
-			otherErrorRate := float64(word.RetryCountSum) / float64(totalSuccess+word.RetryCountSum) * 100
-			overallErrorRate := (float64(word.SkippedCount+word.RetryCountSum) / float64(totalSuccess+word.RetryCountSum)) * 100
-			skippedRate = math.Round(skippedRate*100) / 100
-			otherErrorRate = math.Round(otherErrorRate*100) / 100
-			overallErrorRate = math.Round(overallErrorRate*100) / 100
-			UserReturnLogs = fmt.Sprintf("共 %d 个成功的请求中，有 %d 次未压缩（%.2f%%），有 %d 个请求共 %d 次其他错误（%.2f%%），整体错误率为 %.2f%%。", totalSuccess, word.SkippedCount, skippedRate, word.RetriedCount, word.RetryCountSum, otherErrorRate, overallErrorRate)
-		}
-
-		pickedWords = pickedWords + fmt.Sprintf("\n - 在 %d 分钟内%s", timeCount, UserReturnLogs)
-		count = count + 1
-
-	}
-	var AdditionReply string
-	switch {
-	case retry.ReturnValue[2].FailedCount > 8:
-		AdditionReply = fmt.Sprintf(" 💥在过去的 60 分钟内 出现 Wahlap Service 在多次尝试访问下未响应 (错误次数: %d 次) , 游戏服务器可能出现严重问题, 目前正在运行的加速方案失效, Bot服务可能会出现未响应错误 ,请耐心等待官方服务器修复 ( ", retry.ReturnValue[2].FailedCount)
-	}
-	if float64(retry.ReturnValue[2].RetryCountSum)/float64(retry.ReturnValue[2].TotalCount-retry.ReturnValue[2].FailedCount+retry.ReturnValue[2].RetryCountSum) > 0.3 && AdditionReply == "" {
-		AdditionReply = "❌ Wahlap Service 重试率较高，所有机台登录和保存成绩时均可能耗时较长, Bot 服务可能会出现长期未响应错误. "
-	}
-	if float64(retry.ReturnValue[2].SkippedCount)/float64(retry.ReturnValue[2].TotalCount-retry.ReturnValue[2].FailedCount) > 0.2 && AdditionReply == "" {
-		AdditionReply = "⚠️ 压缩跳过率较高，部分未加速方案机台可能会出现登陆出现小黑屋 / 加载与保存时间过长或错误的问题, 已加速方案可忽视."
-	}
-
-	return header + pickedWords + "\n\n" + AdditionReply
 }

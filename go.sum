@@ -16,6 +16,8 @@ github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJG
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b/go.mod h1:fHZFWGquNXuHttu9dUYoKuNbm3dzLETnIOnm1muSfDs=
 github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52 h1:BrStRXeosWh8L0iA/EjPd8w6xNexDkqki39ITZko/9Q=
 github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52/go.mod h1:qqMLUwR7tKpqnAqsgI7aZbn0hbs2FEVF4ylMXqIpBdY=
+github.com/MoYoez/LucyBaseRouter-Toolchain v0.0.0-20240513105735-fa25f6949091 h1:S/bbzRiSkKRu/IJOu0WAPfvs0nJ2cMr2f6frUizIS7Y=
+github.com/MoYoez/LucyBaseRouter-Toolchain v0.0.0-20240513105735-fa25f6949091/go.mod h1:cPlGyxReSzPHtl31iX2bYj0VzAXugUqLAImnyJcT3m4=
 github.com/MoYoez/ReiBot v0.0.0-20240311142840-76873b41aa4a h1:hVdKlkVTX2ta8BFo2xcH7wBuQVsVzzRNKUbZklyaeNI=
 github.com/MoYoez/ReiBot v0.0.0-20240311142840-76873b41aa4a/go.mod h1:d8YGk5jIN2VyMMnMJg6edBt7I7yDhpTXSUELGuLxCCQ=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=

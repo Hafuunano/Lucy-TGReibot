@@ -4,23 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/MoYoez/Lucy_reibot/utils/toolchain"
 	rei "github.com/fumiama/ReiBot"
 	tgba "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/tidwall/gjson"
-
 	"image"
-	"math"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
 var engine = rei.Register("mai", &ctrl.Options[*rei.Ctx]{
@@ -52,35 +45,6 @@ func init() {
 					return
 				}
 				BindFriendCode(ctx, Toint64)
-			case getSplitStringList[1] == "userbind":
-				if getSplitLength < 3 {
-					ctx.SendPlainMessage(true, "参数提供不足, /mai userbind <maiTempID> ")
-					return
-				}
-				getID, _ := toolchain.GetChatUserInfoID(ctx)
-				userID := GetWahlapUserID(getSplitStringList[2])
-				if userID == -1 {
-					ctx.SendPlainMessage(true, "ID 无效或者是过期 ，请使用新的ID或者再次尝试")
-					return
-				}
-				ctx.SendPlainMessage(true, "绑定成功~")
-				FormatUserIDDatabase(getID, strconv.FormatInt(userID, 10)).BindUserIDDataBase()
-			case getSplitStringList[1] == "unlock":
-				getID, _ := toolchain.GetChatUserInfoID(ctx)
-				getMaiID := GetUserIDFromDatabase(getID)
-				if getMaiID.Userid == "" {
-					ctx.SendPlainMessage(true, "没有绑定~ 绑定方式: /mai userbind <maiTempID>")
-					return
-				}
-				//	getCodeRaw, err := strconv.ParseInt(getMaiID.Userid, 10, 64)
-				//	if err != nil {
-				//		panic(err)
-				//	}
-				getCodeStat, _ := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/idunlocker?userid="+getMaiID.Userid, "GET", func(request *http.Request) error {
-					request.Header.Set("valid", os.Getenv("validauth"))
-					return nil
-				}, nil)
-				ctx.SendPlainMessage(true, string(getCodeStat))
 			case getSplitStringList[1] == "plate":
 				if getSplitLength == 2 {
 					SetUserPlateToLocal(ctx, "")
@@ -104,127 +68,6 @@ func init() {
 				SetUserDefaultPlateToDatabase(ctx, getSplitStringList[2])
 			case getSplitStringList[1] == "switch":
 				MaimaiSwitcherService(ctx)
-			case getSplitStringList[1] == "region":
-				getID, _ := toolchain.GetChatUserInfoID(ctx)
-				getMaiID := GetUserIDFromDatabase(getID)
-				if getMaiID.Userid == "" {
-					ctx.SendPlainMessage(true, "没有绑定UserID~ 绑定方式: /mai userbind <maiTempID>")
-					return
-				}
-				//	getIntID, _ := strconv.ParseInt(getMaiID.Userid, 10, 64)
-				getReplyMsg, _ := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/getRegion?userid="+getMaiID.Userid, "GET", func(request *http.Request) error {
-					request.Header.Set("valid", os.Getenv("validauth"))
-					return nil
-				}, nil)
-
-				if !strings.Contains(string(getReplyMsg), "{") {
-					ctx.SendPlainMessage(true, "返回了错误.png, ERROR:"+string(getReplyMsg))
-					return
-				}
-				var MixedMagic GetUserRegionStruct
-				json.Unmarshal(getReplyMsg, &MixedMagic)
-				var returnText string
-				for _, onlistLoader := range MixedMagic.UserRegionList {
-					returnText = returnText + MixedRegionWriter(onlistLoader.RegionId-1, onlistLoader.PlayCount, onlistLoader.Created) + "\n\n"
-				}
-				if returnText == "" {
-					ctx.SendPlainMessage(true, "目前 Lucy 没有查到您的游玩记录哦~")
-					return
-				}
-				ctx.SendPlainMessage(true, "目前查询到您的游玩记录如下: \n\n"+returnText)
-			case getSplitStringList[1] == "status":
-				getZlibError := ReturnZlibError()
-				getPlayedStatus, err := web.GetData("https://maihook.lemonkoi.one/api/calc")
-				if err != nil {
-					return
-				}
-				var playerStatus RealConvertPlay
-				json.Unmarshal(getPlayedStatus, &playerStatus)
-				getLucyRespHandlerStr := strconv.Itoa(getZlibError.Full.Field3)
-
-				getZlibWord := "Zlib 压缩跳过率: \n" + "10mins (" + ConvertZlib(getZlibError.ZlibError.Field1, getZlibError.Full.Field1) + " Loss)\n" + "30mins (" + ConvertZlib(getZlibError.ZlibError.Field2, getZlibError.Full.Field2) + " Loss)\n" + "60mins (" + ConvertZlib(getZlibError.ZlibError.Field3, getZlibError.Full.Field3) + " Loss)\n"
-				getRealStatus := "\n以下数据来源于mai机台的数据反馈\n"
-				ctx.SendPlainMessage(true, "* Zlib 压缩跳过率可以很好的反馈当前 MaiNet (Wahlap Service) 当前负载的情况，根据样本 + Lucy处理情况 来判断 \n* 错误率收集则来源于 机台游玩数据，反应各地区真实mai游玩错误情况 \n* 在 1小时 内，Lucy 共处理了 "+getLucyRespHandlerStr+"次 请求💫，其中详细数据如下:\n\n"+getZlibWord+getRealStatus+"\n"+ConvertRealPlayWords(playerStatus))
-			case getSplitStringList[1] == "update":
-				getID, _ := toolchain.GetChatUserInfoID(ctx)
-				getMaiID := GetUserIDFromDatabase(getID)
-				if getMaiID.Userid == "" {
-					ctx.SendPlainMessage(true, "没有绑定UserID~ 绑定方式: /mai userbind <maiTempID>")
-					return
-				}
-				getTokenId := GetUserToken(strconv.FormatInt(getID, 10))
-				if getTokenId == "" {
-					ctx.SendPlainMessage(true, "请先 /mai tokenbind <token> 绑定水鱼查分器哦")
-					return
-				}
-				if !CheckTheTicketIsValid(getTokenId) {
-					ctx.SendPlainMessage(true, "此 Token 不合法 ，请重新绑定")
-					return
-				}
-				// token is valid, get data.
-				//
-				getData, err := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/getMusicList?userid="+getMaiID.Userid+"&index=0", "GET", func(request *http.Request) error {
-					request.Header.Set("valid", os.Getenv("validauth"))
-					return nil
-				}, nil)
-				if err != nil {
-					panic(err)
-				}
-				// update by path.
-				var unmashellData UserMusicListStruct
-				json.Unmarshal(getData, &unmashellData)
-				resp := UpdateHandler(unmashellData, getTokenId)
-				if unmashellData.NextIndex != 0 {
-					for i := unmashellData.NextIndex; i > 0; {
-						var unmashellDataS UserMusicListStruct
-						iStr := strconv.Itoa(i)
-						getDataS, err := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/getMusicList?userid="+getMaiID.Userid+"&index="+iStr, "GET", func(request *http.Request) error {
-							request.Header.Set("valid", os.Getenv("validauth"))
-							return nil
-						}, nil)
-						if err != nil {
-							panic(err)
-						}
-						json.Unmarshal(getDataS, &unmashellDataS)
-						UpdateHandler(unmashellDataS, getTokenId)
-						i = unmashellDataS.NextIndex
-					}
-				}
-				// if data didn't update perfectly, repeat.
-				ctx.SendPlainMessage(true, "Update CODE:"+strconv.Itoa(resp))
-			case getSplitStringList[1] == "tokenbind":
-				if getSplitLength == 2 {
-					ctx.SendPlainMessage(true, "缺少参数哦~ qwq")
-					return
-				}
-				getID, _ := toolchain.GetChatUserInfoID(ctx)
-				FormatUserToken(strconv.FormatInt(getID, 10), getSplitStringList[2]).BindUserToken()
-				ctx.SendPlainMessage(true, "绑定成功~")
-			case getSplitStringList[1] == "ticket":
-				if getSplitLength == 2 {
-					ctx.SendPlainMessage(true, "缺少参数哦~ qwq")
-					return
-				}
-				getID, _ := toolchain.GetChatUserInfoID(ctx)
-				getMaiID := GetUserIDFromDatabase(getID)
-				if getMaiID.Userid == "" {
-					ctx.SendPlainMessage(true, "没有绑定~ 绑定方式: /mai userbind <maiTempID>")
-					return
-				}
-				_, err := strconv.ParseInt(getSplitStringList[2], 10, 64)
-				if err != nil {
-					ctx.SendPlainMessage(true, "传输的数据不合法~")
-					return
-				}
-				getCodeRaw, err := web.RequestDataWithHeaders(http.DefaultClient, "https://maihook.lemonkoi.one/api/ticket?userid="+getMaiID.Userid+"&ticket="+getSplitStringList[2], "GET", func(request *http.Request) error {
-					request.Header.Set("valid", os.Getenv("validauth"))
-					return nil
-				}, nil)
-				if err != nil {
-					panic(err)
-				}
-				getCode := string(getCodeRaw)
-				ctx.SendPlainMessage(true, getCode)
 			case getSplitStringList[1] == "raw" || getSplitStringList[1] == "file":
 				MaimaiRenderBase(ctx, true)
 			case getSplitStringList[1] == "query":
@@ -759,7 +602,7 @@ func MaimaiRenderBase(ctx *rei.Ctx, israw bool) {
 		// diving fish checker:
 		getUsername := GetUserInfoNameFromDatabase(getUserID)
 		if getUsername == "" {
-			ctx.SendPlainMessage(true, "你还没有绑定呢！使用/mai bind <UserName> 以绑定")
+			ctx.SendPlainMessage(true, "你还没有绑定呢！使用/mai bind UserName 以绑定")
 			return
 		}
 		getUserData, err := QueryMaiBotDataFromUserName(getUsername)
@@ -806,52 +649,6 @@ func MaimaiSwitcherService(ctx *rei.Ctx) {
 	ctx.SendPlainMessage(true, "已经修改为"+getEventText)
 }
 
-func CheckTheTicketIsValid(ticket string) bool {
-	getData, err := web.GetData("https://www.diving-fish.com/api/maimaidxprober/token_available?token=" + ticket)
-	if err != nil {
-		panic(err)
-	}
-	result := gjson.Get(helper.BytesToString(getData), "message").String()
-	return result == "ok"
-}
-
-// convert SongDataTo
-func convert(listStruct UserMusicListStruct) []InnerStructChanger {
-	getRequest, err := os.ReadFile(engine.DataFolder() + "music_data") // be aware that this songdata need upgarde.
-	if err != nil {
-		panic(err)
-	}
-	var divingfishMusicData []DivingFishMusicDataStruct
-	err = json.Unmarshal(getRequest, &divingfishMusicData)
-	if err != nil {
-		panic(err)
-	}
-	mdMap := make(map[string]DivingFishMusicDataStruct)
-	for _, m := range divingfishMusicData {
-		mdMap[m.Id] = m
-	}
-	var dest []InnerStructChanger
-	for _, musicList := range listStruct.UserMusicList {
-		for _, musicDetailedList := range musicList.UserMusicDetailList {
-			level := musicDetailedList.Level
-			achievement := math.Min(1010000, float64(musicDetailedList.Achievement))
-			fc := []string{"", "fc", "fcp", "ap", "app"}[musicDetailedList.ComboStatus]
-			fs := []string{"", "fs", "fsp", "fsd", "fsdp"}[musicDetailedList.SyncStatus]
-			dxScore := musicDetailedList.DeluxscoreMax
-			dest = append(dest, InnerStructChanger{
-				Title:        mdMap[strconv.Itoa(musicDetailedList.MusicId)].Title,
-				Type:         mdMap[strconv.Itoa(musicDetailedList.MusicId)].Type,
-				LevelIndex:   level,
-				Achievements: (achievement) / 10000,
-				Fc:           fc,
-				Fs:           fs,
-				DxScore:      dxScore,
-			})
-		}
-	}
-	return dest
-}
-
 func simpleNumHandler(num int, upper bool) int {
 	if upper {
 		if num < 1000 && num > 100 {
@@ -869,28 +666,4 @@ func simpleNumHandler(num int, upper bool) int {
 		return toint
 	}
 	return num
-}
-
-// UpdateHandler Update handler
-func UpdateHandler(userMusicList UserMusicListStruct, getTokenId string) int {
-	getFullDataStruct := convert(userMusicList)
-	jsonDumper := getFullDataStruct
-	jsonDumperFull, err := json.Marshal(jsonDumper)
-	if err != nil {
-		panic(err)
-	}
-	// upload to diving fish api
-	req, err := http.NewRequest("POST", "https://www.diving-fish.com/api/maimaidxprober/player/update_records", bytes.NewBuffer(jsonDumperFull))
-	if err != nil {
-		// Handle error
-		panic(err)
-	}
-	req.Header.Set("Import-Token", getTokenId)
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	return resp.StatusCode
 }
