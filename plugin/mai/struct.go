@@ -24,16 +24,6 @@ import (
 	"golang.org/x/text/width"
 )
 
-type BaseUserIDStruct struct {
-	UserID int64 `json:"user_id"`
-}
-
-type GetMusicStruct struct {
-	BaseUserIDStruct
-	GetIndex   int64 `json:"get_index"`
-	GetCounter int64 `json:"get_counter"`
-}
-
 type player struct {
 	AdditionalRating int `json:"additional_rating"`
 	Charts           struct {
@@ -374,6 +364,7 @@ func RenderCard(data playerData, num int, isSimpleRender bool) image.Image {
 }
 
 func GetRankPicRaw(id int) (image.Image, error) {
+	log.Println(id)
 	var idStr string
 	if id < 10 {
 		idStr = "0" + strconv.FormatInt(int64(id), 10)
@@ -409,7 +400,21 @@ func GetCover(id string) (image.Image, error) {
 		downloadURL := "https://www.diving-fish.com/covers/" + fileName
 		cover, err := downloadImage(downloadURL)
 		if err != nil {
-			return LoadPictureWithResize(defaultCoverLink, 90, 90), nil
+			// try with lxns service
+			getConvert, _ := strconv.Atoi(id)
+			switch {
+			case getConvert >= 11000:
+				id = id[1:]
+			}
+			if getConvert > 10000 && getConvert < 11000 {
+				id = id[2:]
+			}
+			downloadFromLxns := "https://lx-rec-reproxy.lemonkoi.one/maimai/jacket/" + id + ".png"
+			coverNewer, err := downloadImage(downloadFromLxns)
+			if err != nil {
+				return LoadPictureWithResize(defaultCoverLink, 90, 90), nil
+			}
+			cover = coverNewer
 		}
 		saveImage(cover, filePath)
 	}
@@ -464,7 +469,12 @@ func LoadComboImage(imageName string) image.Image {
 
 // LoadSyncImage Load sync images
 func LoadSyncImage(imageName string) image.Image {
-	link := loadMaiPic + "sync_" + imageName + ".png"
+	var link string
+	if imageName == "sync" {
+		link = loadMaiPic + "sync_fs.png"
+	} else {
+		link = loadMaiPic + "sync_" + imageName + ".png"
+	}
 	return LoadPictureWithResize(link, 60, 40)
 }
 
